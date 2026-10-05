@@ -1,0 +1,29 @@
+name: takura-local
+services:
+  postgres:
+    image: postgres:17.11-alpine3.24
+    environment:
+      POSTGRES_DB: takura
+      POSTGRES_USER: takura_admin
+      POSTGRES_PASSWORD: local-admin-only
+      TAKURA_MIGRATION_PASSWORD: local-migration-only
+      TAKURA_RUNTIME_PASSWORD: local-runtime-only
+    ports:
+      - '127.0.0.1:15432:5432'
+    volumes:
+      - takura-postgres-data:/var/lib/postgresql
+      - ./infra/contabo/postgres/init-local.sh:/docker-entrypoint-initdb.d/01-roles.sh:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U takura_admin -d takura']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 768M
+        reservations:
+          memory: 256M
+volumes:
+  takura-postgres-data:

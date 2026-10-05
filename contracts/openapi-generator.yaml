@@ -1,0 +1,15 @@
+generatorName: typescript-angular
+inputSpec: contracts/openapi.yaml
+outputDir: libs/api-client/src/generated
+additionalProperties:
+  npmName: '@takura/api-client-generated'
+  npmVersion: 0.1.0
+  ngVersion: 22.2.1
+  providedInRoot: true
+  stringEnums: true
+  supportsES6: true
+globalProperties:
+  apiDocs: false
+  modelDocs: false
+  apiTests: false
+  modelTests: false

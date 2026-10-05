@@ -1,0 +1,67 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "paths": {
+      "api-client": ["./dist/api-client"],
+      "design-tokens": ["./dist/design-tokens"],
+      "domain-types": ["./dist/domain-types"],
+      "ui": ["./dist/ui"]
+    },
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve"
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/public-web/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/public-web/tsconfig.spec.json"
+    },
+    {
+      "path": "./apps/staff-web/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/staff-web/tsconfig.spec.json"
+    },
+    {
+      "path": "./libs/api-client/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/api-client/tsconfig.spec.json"
+    },
+    {
+      "path": "./libs/domain-types/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/domain-types/tsconfig.spec.json"
+    },
+    {
+      "path": "./libs/ui/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/ui/tsconfig.spec.json"
+    },
+    {
+      "path": "./libs/design-tokens/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/design-tokens/tsconfig.spec.json"
+    }
+  ]
+}

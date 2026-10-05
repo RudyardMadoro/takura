@@ -1,0 +1,5 @@
+docs/source/**
+docs/development/prompts/**
+backend/**
+node_modules/**
+dist/**

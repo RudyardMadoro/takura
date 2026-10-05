@@ -1,0 +1,148 @@
+openapi: 3.1.0
+info:
+  title: Takura Platform API
+  version: 1.0.0
+  description: Versioned contracts for the synthetic R1 preview platform.
+servers:
+  - url: /api/v1
+paths:
+  /health:
+    get:
+      operationId: getPublicHealth
+      security: []
+      responses:
+        '200':
+          description: Minimal public health status
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /public/config:
+    get:
+      operationId: getPublicConfig
+      security: []
+      responses:
+        '200':
+          description: Public-safe synthetic configuration
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicConfig'
+  /admin/probe:
+    get:
+      operationId: getPrivateProbe
+      security:
+        - staffBearer: []
+          staffSession: []
+      responses:
+        '200':
+          description: Authenticated private probe
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                required: [status]
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  securitySchemes:
+    staffBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    staffSession:
+      type: apiKey
+      in: header
+      name: X-Staff-Session
+  headers:
+    CorrelationId:
+      description: Validated caller identifier or a server-generated UUID.
+      schema:
+        type: string
+        maxLength: 64
+        pattern: '^[A-Za-z0-9._-]+$'
+  responses:
+    Unauthorized:
+      description: Authentication is missing or invalid.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    Forbidden:
+      description: The authenticated principal is not authorised.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+  schemas:
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        status: { type: string, enum: [UP] }
+      required: [status]
+    PublicConfig:
+      type: object
+      additionalProperties: false
+      properties:
+        environment: { $ref: '#/components/schemas/ConfigurationStatus' }
+        contact: { $ref: '#/components/schemas/Contact' }
+      required: [environment, contact]
+    Contact:
+      type: object
+      additionalProperties: false
+      properties:
+        email: { type: string, format: email }
+        phone: { type: string }
+      required: [email, phone]
+    Location:
+      type: object
+      additionalProperties: false
+      properties:
+        locality: { type: string }
+        region: { type: string }
+        country_code: { type: string, minLength: 2, maxLength: 2 }
+    Money:
+      type: object
+      additionalProperties: false
+      properties:
+        amount: { type: string, pattern: '^-?[0-9]+(\\.[0-9]+)?$' }
+        currency: { type: string, pattern: '^[A-Z]{3}$' }
+      required: [amount, currency]
+    PageMetadata:
+      type: object
+      additionalProperties: false
+      properties:
+        next_cursor: { type: [string, 'null'] }
+        page_size: { type: integer, minimum: 1, maximum: 100 }
+      required: [next_cursor, page_size]
+    ConfigurationStatus:
+      type: string
+      enum: [DEMO, PENDING, CONFIRMED, RETIRED]
+    FieldError:
+      type: object
+      additionalProperties: false
+      properties:
+        path: { type: string }
+        code: { type: string }
+        user_message: { type: string }
+      required: [path, code, user_message]
+    ApiError:
+      type: object
+      additionalProperties: false
+      properties:
+        code: { type: string }
+        message: { type: string }
+        correlation_id: { type: string }
+        field_errors:
+          type: array
+          items: { $ref: '#/components/schemas/FieldError' }
+      required: [code, message, correlation_id, field_errors]

@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: takura-backend
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:15432/takura}
+    username: ${DATABASE_RUNTIME_USER:takura_runtime}
+    password: ${DATABASE_RUNTIME_PASSWORD:local-runtime-only}
+    hikari:
+      maximum-pool-size: ${DATABASE_POOL_SIZE:10}
+  flyway:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:15432/takura}
+    user: ${DATABASE_MIGRATION_USER:takura_migrator}
+    password: ${DATABASE_MIGRATION_PASSWORD:local-migration-only}
+    default-schema: takura
+    schemas: takura
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  forward-headers-strategy: framework
+management:
+  server:
+    port: ${MANAGEMENT_PORT:9090}
+    address: ${MANAGEMENT_ADDRESS:127.0.0.1}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+logging:
+  structured:
+    format:
+      console: ecs
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: OFF

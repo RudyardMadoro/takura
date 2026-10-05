@@ -1,0 +1,9 @@
+spring:
+  main:
+    web-application-type: none
+  datasource:
+    hikari:
+      maximum-pool-size: ${DATABASE_POOL_SIZE:4}
+management:
+  endpoints:
+    enabled-by-default: false

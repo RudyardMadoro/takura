@@ -1,0 +1,49 @@
+{
+  "name": "takura-workspace",
+  "version": "0.1.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve public-web",
+    "start:public": "ng serve public-web",
+    "start:staff": "ng serve staff-web --port 4201",
+    "build": "pnpm build:public && pnpm build:staff && pnpm build:libs",
+    "build:public": "ng build public-web",
+    "build:staff": "ng build staff-web",
+    "build:libs": "ng build domain-types && ng build design-tokens && ng build ui && ng build api-client",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "ng test --watch=false",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "api:generate": "openapi-generator-cli generate -c contracts/openapi-generator.yaml && prettier --write libs/api-client/src/generated",
+    "api:check": "pnpm api:generate && git diff --exit-code -- libs/api-client/src/generated",
+    "serve:ssr:public-web": "node dist/public-web/server/server.mjs"
+  },
+  "private": true,
+  "packageManager": "pnpm@11.25.0",
+  "dependencies": {
+    "@angular/common": "22.2.1",
+    "@angular/compiler": "22.2.1",
+    "@angular/core": "22.2.1",
+    "@angular/forms": "22.2.1",
+    "@angular/platform-browser": "22.2.1",
+    "@angular/platform-server": "22.2.1",
+    "@angular/router": "22.2.1",
+    "@angular/ssr": "22.2.1",
+    "express": "5.1.0",
+    "rxjs": "7.8.2",
+    "tslib": "2.8.1"
+  },
+  "devDependencies": {
+    "@angular/build": "22.2.1",
+    "@angular/cli": "22.2.1",
+    "@angular/compiler-cli": "22.2.1",
+    "@openapitools/openapi-generator-cli": "2.25.2",
+    "@types/express": "5.0.3",
+    "@types/node": "24.7.2",
+    "jsdom": "27.0.0",
+    "ng-packagr": "22.2.1",
+    "prettier": "3.6.2",
+    "typescript": "6.0.2",
+    "vitest": "5.0.3"
+  }
+}
