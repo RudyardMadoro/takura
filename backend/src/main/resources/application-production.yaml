@@ -5,6 +5,10 @@ spring:
   flyway:
     clean-disabled: true
 takura:
+  security:
+    bootstrap:
+      enabled: false
+    local-provider-enabled: false
   adapters:
     fake-authentication-enabled: false
     fake-malware-scanning-enabled: false

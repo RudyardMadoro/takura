@@ -54,6 +54,113 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+  /admin/session:
+    post:
+      operationId: createStaffSession
+      security: [{ staffBearer: [] }]
+      responses:
+        '201':
+          {
+            description: Subject-bound revocable session created,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/StaffSession' } } },
+          }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    get:
+      operationId: getStaffSession
+      security: [{ staffBearer: [], staffSession: [] }]
+      responses:
+        '200':
+          {
+            description: Current staff authorization,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/StaffAuthorization' } } },
+          }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    delete:
+      operationId: deleteStaffSession
+      security: [{ staffBearer: [], staffSession: [] }]
+      responses:
+        '204': { description: Session revoked }
+  /admin/users:
+    get:
+      operationId: listStaffAccess
+      security: [{ staffBearer: [], staffSession: [] }]
+      responses:
+        '200':
+          {
+            description: Federated access grants,
+            content:
+              {
+                application/json:
+                  {
+                    schema: { type: array, items: { $ref: '#/components/schemas/StaffIdentity' } },
+                  },
+              },
+          }
+    post:
+      operationId: provisionStaffAccess
+      security: [{ staffBearer: [], staffSession: [] }]
+      requestBody:
+        {
+          required: true,
+          content:
+            { application/json: { schema: { $ref: '#/components/schemas/StaffAccessUpdate' } } },
+        }
+      responses:
+        '201':
+          {
+            description: External subject provisioned,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/StaffIdentity' } } },
+          }
+  /admin/users/{id}:
+    put:
+      operationId: updateStaffAccess
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: If-Match, in: header, required: true, schema: { type: string } }
+      requestBody:
+        {
+          required: true,
+          content:
+            { application/json: { schema: { $ref: '#/components/schemas/StaffAccessUpdate' } } },
+        }
+      responses:
+        '200': { description: Access updated }
+        '412': { description: Stale revision }
+        '428': { description: If-Match required }
+  /admin/settings:
+    get:
+      operationId: listSettings
+      security: [{ staffBearer: [], staffSession: [] }]
+      responses:
+        '200':
+          {
+            description: Typed configuration history,
+            content:
+              {
+                application/json:
+                  { schema: { type: array, items: { $ref: '#/components/schemas/Setting' } } },
+              },
+          }
+  /admin/settings/{id}:
+    put:
+      operationId: updateSetting
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: If-Match, in: header, required: true, schema: { type: string } }
+      requestBody:
+        {
+          required: true,
+          content: { application/json: { schema: { $ref: '#/components/schemas/SettingUpdate' } } },
+        }
+      responses:
+        '200': { description: Setting updated }
+        '412': { description: Stale revision }
+        '428': { description: If-Match required }
 components:
   securitySchemes:
     staffBearer:
@@ -83,6 +190,68 @@ components:
         application/problem+json:
           schema: { $ref: '#/components/schemas/ApiError' }
   schemas:
+    StaffSession:
+      type: object
+      additionalProperties: false
+      properties:
+        session_handle: { type: string, minLength: 43, maxLength: 43 }
+        idle_expires_at: { type: string, format: date-time }
+        absolute_expires_at: { type: string, format: date-time }
+      required: [session_handle, idle_expires_at, absolute_expires_at]
+    StaffAuthorization:
+      type: object
+      properties:
+        identity_id: { type: string, format: uuid }
+        roles: { type: array, items: { type: string } }
+        teams: { type: array, items: { type: string } }
+        operations: { type: array, items: { type: string } }
+      required: [identity_id, roles, teams, operations]
+    StaffIdentity:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        issuer: { type: string, format: uri }
+        subject: { type: string }
+        display_label: { type: string }
+        active: { type: boolean }
+        revision: { type: integer, format: int64 }
+      required: [id, issuer, subject, display_label, active, revision]
+    StaffAccessUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        issuer: { type: string, format: uri }
+        subject: { type: string }
+        display_label: { type: string, maxLength: 160 }
+        active: { type: boolean }
+        roles: { type: array, uniqueItems: true, items: { type: string } }
+        teams: { type: array, uniqueItems: true, items: { type: string } }
+        operations: { type: array, uniqueItems: true, items: { type: string } }
+      required: [issuer, subject, display_label, active, roles, teams, operations]
+    Setting:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        key: { type: string }
+        value: { type: string }
+        value_type:
+          { type: string, enum: [STRING, BOOLEAN, INTEGER, DECIMAL, URI, EMAIL, PHONE, DURATION] }
+        environment: { type: string }
+        status: { $ref: '#/components/schemas/ConfigurationStatus' }
+        effective_at: { type: string, format: date-time }
+        revision: { type: integer, format: int64 }
+        changed_at: { type: string, format: date-time }
+      required:
+        [id, key, value, value_type, environment, status, effective_at, revision, changed_at]
+    SettingUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        value: { type: string }
+        value_type: { type: string }
+        status: { $ref: '#/components/schemas/ConfigurationStatus' }
+        effective_at: { type: string, format: date-time }
+      required: [value, value_type, status, effective_at]
     HealthResponse:
       type: object
       additionalProperties: false

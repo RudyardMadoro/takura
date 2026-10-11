@@ -19,6 +19,12 @@ model/models.ts
 model/money.ts
 model/pageMetadata.ts
 model/publicConfig.ts
+model/setting.ts
+model/settingUpdate.ts
+model/staffAccessUpdate.ts
+model/staffAuthorization.ts
+model/staffIdentity.ts
+model/staffSession.ts
 ng-package.json
 package.json
 param.ts

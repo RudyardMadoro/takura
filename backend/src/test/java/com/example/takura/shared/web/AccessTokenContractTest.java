@@ -1,0 +1,7 @@
+package com.example.takura.shared.web;
+import static org.assertj.core.api.Assertions.assertThat;
+import java.time.Instant;import java.util.List;import org.junit.jupiter.api.Test;import org.springframework.security.oauth2.jwt.Jwt;
+class AccessTokenContractTest {
+ @Test void acceptsOnlyAccessTokenWithClientAudienceScopeAuthTimeAndMfa(){Jwt valid=token("access","client",List.of("api"),"takura.staff",List.of("pwd","mfa"));assertThat(SecurityConfiguration.validateContract(valid,"client","api","takura.staff").hasErrors()).isFalse();for(Jwt invalid:List.of(token("id","client",List.of("api"),"takura.staff",List.of("mfa")),token("access","other",List.of("api"),"takura.staff",List.of("mfa")),token("access","client",List.of("other"),"takura.staff",List.of("mfa")),token("access","client",List.of("api"),"wrong",List.of("mfa")),token("access","client",List.of("api"),"takura.staff",List.of("pwd"))))assertThat(SecurityConfiguration.validateContract(invalid,"client","api","takura.staff").hasErrors()).isTrue();}
+ private Jwt token(String type,String client,List<String> audience,String scope,List<String> amr){Instant now=Instant.now();return Jwt.withTokenValue("synthetic-not-secret").header("alg","none").issuer("https://issuer.example.invalid").subject("subject").audience(audience).issuedAt(now).expiresAt(now.plusSeconds(60)).claim("client_id",client).claim("token_use",type).claim("scope",scope).claim("auth_time",now.getEpochSecond()).claim("amr",amr).build();}
+}

@@ -2,13 +2,13 @@ spring:
   application:
     name: takura-backend
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:15432/takura}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/takura}
     username: ${DATABASE_RUNTIME_USER:takura_runtime}
     password: ${DATABASE_RUNTIME_PASSWORD:local-runtime-only}
     hikari:
       maximum-pool-size: ${DATABASE_POOL_SIZE:10}
   flyway:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:15432/takura}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/takura}
     user: ${DATABASE_MIGRATION_USER:takura_migrator}
     password: ${DATABASE_MIGRATION_PASSWORD:local-migration-only}
     default-schema: takura
@@ -44,3 +44,19 @@ logging:
       console: ecs
   level:
     org.springframework.web.filter.CommonsRequestLoggingFilter: OFF
+takura:
+  security:
+    allowed-origins: ${STAFF_ALLOWED_ORIGINS:http://localhost:4201}
+    oidc:
+      issuer: ${STAFF_OIDC_ISSUER:http://127.0.0.1:8080/dev-oidc}
+      jwk-set-uri: ${STAFF_OIDC_JWKS_URI:http://127.0.0.1:8080/dev-oidc/jwks}
+      client-id: ${STAFF_OIDC_CLIENT_ID:takura-staff-local}
+      audience: ${STAFF_OIDC_AUDIENCE:takura-api}
+      required-scope: ${STAFF_OIDC_REQUIRED_SCOPE:takura.staff}
+    session:
+      idle-timeout: ${STAFF_SESSION_IDLE_TIMEOUT:PT30M}
+      absolute-timeout: ${STAFF_SESSION_ABSOLUTE_TIMEOUT:PT8H}
+      fresh-authentication-window: ${STAFF_SESSION_FRESH_AUTH_WINDOW:PT5M}
+    bootstrap:
+      enabled: false
+    local-provider-enabled: false

@@ -1,0 +1,3 @@
+takura:
+  security:
+    local-provider-enabled: true

@@ -29,6 +29,18 @@ import { GetPrivateProbe200Response } from '../model/getPrivateProbe200Response'
 import { HealthResponse } from '../model/healthResponse';
 // @ts-ignore
 import { PublicConfig } from '../model/publicConfig';
+// @ts-ignore
+import { Setting } from '../model/setting';
+// @ts-ignore
+import { SettingUpdate } from '../model/settingUpdate';
+// @ts-ignore
+import { StaffAccessUpdate } from '../model/staffAccessUpdate';
+// @ts-ignore
+import { StaffAuthorization } from '../model/staffAuthorization';
+// @ts-ignore
+import { StaffIdentity } from '../model/staffIdentity';
+// @ts-ignore
+import { StaffSession } from '../model/staffSession';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS } from '../variables';
@@ -45,6 +57,170 @@ export class DefaultService extends BaseService {
     @Optional() configuration?: Configuration,
   ) {
     super(basePath, configuration);
+  }
+
+  /**
+   * @endpoint post /admin/session
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public createStaffSession(
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json' | 'application/problem+json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<StaffSession>;
+  public createStaffSession(
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json' | 'application/problem+json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<HttpResponse<StaffSession>>;
+  public createStaffSession(
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json' | 'application/problem+json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<HttpEvent<StaffSession>>;
+  public createStaffSession(
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {
+      httpHeaderAccept?: 'application/json' | 'application/problem+json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<any> {
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ??
+      this.configuration.selectHeaderAccept(['application/json', 'application/problem+json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/session`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<StaffSession>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint delete /admin/session
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public deleteStaffSession(
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public deleteStaffSession(
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public deleteStaffSession(
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public deleteStaffSession(
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/session`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
   }
 
   /**
@@ -292,6 +468,637 @@ export class DefaultService extends BaseService {
     const { basePath, withCredentials } = this.configuration;
     return this.httpClient.request<HealthResponse>('get', `${basePath}${localVarPath}`, {
       context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint get /admin/session
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public getStaffSession(
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json' | 'application/problem+json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<StaffAuthorization>;
+  public getStaffSession(
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json' | 'application/problem+json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<HttpResponse<StaffAuthorization>>;
+  public getStaffSession(
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json' | 'application/problem+json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<HttpEvent<StaffAuthorization>>;
+  public getStaffSession(
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {
+      httpHeaderAccept?: 'application/json' | 'application/problem+json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<any> {
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ??
+      this.configuration.selectHeaderAccept(['application/json', 'application/problem+json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/session`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<StaffAuthorization>('get', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint get /admin/settings
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public listSettings(
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<Array<Setting>>;
+  public listSettings(
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<HttpResponse<Array<Setting>>>;
+  public listSettings(
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<HttpEvent<Array<Setting>>>;
+  public listSettings(
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {
+      httpHeaderAccept?: 'application/json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<any> {
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept(['application/json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/settings`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<Array<Setting>>('get', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint get /admin/users
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public listStaffAccess(
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<Array<StaffIdentity>>;
+  public listStaffAccess(
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<HttpResponse<Array<StaffIdentity>>>;
+  public listStaffAccess(
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<HttpEvent<Array<StaffIdentity>>>;
+  public listStaffAccess(
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {
+      httpHeaderAccept?: 'application/json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<any> {
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept(['application/json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/users`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<Array<StaffIdentity>>('get', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint post /admin/users
+   * @param staffAccessUpdate
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public provisionStaffAccess(
+    staffAccessUpdate: StaffAccessUpdate,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<StaffIdentity>;
+  public provisionStaffAccess(
+    staffAccessUpdate: StaffAccessUpdate,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<HttpResponse<StaffIdentity>>;
+  public provisionStaffAccess(
+    staffAccessUpdate: StaffAccessUpdate,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<HttpEvent<StaffIdentity>>;
+  public provisionStaffAccess(
+    staffAccessUpdate: StaffAccessUpdate,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {
+      httpHeaderAccept?: 'application/json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<any> {
+    if (staffAccessUpdate === null || staffAccessUpdate === undefined) {
+      throw new Error(
+        'Required parameter staffAccessUpdate was null or undefined when calling provisionStaffAccess.',
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept(['application/json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    // to determine the Content-Type header
+    const consumes: string[] = ['application/json'];
+    const httpContentTypeSelected: string | undefined =
+      this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+    }
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/users`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<StaffIdentity>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      body: staffAccessUpdate,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint put /admin/settings/{id}
+   * @param id
+   * @param ifMatch
+   * @param settingUpdate
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public updateSetting(
+    id: string,
+    ifMatch: string,
+    settingUpdate: SettingUpdate,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public updateSetting(
+    id: string,
+    ifMatch: string,
+    settingUpdate: SettingUpdate,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public updateSetting(
+    id: string,
+    ifMatch: string,
+    settingUpdate: SettingUpdate,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public updateSetting(
+    id: string,
+    ifMatch: string,
+    settingUpdate: SettingUpdate,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    if (id === null || id === undefined) {
+      throw new Error('Required parameter id was null or undefined when calling updateSetting.');
+    }
+    if (ifMatch === null || ifMatch === undefined) {
+      throw new Error(
+        'Required parameter ifMatch was null or undefined when calling updateSetting.',
+      );
+    }
+    if (settingUpdate === null || settingUpdate === undefined) {
+      throw new Error(
+        'Required parameter settingUpdate was null or undefined when calling updateSetting.',
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+    if (ifMatch !== undefined && ifMatch !== null) {
+      localVarHeaders = localVarHeaders.set('If-Match', String(ifMatch));
+    }
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    // to determine the Content-Type header
+    const consumes: string[] = ['application/json'];
+    const httpContentTypeSelected: string | undefined =
+      this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+    }
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/settings/${this.configuration.encodeParam({ name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid' })}`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('put', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      body: settingUpdate,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint put /admin/users/{id}
+   * @param id
+   * @param ifMatch
+   * @param staffAccessUpdate
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public updateStaffAccess(
+    id: string,
+    ifMatch: string,
+    staffAccessUpdate: StaffAccessUpdate,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public updateStaffAccess(
+    id: string,
+    ifMatch: string,
+    staffAccessUpdate: StaffAccessUpdate,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public updateStaffAccess(
+    id: string,
+    ifMatch: string,
+    staffAccessUpdate: StaffAccessUpdate,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public updateStaffAccess(
+    id: string,
+    ifMatch: string,
+    staffAccessUpdate: StaffAccessUpdate,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    if (id === null || id === undefined) {
+      throw new Error(
+        'Required parameter id was null or undefined when calling updateStaffAccess.',
+      );
+    }
+    if (ifMatch === null || ifMatch === undefined) {
+      throw new Error(
+        'Required parameter ifMatch was null or undefined when calling updateStaffAccess.',
+      );
+    }
+    if (staffAccessUpdate === null || staffAccessUpdate === undefined) {
+      throw new Error(
+        'Required parameter staffAccessUpdate was null or undefined when calling updateStaffAccess.',
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+    if (ifMatch !== undefined && ifMatch !== null) {
+      localVarHeaders = localVarHeaders.set('If-Match', String(ifMatch));
+    }
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    // to determine the Content-Type header
+    const consumes: string[] = ['application/json'];
+    const httpContentTypeSelected: string | undefined =
+      this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+    }
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/users/${this.configuration.encodeParam({ name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid' })}`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('put', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      body: staffAccessUpdate,
       responseType: <any>responseType_,
       ...(withCredentials ? { withCredentials } : {}),
       headers: localVarHeaders,
