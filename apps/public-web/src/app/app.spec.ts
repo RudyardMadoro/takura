@@ -16,12 +16,13 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('should render accessible site navigation', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain(
-      'Property services and board sales',
+    expect(compiled.querySelector('.brand')?.textContent).toContain(
+      'Example Property Transformation',
     );
+    expect(compiled.querySelector('nav[aria-label="Main navigation"]')).toBeTruthy();
   });
 });

@@ -35,34 +35,34 @@ The implementation remains within R1 staff identity, authorization, revocable se
 
 ## Commands run and actual outcomes
 
-| Command or check | Status | Actual outcome |
-| --- | --- | --- |
-| Baseline DOCX paragraph/table review | PASS | All three required versions and mapped sections were present. |
-| Official GA compatibility check | PASS | Angular 22.2/TypeScript 6.0/Node 24 and Spring Boot 3.5.16/Java 21 remain supported; OIDC client 22.0.1 is current. |
-| `pnpm add -w angular-auth-oidc-client@22.0.1 --save-exact` | PASS | Dependency and lockfile updated. |
-| `backend/mvnw.cmd verify` | PASS | 11 tests, zero failures/errors/skips; includes PostgreSQL 17 migration replay, JWT claim matrix, injected-clock timeout behavior and architecture rules. |
-| `pnpm test` | PASS | Six test files and eight tests passed. |
-| `pnpm build` | PASS | Public SSR, staff CSR and all libraries built. The host used Node 23.5 and emitted the expected non-LTS warning; the repository remains pinned to Node 24.19. |
-| `pnpm format:check` | PASS | Repository formatting passed. |
-| `pnpm api:generate` | PASS | OpenAPI Generator reproduced and formatted the updated client. |
-| `pnpm api:check` | FAIL | The command compares generated files with committed HEAD, so it correctly reports this phase's uncommitted generated-client additions as a diff. No staging/commit was allowed; deterministic regeneration completed. |
-| Local database migration | PASS | Existing local schema migrated from V1 to V2. |
-| Demo seed twice | PASS | First run added 6 identities, 6 roles and 9 grants; second run added zero records. |
-| Local API/provider runtime | BLOCKED | Migration and context initialization succeeded, but port 8080 was already occupied. The provider browser flow was therefore not exercised end to end. |
-| Real Cognito/upstream IdP/MFA | NOT RUN | No tenant credentials or approved external accounts were supplied. |
+| Command or check                                           | Status  | Actual outcome                                                                                                                                                                                                        |
+| ---------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Baseline DOCX paragraph/table review                       | PASS    | All three required versions and mapped sections were present.                                                                                                                                                         |
+| Official GA compatibility check                            | PASS    | Angular 22.2/TypeScript 6.0/Node 24 and Spring Boot 3.5.16/Java 21 remain supported; OIDC client 22.0.1 is current.                                                                                                   |
+| `pnpm add -w angular-auth-oidc-client@22.0.1 --save-exact` | PASS    | Dependency and lockfile updated.                                                                                                                                                                                      |
+| `backend/mvnw.cmd verify`                                  | PASS    | 11 tests, zero failures/errors/skips; includes PostgreSQL 17 migration replay, JWT claim matrix, injected-clock timeout behavior and architecture rules.                                                              |
+| `pnpm test`                                                | PASS    | Six test files and eight tests passed.                                                                                                                                                                                |
+| `pnpm build`                                               | PASS    | Public SSR, staff CSR and all libraries built. The host used Node 23.5 and emitted the expected non-LTS warning; the repository remains pinned to Node 24.19.                                                         |
+| `pnpm format:check`                                        | PASS    | Repository formatting passed.                                                                                                                                                                                         |
+| `pnpm api:generate`                                        | PASS    | OpenAPI Generator reproduced and formatted the updated client.                                                                                                                                                        |
+| `pnpm api:check`                                           | FAIL    | The command compares generated files with committed HEAD, so it correctly reports this phase's uncommitted generated-client additions as a diff. No staging/commit was allowed; deterministic regeneration completed. |
+| Local database migration                                   | PASS    | Existing local schema migrated from V1 to V2.                                                                                                                                                                         |
+| Demo seed twice                                            | PASS    | First run added 6 identities, 6 roles and 9 grants; second run added zero records.                                                                                                                                    |
+| Local API/provider runtime                                 | BLOCKED | Migration and context initialization succeeded, but port 8080 was already occupied. The provider browser flow was therefore not exercised end to end.                                                                 |
+| Real Cognito/upstream IdP/MFA                              | NOT RUN | No tenant credentials or approved external accounts were supplied.                                                                                                                                                    |
 
 ## Acceptance status
 
-| Criterion | Status | Evidence or limitation |
-| --- | --- | --- |
-| Newly federated subject has zero access until provisioned; editor has no lead access | PASS | Session creation requires an existing active identity; separated synthetic grants demonstrate editor-only content access. |
-| Wrong token contract, cross-identity/client handle and handle without JWT fail | PASS | JWT contract matrix and subject/client-bound session query; security chain requires bearer JWT before the session filter. Wrong signature/issuer/expiry use Spring Security's standard validators. |
-| Polling cannot extend idle; refreshed JWT/repeated POST cannot extend eight hours | PASS | Injected-clock tests and database constraint anchor absolute expiry to original authentication; creation requires fresh `auth_time`. |
-| Logout, deactivation and grant removal affect next request | PASS | DELETE revokes; update revokes all sessions; verification reloads active state and operations on every request. |
-| Tokens are not persisted or logged | PASS | Custom memory storage, no refresh token, request-body logging disabled and no token logging added. The bundled library contains unused session-storage implementation code, but the application provider overrides it. |
-| Concurrent grant/settings updates and final administrator safety | PASS | Row revision predicates yield 412; missing precondition yields 428; identity update prevents removing the final active administrator. |
-| Production rejects local provider | PASS | Provider bean is local-profile-only and production startup guard rejects explicit local-provider enablement. |
-| End-to-end local provider browser flow and real Cognito MFA paths | BLOCKED | Local port conflict prevented browser flow; real provider credentials are absent. |
+| Criterion                                                                            | Status  | Evidence or limitation                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Newly federated subject has zero access until provisioned; editor has no lead access | PASS    | Session creation requires an existing active identity; separated synthetic grants demonstrate editor-only content access.                                                                                              |
+| Wrong token contract, cross-identity/client handle and handle without JWT fail       | PASS    | JWT contract matrix and subject/client-bound session query; security chain requires bearer JWT before the session filter. Wrong signature/issuer/expiry use Spring Security's standard validators.                     |
+| Polling cannot extend idle; refreshed JWT/repeated POST cannot extend eight hours    | PASS    | Injected-clock tests and database constraint anchor absolute expiry to original authentication; creation requires fresh `auth_time`.                                                                                   |
+| Logout, deactivation and grant removal affect next request                           | PASS    | DELETE revokes; update revokes all sessions; verification reloads active state and operations on every request.                                                                                                        |
+| Tokens are not persisted or logged                                                   | PASS    | Custom memory storage, no refresh token, request-body logging disabled and no token logging added. The bundled library contains unused session-storage implementation code, but the application provider overrides it. |
+| Concurrent grant/settings updates and final administrator safety                     | PASS    | Row revision predicates yield 412; missing precondition yields 428; identity update prevents removing the final active administrator.                                                                                  |
+| Production rejects local provider                                                    | PASS    | Provider bean is local-profile-only and production startup guard rejects explicit local-provider enablement.                                                                                                           |
+| End-to-end local provider browser flow and real Cognito MFA paths                    | BLOCKED | Local port conflict prevented browser flow; real provider credentials are absent.                                                                                                                                      |
 
 Overall phase status: **BLOCKED**. Implementation and automated checks pass except the deliberately HEAD-relative generated-client check, but the required local browser/provider flow was not exercised because port 8080 was occupied, and real Cognito/federated MFA evidence remains a production-readiness blocker.
 

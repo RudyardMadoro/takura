@@ -1,22 +1,23 @@
 <a class="skip-link" href="#main">Skip to content</a>
-<div class="demo-banner" role="status">Demonstration environment - synthetic information only</div>
+<div class="demo-banner" role="status">Demonstration environment — synthetic concepts only</div>
 <header>
   <a class="brand" routerLink="/">Example Property Transformation</a>
-  <nav aria-label="Main navigation">
-    <a routerLink="/">Home</a>
-    <a routerLink="/services">Services</a>
-    <a routerLink="/boards">Board catalogue</a>
-  </nav>
+  <details class="menu">
+    <summary>Menu</summary>
+    <nav aria-label="Main navigation">
+      <a routerLink="/property-transformation">Property transformation</a
+      ><a routerLink="/services">Services</a><a routerLink="/projects">Projects</a
+      ><a routerLink="/cabinetry">Cabinetry</a
+      ><a routerLink="/boards">Boards <span>Phase 04</span></a
+      ><a routerLink="/about">About</a><a routerLink="/contact">Contact</a>
+    </nav>
+  </details>
 </header>
-<main id="main">
-  <section class="hero">
-    <p class="eyebrow">Preview platform</p>
-    <h1>Property services and board sales</h1>
-    <p>
-      This foundation shell contains no claims about completed work, qualifications, capacity,
-      pricing or returns.
-    </p>
-  </section>
-  <router-outlet />
-</main>
-<footer>Contact details are intentionally unavailable in this demonstration.</footer>
+<main id="main"><router-outlet /></main>
+<footer>
+  <nav aria-label="Footer">
+    <a routerLink="/faqs">FAQs</a><a routerLink="/privacy">Privacy</a
+    ><a routerLink="/terms">Terms</a>
+  </nav>
+  <p>Contact actions are disabled until verified business details are confirmed.</p>
+</footer>

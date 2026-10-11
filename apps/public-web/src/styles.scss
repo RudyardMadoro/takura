@@ -1,15 +1,27 @@
 @use '../../../libs/design-tokens/src/tokens';
-
 * {
   box-sizing: border-box;
 }
+html {
+  scroll-behavior: smooth;
+}
 body {
   margin: 0;
-  color: var(--color-ink);
-  background: var(--color-surface);
+  color: #24221f;
+  background: #faf7f1;
   font:
-    1rem/1.6 system-ui,
+    1rem/1.65 system-ui,
     sans-serif;
+}
+a {
+  color: #55371f;
+  text-underline-offset: 0.2em;
+}
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #b86121;
+  outline-offset: 4px;
 }
 .skip-link {
   position: absolute;
@@ -18,54 +30,176 @@ body {
 .skip-link:focus {
   left: 1rem;
   top: 1rem;
-  z-index: 2;
-  background: white;
-  padding: 0.5rem;
+  z-index: 9;
+  background: #fff;
+  padding: 0.75rem;
 }
 .demo-banner {
   padding: 0.55rem 1rem;
   text-align: center;
-  background: var(--color-demo);
-  color: #1d1600;
-  font-weight: 700;
+  background: #f4d88e;
+  color: #201600;
+  font-weight: 750;
 }
 header {
   display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
+  align-items: center;
   gap: 1rem;
-  padding: 1.25rem max(1rem, calc((100vw - 72rem) / 2));
-  border-bottom: 1px solid var(--color-border);
+  padding: 1rem max(1rem, calc((100vw - 72rem) / 2));
+  border-bottom: 1px solid #d8d0c5;
 }
 .brand {
-  color: inherit;
-  font-weight: 800;
+  font-weight: 850;
   text-decoration: none;
 }
-nav {
-  display: flex;
-  gap: 1rem;
+.menu summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 0.6rem;
 }
-nav a {
-  color: inherit;
+.menu nav {
+  display: grid;
+  gap: 0.4rem;
+  position: absolute;
+  right: 1rem;
+  z-index: 3;
+  background: #faf7f1;
+  border: 1px solid #b9aa99;
+  padding: 1rem;
+  box-shadow: 0 0.6rem 2rem #0002;
+}
+.menu span,
+.tag {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 main,
 footer {
   max-width: 72rem;
   margin: auto;
-  padding: 2rem 1rem;
+  padding: clamp(1.2rem, 4vw, 3rem) 1rem;
 }
-.hero {
-  max-width: 48rem;
-  padding-block: clamp(2rem, 8vw, 7rem);
+.page {
+  max-width: 68rem;
+}
+.page > p,
+.page > h1,
+.page > h2,
+.page > ol {
+  max-width: 45rem;
 }
 .eyebrow {
-  color: var(--color-accent);
+  color: #8a491d;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 h1 {
-  font-size: clamp(2.2rem, 7vw, 4.8rem);
-  line-height: 1.05;
+  font-size: clamp(2.25rem, 7vw, 5rem);
+  line-height: 1.04;
+  margin: 0.2em 0;
+}
+.lead {
+  font-size: clamp(1.15rem, 2.5vw, 1.5rem);
+  max-width: 46rem;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+.cards a,
+.card {
+  display: block;
+  padding: 1.4rem;
+  border: 1px solid #cfc5b8;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+}
+.cards .timber {
+  background: #55371f;
+  color: #fff;
+}
+.cards a:focus-visible {
+  outline-color: #f4d88e;
+}
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+}
+.gallery figure {
+  margin: 0;
+}
+.placeholder {
+  aspect-ratio: 4/3;
+  background: linear-gradient(135deg, #d7c0a3 0 48%, #403a34 48%);
+  border: 1px solid #8d8175;
+}
+.during {
+  background: linear-gradient(45deg, #e7dfd1 0 45%, #966035 45% 60%, #35322e 60%);
+}
+.after {
+  background: linear-gradient(135deg, #423a32, #c69a6b);
+}
+figcaption {
+  padding: 0.5rem 0;
+}
+details {
+  margin: 0.8rem 0;
+}
+summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 0.55rem 0;
+  font-weight: 700;
+}
+button {
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+}
+footer {
+  border-top: 1px solid #d8d0c5;
+}
+footer nav {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+@media (min-width: 900px) {
+  .menu > summary {
+    display: none;
+  }
+  .menu nav {
+    display: flex;
+    position: static;
+    border: 0;
+    padding: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+  .menu:not([open]) nav {
+    display: flex;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+@media (max-width: 360px) {
+  header {
+    align-items: flex-start;
+  }
+  .brand {
+    max-width: 13rem;
+  }
 }

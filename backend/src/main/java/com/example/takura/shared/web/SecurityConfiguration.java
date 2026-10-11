@@ -35,6 +35,7 @@ class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/v1/health", "/api/v1/public/config").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/services/**", "/api/v1/projects/**", "/api/v1/sitemap.xml").permitAll()
                         .requestMatchers("/actuator/health/liveness", "/actuator/health/readiness").permitAll()
                         .requestMatchers("/dev-oidc/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/session").authenticated()

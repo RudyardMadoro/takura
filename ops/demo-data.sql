@@ -37,6 +37,28 @@ INSERT INTO takura.staff_role(staff_identity_id,role_code) VALUES
 ON CONFLICT DO NOTHING;
 
 INSERT INTO takura.staff_grant(id,staff_identity_id,operation_code,granted_at) VALUES
+ ('20000000-0000-4000-8000-000000000010','10000000-0000-4000-8000-000000000005','content:write','2026-10-05T00:00:00Z'),
+ ('20000000-0000-4000-8000-000000000011','10000000-0000-4000-8000-000000000001','content:publish','2026-10-05T00:00:00Z')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO takura.content_entry(id,content_type,slug,state,current_revision,published_revision,featured,category_code,published_at,created_at) VALUES
+ ('30000000-0000-4000-8000-000000000001','SERVICE','property-transformation','PUBLISHED',1,1,true,'PROPERTY','2026-10-05T00:00:00Z','2026-10-05T00:00:00Z'),
+ ('30000000-0000-4000-8000-000000000002','SERVICE','custom-cabinetry','PUBLISHED',1,1,true,'CABINETRY','2026-10-05T00:00:00Z','2026-10-05T00:00:00Z'),
+ ('30000000-0000-4000-8000-000000000003','SERVICE','standalone-board-supply','PUBLISHED',1,1,true,'WORKSHOP','2026-10-05T00:00:00Z','2026-10-05T00:00:00Z'),
+ ('30000000-0000-4000-8000-000000000011','PROJECT','compact-home-concept','PUBLISHED',1,1,true,'PROPERTY','2026-10-05T00:00:00Z','2026-10-05T00:00:00Z'),
+ ('30000000-0000-4000-8000-000000000012','PROJECT','storage-renewal-concept','PUBLISHED',1,1,false,'CABINETRY','2026-10-04T00:00:00Z','2026-10-05T00:00:00Z'),
+ ('30000000-0000-4000-8000-000000000013','PROJECT','workshop-material-concept','PUBLISHED',1,1,false,'WORKSHOP','2026-10-03T00:00:00Z','2026-10-05T00:00:00Z')
+ON CONFLICT(content_type,slug) DO NOTHING;
+INSERT INTO takura.content_revision(entry_id,revision,title,summary,body_html,metadata,changed_at) VALUES
+ ('30000000-0000-4000-8000-000000000001',1,'Property transformation','Explore feasibility, constraints and an assessment-led process without promises about approvals or unit counts.','<p>Every site and approval path is different. This demonstration describes a structured feasibility conversation.</p>','{"synthetic":true}', '2026-10-05T00:00:00Z'),
+ ('30000000-0000-4000-8000-000000000002',1,'Custom cabinetry','Supply-only and fix-and-supply cabinetry paths for a confirmed project brief.','<p>Choose SUPPLY_ONLY or FIX_AND_SUPPLY after scope and site constraints are understood.</p>','{"synthetic":true,"fulfilment":["SUPPLY_ONLY","FIX_AND_SUPPLY"]}', '2026-10-05T00:00:00Z'),
+ ('30000000-0000-4000-8000-000000000003',1,'Standalone board supply','A prominent quotation-only material proposition. The live catalogue arrives in Phase 04.','<p>No stock, price or availability is claimed in this demonstration.</p>','{"synthetic":true,"catalogue_available":false}', '2026-10-05T00:00:00Z'),
+ ('30000000-0000-4000-8000-000000000011',1,'Compact home owner-development concept','Synthetic concept, not a client commission or completed project.','<p>An owner-development concept exploring space planning in an approximate Gauteng context.</p>','{"synthetic":true,"ownership_designation":"OWNER_DEVELOPMENT_CONCEPT","approximate_location":"Gauteng concept area"}', '2026-10-05T00:00:00Z'),
+ ('30000000-0000-4000-8000-000000000012',1,'Storage renewal owner-development concept','Synthetic cabinetry concept, not completed client work.','<p>A demonstration narrative for storage decisions and material coordination.</p>','{"synthetic":true,"ownership_designation":"OWNER_DEVELOPMENT_CONCEPT","approximate_location":"South Africa concept"}', '2026-10-05T00:00:00Z'),
+ ('30000000-0000-4000-8000-000000000013',1,'Workshop material owner-development concept','Synthetic material-planning concept with no capacity or stock claims.','<p>A demonstration of how a future board enquiry may be positioned.</p>','{"synthetic":true,"ownership_designation":"OWNER_DEVELOPMENT_CONCEPT","approximate_location":"Workshop concept"}', '2026-10-05T00:00:00Z')
+ON CONFLICT(entry_id,revision) DO NOTHING;
+
+INSERT INTO takura.staff_grant(id,staff_identity_id,operation_code,granted_at) VALUES
  ('20000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000001','staff_access:read','2026-10-05T00:00:00Z'),
  ('20000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000001','staff_access:write','2026-10-05T00:00:00Z'),
  ('20000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000001','settings:read','2026-10-05T00:00:00Z'),
