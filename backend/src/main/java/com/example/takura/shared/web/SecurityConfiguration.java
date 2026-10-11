@@ -38,6 +38,8 @@ class SecurityConfiguration {
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/health", "/api/v1/public/config").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/services", "/api/v1/services/**", "/api/v1/projects", "/api/v1/projects/**", "/api/v1/sitemap.xml").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/catalogue/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/enquiries").permitAll()
                         .requestMatchers("/actuator/health/liveness", "/actuator/health/readiness").permitAll()
                         .requestMatchers("/dev-oidc/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/session").authenticated()
@@ -76,7 +78,7 @@ class SecurityConfiguration {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "If-Match", "X-Correlation-ID", "X-Staff-Session"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "If-Match", "Idempotency-Key", "X-Correlation-ID", "X-Staff-Session"));
         config.setExposedHeaders(List.of("ETag", "X-Correlation-ID"));
         config.setAllowCredentials(false);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

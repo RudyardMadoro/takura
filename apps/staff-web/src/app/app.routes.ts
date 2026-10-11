@@ -8,6 +8,7 @@ import {
   SignInPage,
 } from './staff.pages';
 import { ContentEditorPage } from './content-editor.page';
+import { BoardInboxPage, CatalogueAdminPage } from './board-operations.page';
 export const routes: Routes = [
   { path: '', component: SignInPage },
   { path: 'auth/callback', component: SignInPage },
@@ -18,6 +19,16 @@ export const routes: Routes = [
     path: 'content',
     component: ContentEditorPage,
     canActivate: [permissionGuard('content:write')],
+  },
+  {
+    path: 'catalogue',
+    component: CatalogueAdminPage,
+    canActivate: [permissionGuard('catalogue:write')],
+  },
+  {
+    path: 'enquiries',
+    component: BoardInboxPage,
+    canActivate: [permissionGuard('enquiry:assigned:read')],
   },
   { path: 'forbidden', component: AccessDeniedPage },
   { path: '**', component: NotFoundPage },

@@ -22,6 +22,7 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
         String supplied = request.getHeader(HEADER);
         String correlationId = supplied != null && SAFE.matcher(supplied).matches() ? supplied : UUID.randomUUID().toString();
         response.setHeader(HEADER, correlationId);
+        request.setAttribute("correlationId", correlationId);
         try (MDC.MDCCloseable ignored = MDC.putCloseable("correlation_id", correlationId)) {
             chain.doFilter(request, response);
         }

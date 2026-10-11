@@ -53,19 +53,10 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                 ><h2>Custom cabinetry</h2>
                 <p>Supply-only or fix-and-supply routes.</p></a
               >
-              @if (nonProduction) {
-                <a class="timber" routerLink="/boards"
-                  ><h2>Standalone board supply</h2>
-                  <p>
-                    A prominent quotation proposition. The live catalogue arrives in Phase 04.
-                  </p></a
-                >
-              } @else {
-                <article class="timber pending-offer">
-                  <h2>Standalone board supply</h2>
-                  <p>Catalogue access is pending launch readiness.</p>
-                </article>
-              }
+              <a class="timber" routerLink="/boards"
+                ><h2>Standalone board supply</h2>
+                <p>Browse published full-sheet specifications and request a quotation.</p></a
+              >
             </section>
             <section>
               <h2>A careful process</h2>
@@ -105,9 +96,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
               <p class="lead">{{ content.summary }}</p>
               <div class="rich-text" [innerHTML]="content.body_html"></div>
               <p>
-                <a class="action" routerLink="/request-quote"
-                  >Quote requests are not yet available</a
-                >
+                <a class="action" routerLink="/request-quote">Request full board sheets</a>
               </p>
             }
           }
@@ -174,7 +163,10 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
           @case ('faqs') {
             <details>
               <summary>Is the board catalogue live?</summary>
-              <p>No. Catalogue records arrive in Phase 04.</p>
+              <p>
+                Yes. Published board specifications can be requested as full sheets; no stock or
+                price is claimed.
+              </p>
             </details>
             <details>
               <summary>Are the projects completed client work?</summary>

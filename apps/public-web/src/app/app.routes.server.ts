@@ -8,9 +8,7 @@ const staticPaths = [
   'faqs',
   'privacy',
   'terms',
-  'boards',
   'workshop/board-cutting',
-  'hardware',
   'request-quote',
 ];
 export const serverRoutes: ServerRoute[] = [
@@ -19,5 +17,9 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'projects', renderMode: RenderMode.Server },
   { path: 'services/:slug', renderMode: RenderMode.Server },
   { path: 'projects/:slug', renderMode: RenderMode.Server },
+  { path: 'boards', renderMode: RenderMode.Server },
+  { path: 'boards/:slug', renderMode: RenderMode.Server },
+  { path: 'hardware', renderMode: RenderMode.Server },
+  { path: 'request-quote', renderMode: RenderMode.Server },
   { path: '**', renderMode: RenderMode.Server, status: 404 },
 ];

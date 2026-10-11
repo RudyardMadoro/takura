@@ -1,6 +1,9 @@
 import { Routes } from '@angular/router';
 import { PublicPage } from './public.page';
 import { publicContentResolver } from './content-api.service';
+import { CataloguePage } from './catalogue.page';
+import { QuotePage } from './quote.page';
+import { catalogueResolver } from './catalogue-api.service';
 export const routes: Routes = [
   {
     path: '',
@@ -56,8 +59,16 @@ export const routes: Routes = [
   { path: 'terms', component: PublicPage, data: { kind: 'terms', title: 'Terms' } },
   {
     path: 'boards',
-    component: PublicPage,
-    data: { kind: 'upcoming', title: 'Board catalogue coming in Phase 04' },
+    component: CataloguePage,
+    data: { kind: 'boards', title: 'Standalone board catalogue' },
+    resolve: { catalogue: catalogueResolver },
+    runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+  },
+  {
+    path: 'boards/:slug',
+    component: CataloguePage,
+    data: { kind: 'board', title: 'Board detail' },
+    resolve: { catalogue: catalogueResolver },
   },
   {
     path: 'workshop/board-cutting',
@@ -66,13 +77,14 @@ export const routes: Routes = [
   },
   {
     path: 'hardware',
-    component: PublicPage,
-    data: { kind: 'upcoming', title: 'Hardware catalogue unavailable' },
+    component: CataloguePage,
+    data: { kind: 'hardware', title: 'Supporting hardware' },
+    resolve: { catalogue: catalogueResolver },
   },
   {
     path: 'request-quote',
-    component: PublicPage,
-    data: { kind: 'upcoming', title: 'Quote requests coming in Phase 05' },
+    component: QuotePage,
+    data: { title: 'Request full board sheets' },
   },
   { path: '**', component: PublicPage, data: { kind: 'notfound', title: 'Page not found' } },
 ];

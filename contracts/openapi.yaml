@@ -316,6 +316,79 @@ paths:
         '204': { description: Entry archived }
         '412': { description: Stale revision }
         '428': { description: If-Match required }
+  /catalogue/boards:
+    get:
+      operationId: listPublishedBoards
+      security: []
+      parameters:
+        - { name: type, in: query, schema: { type: string } }
+        - { name: finish, in: query, schema: { type: string } }
+        - { name: thickness, in: query, schema: { type: string } }
+        - { name: sheet_size, in: query, schema: { type: string } }
+        - { name: cursor, in: query, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: 'Published, enabled and cleared boards'
+          content: { application/json: { schema: { $ref: '#/components/schemas/BoardPage' } } }
+  /catalogue/boards/{slug}:
+    get:
+      operationId: getPublishedBoard
+      security: []
+      parameters: [{ name: slug, in: path, required: true, schema: { type: string } }]
+      responses:
+        '200':
+          {
+            description: Published board,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/BoardProduct' } } },
+          }
+        '404': { description: Published board not found }
+  /catalogue/hardware:
+    get:
+      operationId: listPublishedHardware
+      security: []
+      responses:
+        '200':
+          {
+            description: Published supporting supplies,
+            content:
+              {
+                application/json:
+                  { schema: { type: array, items: { $ref: '#/components/schemas/HardwareItem' } } },
+              },
+          }
+  /enquiries:
+    post:
+      operationId: createEnquiry
+      security: []
+      parameters:
+        - {
+            name: Idempotency-Key,
+            in: header,
+            required: true,
+            schema: { type: string, maxLength: 200 },
+          }
+      requestBody:
+        {
+          required: true,
+          content:
+            { application/json: { schema: { $ref: '#/components/schemas/CreateBoardEnquiry' } } },
+        }
+      responses:
+        '201':
+          {
+            description: Enquiry committed,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/EnquiryReceipt' } } },
+          }
+        '409':
+          description: 'Idempotency, notice or availability conflict'
+          content: { application/json: { schema: { $ref: '#/components/schemas/ApiError' } } }
+        '429':
+          {
+            description: Abuse quota reached,
+            content: { application/json: { schema: { $ref: '#/components/schemas/ApiError' } } },
+          }
 components:
   securitySchemes:
     staffBearer:
@@ -345,6 +418,134 @@ components:
         application/problem+json:
           schema: { $ref: '#/components/schemas/ApiError' }
   schemas:
+    BoardVariant:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        sku: { type: string }
+        material_type: { type: string, enum: [MELAMINE, MDF, PLYWOOD, OTHER] }
+        finish: { type: string }
+        thickness_mm: { type: string }
+        sheet_length_mm: { type: integer }
+        sheet_width_mm: { type: integer }
+        unit: { type: string, enum: [SHEET] }
+        availability_wording: { type: string }
+        collection_delivery_wording: { type: string }
+        revision: { type: integer, format: int64 }
+      required:
+        [
+          id,
+          sku,
+          material_type,
+          finish,
+          thickness_mm,
+          sheet_length_mm,
+          sheet_width_mm,
+          unit,
+          availability_wording,
+          collection_delivery_wording,
+          revision,
+        ]
+    BoardProduct:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        name: { type: string }
+        description: { type: string }
+        variants: { type: array, items: { $ref: '#/components/schemas/BoardVariant' } }
+      required: [id, slug, name, description, variants]
+    BoardPage:
+      allOf:
+        - { $ref: '#/components/schemas/PageMetadata' }
+        - {
+            type: object,
+            properties:
+              { items: { type: array, items: { $ref: '#/components/schemas/BoardProduct' } } },
+            required: [items],
+          }
+    HardwareItem:
+      type: object
+      properties:
+        {
+          id: { type: string, format: uuid },
+          slug: { type: string },
+          name: { type: string },
+          category: { type: string },
+          description: { type: string },
+          unit: { type: string },
+          availability_wording: { type: string },
+          revision: { type: integer, format: int64 },
+        }
+      required: [id, slug, name, category, description, unit, availability_wording, revision]
+    EnquiryContact:
+      type: object
+      properties:
+        {
+          full_name: { type: string },
+          email: { type: [string, 'null'] },
+          phone: { type: [string, 'null'] },
+          preferred_contact: { type: string, enum: [EMAIL, CALL, WHATSAPP] },
+        }
+      required: [full_name, preferred_contact]
+    BoardRequestLine:
+      type: object
+      properties:
+        {
+          variant_id: { type: [string, 'null'], format: uuid },
+          requested_specification: { type: [string, 'null'] },
+          quantity: { type: integer, minimum: 1, maximum: 9999 },
+          unit: { type: string, enum: [SHEET] },
+          fulfilment: { type: string, enum: [FULL_SHEET] },
+          collection_preference: { type: string, enum: [COLLECTION, DELIVERY, UNDECIDED] },
+          substitutes_allowed: { type: string, enum: [YES, NO, DISCUSS] },
+        }
+      required: [quantity, unit, fulfilment, collection_preference, substitutes_allowed]
+    CreateBoardEnquiry:
+      type: object
+      properties:
+        services:
+          { type: array, minItems: 1, maxItems: 1, items: { type: string, enum: [BOARD_SALES] } }
+        contact: { $ref: '#/components/schemas/EnquiryContact' }
+        location:
+          {
+            type: object,
+            properties: { country_code: { type: string }, town_or_suburb: { type: string } },
+            required: [country_code, town_or_suburb],
+          }
+        description: { type: string, minLength: 10, maxLength: 5000 }
+        request_lines:
+          {
+            type: array,
+            minItems: 1,
+            maxItems: 10,
+            items: { $ref: '#/components/schemas/BoardRequestLine' },
+          }
+        attachment_ids: { type: array, maxItems: 0, items: { type: string } }
+        privacy_acknowledged: { type: boolean }
+        privacy_notice_version: { type: string }
+        marketing_opt_in: { type: boolean, default: false }
+      required:
+        [
+          services,
+          contact,
+          location,
+          description,
+          request_lines,
+          privacy_acknowledged,
+          privacy_notice_version,
+          marketing_opt_in,
+        ]
+    EnquiryReceipt:
+      type: object
+      properties:
+        {
+          reference: { type: string },
+          result: { type: string, enum: [RECEIVED] },
+          next_step: { type: string },
+          correlation_id: { type: string },
+        }
+      required: [reference, result, next_step, correlation_id]
     PublicContent:
       type: object
       additionalProperties: false

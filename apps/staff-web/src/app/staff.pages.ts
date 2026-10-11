@@ -24,6 +24,7 @@ export class SignInPage {
     <nav aria-label="Staff">
       <a routerLink="/access">Access management</a> <a routerLink="/settings">Settings</a>
       <a routerLink="/content">Editorial content</a>
+      <a routerLink="/catalogue">Board catalogue</a> <a routerLink="/enquiries">Boards inbox</a>
     </nav>
     <button (click)="session.logout()">Sign out</button>`,
 })

@@ -5,6 +5,8 @@ spring:
   flyway:
     clean-disabled: true
 takura:
+  catalogue:
+    demo-fixtures-enabled: false
   security:
     bootstrap:
       enabled: false

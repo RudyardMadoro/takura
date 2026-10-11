@@ -47,6 +47,8 @@ logging:
   level:
     org.springframework.web.filter.CommonsRequestLoggingFilter: OFF
 takura:
+  enquiries:
+    privacy-notice-version: ${PRIVACY_NOTICE_VERSION:demo-privacy-v1}
   security:
     allowed-origins: ${STAFF_ALLOWED_ORIGINS:http://localhost:4201}
     oidc:

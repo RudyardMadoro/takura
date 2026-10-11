@@ -201,6 +201,51 @@ button {
   min-height: 44px;
   padding: 0.6rem 1rem;
 }
+label {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.75rem 0;
+  max-width: 38rem;
+}
+input,
+select,
+textarea {
+  min-height: 44px;
+  padding: 0.55rem;
+  border: 1px solid #665d54;
+  background: #fff;
+  color: #231f1b;
+  font: inherit;
+}
+textarea {
+  min-height: 8rem;
+  resize: vertical;
+}
+fieldset {
+  border: 1px solid #b9aa98;
+  margin: 1rem 0;
+  padding: 1rem;
+}
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+}
+.variant {
+  border: 1px solid #b9aa98;
+  padding: 0.75rem;
+  grid-template-columns: auto 1fr;
+}
+.variant span,
+.variant strong {
+  grid-column: 2;
+}
+.wizard-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
 footer {
   border-top: 1px solid #d8d0c5;
 }

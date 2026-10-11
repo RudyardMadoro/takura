@@ -13,6 +13,7 @@ const app = express();
 const angularApp = new AngularNodeAppEngine();
 const publicSiteMode = (process.env['TAKURA_PUBLIC_SITE_MODE'] || 'DEMO').toUpperCase();
 const nonProduction = publicSiteMode !== 'PRODUCTION';
+app.use(express.json({ limit: '64kb' }));
 
 app.disable('x-powered-by');
 app.use((_req, res, next) => {
@@ -25,8 +26,13 @@ app.use((_req, res, next) => {
 const apiOrigin = (process.env['TAKURA_API_ORIGIN'] || 'http://127.0.0.1:8080').replace(/\/$/, '');
 app.use('/api/v1', async (req, res, next) => {
   if (
-    req.method !== 'GET' ||
-    !/^\/(services|projects)(\/[^/]+)?$|^\/sitemap\.xml$|^\/public\/config$/.test(req.path)
+    !(
+      (req.method === 'GET' &&
+        /^\/(services|projects)(\/[^/]+)?$|^\/catalogue\/(boards(\/[^/]+)?|hardware)$|^\/sitemap\.xml$|^\/public\/config$/.test(
+          req.path,
+        )) ||
+      (req.method === 'POST' && req.path === '/enquiries')
+    )
   ) {
     return next();
   }
@@ -34,6 +40,13 @@ app.use('/api/v1', async (req, res, next) => {
     const response = await fetch(
       `${apiOrigin}/api/v1${req.path}${req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : ''}`,
       {
+        method: req.method,
+        headers: {
+          'content-type': req.get('content-type') ?? 'application/json',
+          'idempotency-key': req.get('idempotency-key') ?? '',
+          'x-correlation-id': req.get('x-correlation-id') ?? '',
+        },
+        body: req.method === 'POST' ? JSON.stringify(req.body) : undefined,
         redirect: 'manual',
       },
     );
@@ -47,9 +60,10 @@ app.use('/api/v1', async (req, res, next) => {
   }
 });
 app.use(async (req, res, next) => {
-  if (!/^\/(services|projects)\/[^/]+$/.test(req.path)) return next();
+  if (!/^\/(services|projects)\/[^/]+$|^\/boards\/[^/]+$/.test(req.path)) return next();
   try {
-    const response = await fetch(`${apiOrigin}/api/v1${req.path}`, { redirect: 'manual' });
+    const apiPath = req.path.startsWith('/boards/') ? `/catalogue${req.path}` : req.path;
+    const response = await fetch(`${apiOrigin}/api/v1${apiPath}`, { redirect: 'manual' });
     if (response.status === 404) res.locals['contentStatus'] = 404;
     if (response.status === 308) {
       const location = response.headers.get('location');

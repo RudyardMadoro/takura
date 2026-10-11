@@ -42,6 +42,13 @@ INSERT INTO takura.staff_grant(id,staff_identity_id,operation_code,granted_at) V
  ('20000000-0000-4000-8000-000000000012','10000000-0000-4000-8000-000000000001','content:write','2026-10-05T00:00:00Z')
 ON CONFLICT DO NOTHING;
 
+INSERT INTO takura.staff_team(staff_identity_id,team_code) VALUES
+ ('10000000-0000-4000-8000-000000000001','BOARDS'),
+ ('10000000-0000-4000-8000-000000000002','BOARDS') ON CONFLICT DO NOTHING;
+INSERT INTO takura.staff_grant(id,staff_identity_id,operation_code,granted_at) VALUES
+ ('20000000-0000-4000-8000-000000000020','10000000-0000-4000-8000-000000000001','catalogue:write','2026-10-05T00:00:00Z'),
+ ('20000000-0000-4000-8000-000000000021','10000000-0000-4000-8000-000000000001','enquiry:all:read','2026-10-05T00:00:00Z') ON CONFLICT DO NOTHING;
+
 INSERT INTO takura.content_entry(id,content_type,slug,state,current_revision,published_revision,featured,category_code,published_at,created_at) VALUES
  ('30000000-0000-4000-8000-000000000001','SERVICE','property-transformation','PUBLISHED',1,1,true,'PROPERTY','2026-10-05T00:00:00Z','2026-10-05T00:00:00Z'),
  ('30000000-0000-4000-8000-000000000002','SERVICE','custom-cabinetry','PUBLISHED',1,1,true,'CABINETRY','2026-10-05T00:00:00Z','2026-10-05T00:00:00Z'),
