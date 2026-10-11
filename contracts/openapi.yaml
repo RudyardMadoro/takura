@@ -161,6 +161,161 @@ paths:
         '200': { description: Setting updated }
         '412': { description: Stale revision }
         '428': { description: If-Match required }
+  /services:
+    get:
+      operationId: listPublishedServices
+      security: []
+      parameters:
+        - { name: cursor, in: query, schema: { type: string, format: uuid } }
+        - {
+            name: page_size,
+            in: query,
+            schema: { type: integer, minimum: 1, maximum: 12, default: 12 },
+          }
+      responses:
+        '200':
+          description: Published service revisions only
+          content:
+            { application/json: { schema: { $ref: '#/components/schemas/PublicContentPage' } } }
+  /services/{slug}:
+    get:
+      operationId: getPublishedService
+      security: []
+      parameters:
+        - {
+            name: slug,
+            in: path,
+            required: true,
+            schema: { type: string, minLength: 3, maxLength: 100 },
+          }
+      responses:
+        '200':
+          {
+            description: Published service,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/PublicContent' } } },
+          }
+        '308':
+          {
+            description: Permanent published-slug redirect,
+            headers: { Location: { schema: { type: string } } },
+          }
+        '404': { description: 'Missing, draft or archived service' }
+  /projects:
+    get:
+      operationId: listPublishedProjects
+      security: []
+      parameters:
+        - { name: category, in: query, schema: { type: string, maxLength: 60 } }
+        - { name: cursor, in: query, schema: { type: string, format: uuid } }
+        - {
+            name: page_size,
+            in: query,
+            schema: { type: integer, minimum: 1, maximum: 12, default: 12 },
+          }
+      responses:
+        '200':
+          {
+            description: Published project revisions only,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/PublicContentPage' } } },
+          }
+  /projects/{slug}:
+    get:
+      operationId: getPublishedProject
+      security: []
+      parameters:
+        - {
+            name: slug,
+            in: path,
+            required: true,
+            schema: { type: string, minLength: 3, maxLength: 100 },
+          }
+      responses:
+        '200':
+          {
+            description: Published project,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/PublicContent' } } },
+          }
+        '308':
+          {
+            description: Permanent published-slug redirect,
+            headers: { Location: { schema: { type: string } } },
+          }
+        '404': { description: 'Missing, draft or archived project' }
+  /admin/content:
+    get:
+      operationId: listEditorialContent
+      security: [{ staffBearer: [], staffSession: [] }]
+      responses:
+        '200':
+          {
+            description: Editorial entries,
+            content:
+              {
+                application/json:
+                  { schema: { type: array, items: { $ref: '#/components/schemas/AdminContent' } } },
+              },
+          }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      operationId: createEditorialContent
+      security: [{ staffBearer: [], staffSession: [] }]
+      requestBody:
+        {
+          required: true,
+          content: { application/json: { schema: { $ref: '#/components/schemas/CreateContent' } } },
+        }
+      responses:
+        '201':
+          {
+            description: Draft created,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/AdminContent' } } },
+          }
+        '409': { description: Slug already exists }
+  /admin/content/{id}:
+    get:
+      operationId: getEditorialContent
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200':
+          {
+            description: Current editable revision,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/ContentEditor' } } },
+          }
+        '404': { description: Content was not found }
+    put:
+      operationId: reviseEditorialContent
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: If-Match, in: header, required: true, schema: { type: string } }
+        - { name: publish, in: query, schema: { type: boolean, default: false } }
+      requestBody:
+        {
+          required: true,
+          content: { application/json: { schema: { $ref: '#/components/schemas/ContentDraft' } } },
+        }
+      responses:
+        '204': { description: Revision stored }
+        '412': { description: Stale revision }
+        '422': { description: Media is not cleared for publication }
+        '428': { description: If-Match required }
+    delete:
+      operationId: archiveEditorialContent
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: If-Match, in: header, required: true, schema: { type: string } }
+      responses:
+        '204': { description: Entry archived }
+        '412': { description: Stale revision }
+        '428': { description: If-Match required }
 components:
   securitySchemes:
     staffBearer:
@@ -190,6 +345,83 @@ components:
         application/problem+json:
           schema: { $ref: '#/components/schemas/ApiError' }
   schemas:
+    PublicContent:
+      type: object
+      additionalProperties: false
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        title: { type: string }
+        summary: { type: string }
+        body_html: { type: string }
+        featured: { type: boolean }
+        published_at: { type: string, format: date-time }
+        metadata_json: { type: string }
+        revision: { type: integer, format: int64 }
+      required:
+        [id, slug, title, summary, body_html, featured, published_at, metadata_json, revision]
+    PublicContentPage:
+      type: object
+      additionalProperties: false
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/PublicContent' } }
+        next_cursor: { type: [string, 'null'], format: uuid }
+        page_size: { type: integer, minimum: 1, maximum: 12 }
+      required: [items, next_cursor, page_size]
+    AdminContent:
+      type: object
+      additionalProperties: false
+      properties:
+        id: { type: string, format: uuid }
+        content_type: { type: string, enum: [PAGE, SERVICE, PROJECT, POLICY, FAQ] }
+        slug: { type: string }
+        state: { type: string, enum: [DRAFT, PUBLISHED, ARCHIVED] }
+        current_revision: { type: integer, format: int64 }
+        published_revision: { type: [integer, 'null'], format: int64 }
+        featured: { type: boolean }
+        category_code: { type: [string, 'null'] }
+        published_at: { type: [string, 'null'], format: date-time }
+      required:
+        [
+          id,
+          content_type,
+          slug,
+          state,
+          current_revision,
+          published_revision,
+          featured,
+          category_code,
+          published_at,
+        ]
+    ContentDraft:
+      type: object
+      additionalProperties: false
+      properties:
+        slug: { type: string, minLength: 3, maxLength: 100, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$' }
+        title: { type: string, minLength: 1, maxLength: 160 }
+        summary: { type: string, minLength: 1, maxLength: 320 }
+        body_html: { type: string, minLength: 1 }
+        metadata_json: { type: string }
+      required: [slug, title, summary, body_html, metadata_json]
+    CreateContent:
+      type: object
+      additionalProperties: false
+      properties:
+        content_type: { type: string, enum: [PAGE, SERVICE, PROJECT, POLICY, FAQ] }
+        featured: { type: boolean }
+        category_code: { type: [string, 'null'] }
+        draft: { $ref: '#/components/schemas/ContentDraft' }
+      required: [content_type, featured, category_code, draft]
+    ContentEditor:
+      allOf:
+        - $ref: '#/components/schemas/AdminContent'
+        - type: object
+          properties:
+            title: { type: string }
+            summary: { type: string }
+            body_html: { type: string }
+            metadata_json: { type: string }
+          required: [title, summary, body_html, metadata_json]
     StaffSession:
       type: object
       additionalProperties: false

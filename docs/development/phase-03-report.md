@@ -1,78 +1,87 @@
 # Phase 03 report — Responsive public website and editorial content
 
 Date: 2026-10-11  
-Overall status: **BLOCKED**
+Overall status: **BLOCKED** (implementation and automated verification pass; required 200% zoom, screen-reader and automated accessibility evidence remains not run)
 
 ## Scope and source traceability
 
-Implemented an initial Phase 03 foundation against Requirements v1.2, Specification v1.1, Architecture v1.0, and the Phase 01–02 reports. The source documents were read from `docs/source/`, including their extracted paragraph and table content. No source document was missing.
+Implemented Phase 03 against Requirements v1.2, Specification v1.1, Architecture v1.0 and the Phase 01–02 reports. All three source documents were present under `docs/source/`; their extracted paragraphs and tables were reviewed. Mappings addressed: FR 01–06, 08–09, 21–22, 25–26; SP 02–05, 19–20, 26–27, 30, 32; AR 01, 16–17; T01, T18, T20, T23; AAT 01, 12.
 
-Mappings addressed: FR 01–06, 08–09, 21–22, 25–26; SP 02–05, 19–20, 26–27, 30, 32; AR 01, 16–17; T01, T18, T20, T23; AAT 01, 12. The implementation keeps the Angular public SSR / staff CSR and Spring Boot modular-monolith boundaries. No Phase 04 catalogue, checkout, inventory, customer-account, or other R2/R3 functionality was added.
+The work stays within Angular public SSR/staff CSR, the Spring Boot modular monolith and PostgreSQL/Flyway. No Phase 04 catalogue, checkout, inventory, customer accounts or R2/R3 functionality was added.
 
 ## Files changed
 
-- Public application routes, shell, page component, responsive styles and tests under `apps/public-web/src/app/` and `apps/public-web/src/styles.scss`.
-- Editorial application service and HTTP controller under `backend/src/main/java/com/example/takura/content/`.
-- Public GET security rules in `backend/src/main/java/com/example/takura/shared/web/SecurityConfiguration.java`.
-- Flyway migration `backend/src/main/resources/db/migration/V3__editorial_content.sql` and migration-count test.
-- Synthetic editorial seed data and grants in `ops/demo-data.sql`.
+- Public SSR application: `apps/public-web/src/app/app.config.ts`, `app.config.server.ts`, `app.routes.server.ts`, `content-api.service.ts`, `public.page.ts`, `server.ts` and `styles.scss`.
+- Staff A07 editor: `apps/staff-web/src/app/app.routes.ts`, `staff.pages.ts` and `content-editor.page.ts`.
+- Editorial API/domain: `backend/src/main/java/com/example/takura/content/`.
+- Security/runtime prerequisite repairs: `StaffSessionService.java`, `LocalOidcProvider.java`, `SecurityConfiguration.java`, `WebConfiguration.java`, `ManagementConnectorConfiguration.java` and the management-context imports resource.
+- Database/tests: `V4__content_media_clearance.sql`, `ContentServiceTest.java`, `PostgresqlMigrationTest.java`, `application.yaml`, `pom.xml` and `ops/demo-data.sql`.
+- Contract/generated client: `contracts/openapi.yaml` and `libs/api-client/src/generated/`.
 - This report.
 
-Repository-wide Prettier also normalised whitespace in the already-modified Phase 02 report and generated `location.ts`; it did not alter their behaviour. Those files were already part of the developer's dirty worktree and were not discarded.
+## Architecture decisions and handoff map
 
-## Architecture decisions
+- Public pages P01–P07, P12–P14 and P18–P19 use shared header/footer, mobile disclosure navigation, service cards, process/proof sections, unavailable states and purposeful Phase-boundary CTAs. Board supply remains a primary offer; its catalogue is explicitly deferred.
+- Public service/project lists and details are backed by published revisions only. Lists default/max to 12, use a featured/publication-time/ID keyset cursor, and projects accept an allowlisted category filter. The sitemap traverses every page of published entries.
+- Angular server rendering fetches public APIs only. The Node SSR host exposes a narrowly allowlisted same-origin public API proxy, applies 60-second public caching, immutable hashed assets, global demo noindex headers and genuine 404/308 behavior for dynamic content. No private token or staff context enters SSR.
+- A07 supports create, revise, publish and archive. `content:write` and `content:publish` are separate server-side checks. `If-Match` is mandatory (428 when absent, 412 when stale); ETags are quoted correctly.
+- Entries retain immutable revisions and DRAFT/PUBLISHED/ARCHIVED state. Slugs are 3–100 characters, unique by type, checked against reserved paths, and old published slugs become loop-protected redirects.
+- Rich HTML is stored only after OWASP allowlist sanitisation. API JSON uses external snake_case and the versioned OpenAPI client was regenerated.
+- `MediaAsset` references are established without upload shortcuts. Publication rejects referenced media unless it is PUBLIC, CLEAN, CLEARED and not DEMO_ONLY. Upload, scanning and derivatives remain Phase 06 work.
+- Three repository-owned, visibly synthetic owner-development concepts are seeded without addresses, tenant data, testimonials, accreditation or claims of client/completed work.
+- Palette tokens remain replaceable charcoal/off-white/timber. Galleries reserve space and provide captions, alt text, reduced motion, keyboard activation, a modal dialog, Escape close, focus return, labelled navigation and a live position announcement.
 
-- Added revisioned `content_entry` and immutable `content_revision` records with DRAFT, PUBLISHED and ARCHIVED states.
-- Added slug redirect history and checks for unique/reserved slugs and redirect loops.
-- Added media metadata and clearance classifications without implementing Phase 06 upload, scanning or derivative creation.
-- Separated `content:write` and `content:publish` checks through the Phase 02 permission service; updates require `If-Match` and return 428/412 through the existing error handling.
-- Public service/project queries expose published records only, default to 12 rows, and use featured/publication-date/id ordering. Project category and cursor inputs are allowlisted/validated.
-- Rich text is sanitised with a conservative server-side allowlist before persistence.
-- Added shared responsive header/footer, mobile navigation, unavailable states, synthetic project/service presentation, FAQs, legal/contact placeholders and demo noindex behaviour.
-- Board supply is prominent while the catalogue remains explicitly unavailable until Phase 04.
+## Migrations and configuration
 
-## Migration and configuration
+- `V4__content_media_clearance.sql` adds constrained media references, publication-clearance attributes and indexes; Flyway now validates and applies four migrations.
+- Demo Owner receives both editorial operations; ordinary Content Editor remains write-only. No provider groups become administrators.
+- Global Jackson snake_case is enabled. Public cache defaults to 60 seconds. Preview/demo responses are noindex and real contact actions remain disabled.
+- Angular 22.2.1/TypeScript 6.0.2/Node 24.19 and Spring Boot 3.5.16/Java 21 remain pinned. Official compatibility was checked at kickoff; no version change was required.
+- No credentials, paid infrastructure, external account, production deployment, live data or real message was created or changed.
 
-- `V3__editorial_content.sql` creates editorial entries, revisions, slug redirects and media metadata/references.
-- Three visibly synthetic owner-development concepts and three synthetic service records are seeded. They are labelled as concepts, not client commissions or completed work.
-- No credentials, provider accounts, paid infrastructure, production deployment, real messages or live data were created or changed.
+## Prerequisite defects repaired
+
+- The Phase 02 local OIDC controller lacked controller registration and was then visible outside its guarded local profile. It is now registered only when both the `local` profile and explicit local-provider flag are active.
+- PostgreSQL could not infer JDBC types for raw `Instant` session/content parameters; bindings now use `Timestamp`.
+- The host JDK/Windows loopback selector failure was avoided by the configured NIO2 connector for both application and loopback-only management servers.
+- Phase 03 response builders emitted invalid unquoted ETags; quoted ETags now support the required optimistic-concurrency workflow.
 
 ## Commands and actual outcomes
 
-| Command/check                                                    | Status         | Outcome                                                                                                                                                              |
-| ---------------------------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `git status --short`; `git branch --show-current`                | PASS           | Worktree was already dirty; current branch is `main`. Existing work was preserved. Recommended developer branch: `feature/phase-03-public-editorial` from `develop`. |
-| `pnpm build:public`                                              | PASS           | Angular SSR build completed and prerendered 14 static routes.                                                                                                        |
-| `pnpm build`                                                     | PASS           | Public app, staff app and libraries built. Local Node 23.5 emitted the repository's version warning against pinned Node 24.19.                                       |
-| `pnpm test`                                                      | PASS           | 6 test files and 8 tests passed after updating the public shell expectation.                                                                                         |
-| `backend\\mvnw.cmd verify`                                       | PASS           | 11 tests passed; Flyway replayed three migrations.                                                                                                                   |
-| `pnpm format:check`                                              | PASS           | All Prettier-managed files pass.                                                                                                                                     |
-| `pnpm api:check`                                                 | FAIL           | Generation succeeds, but the check detects existing formatting drift in generated `location.ts`. Phase 03 endpoints are not yet represented in OpenAPI.              |
-| `ops/seed-demo.ps1 -Environment local` (second run)              | PASS           | All inserts reported `INSERT 0 0`, confirming idempotency.                                                                                                           |
-| Inspect prerendered HTML without JavaScript                      | PASS (partial) | Static HTML contains public copy, unique titles/descriptions and global demo noindex. Canonical is incorrectly emitted as `<meta rel="canonical">`, not a `<link>`.  |
-| Start backend and exercise live API                              | BLOCKED        | PostgreSQL migrated V2→V3, but the application hit the previously recorded Windows/JDK loopback selector `SocketException: Invalid argument: connect`.               |
-| Automated accessibility and manual viewport/screen-reader matrix | NOT RUN        | No browser accessibility runner or complete 320/375/768/1024/1440, 200% zoom and screen-reader evidence was completed.                                               |
+| Command/check                                                     | Status         | Actual outcome                                                                                                                                                                                                                                                                     |
+| ----------------------------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `git status --short`; `git branch --show-current`                 | PASS           | Started clean on `main`; work remained uncommitted. Recommended developer branch: `feature/phase-03-public-editorial` from `develop`.                                                                                                                                              |
+| Official Angular/Spring compatibility review                      | PASS           | Pinned GA combinations are supported; no manifest/lockfile change required.                                                                                                                                                                                                        |
+| `pnpm build` and final `pnpm build:public`                        | PASS           | Public SSR, staff CSR and all libraries built; 12 static routes prerendered. Host Node 23.5 warned because it is not the pinned Node 24.19.                                                                                                                                        |
+| `pnpm test`                                                       | PASS           | Six frontend test targets passed (8 tests total).                                                                                                                                                                                                                                  |
+| `pnpm format:check`                                               | PASS           | All Prettier-managed files passed.                                                                                                                                                                                                                                                 |
+| `pnpm api:generate`                                               | PASS           | Contract regenerated deterministically; generated changes intentionally differ from HEAD because this phase is uncommitted.                                                                                                                                                        |
+| `backend\\mvnw.cmd verify`                                        | PASS           | 13 tests passed; PostgreSQL 17.11 Testcontainers applied and revalidated all four migrations.                                                                                                                                                                                      |
+| Live local OIDC/session/editor lifecycle                          | PASS           | Session 201, create 201, publish 204, stale update 412, published GET 200 with script removed, archive 204, archived GET 404, logout 204.                                                                                                                                          |
+| Raw SSR checks without JavaScript                                 | PASS           | Listings/details include published copy and SEO; dynamic missing content returns 404; canonical links and noindex are present.                                                                                                                                                     |
+| Responsive browser checks                                         | PASS (partial) | 320, 375, 768, 1024 and 1440 viewport attempts reported no horizontal overflow (the in-app browser clamped one 768 attempt to 375). Mobile-menu and FAQ disclosures opened from Enter.                                                                                             |
+| Gallery browser interaction                                       | NOT RUN        | The available in-app browser did not complete Angular HTTP hydration for the dynamic project route, despite SSR and the same-origin public API both returning 200. Gallery semantics/build are present, but modal focus/Escape evidence was not completed in a production browser. |
+| 200% zoom, screen-reader pass and automated accessibility scanner | NOT RUN        | No supported screen reader or automated accessibility runner was available in this environment.                                                                                                                                                                                    |
 
 ## Acceptance criteria
 
-- **PASS (partial):** Responsive public route set, synthetic offer positioning, demo/staging noindex, disabled contact actions, keyboard-visible focus, reduced-motion styles, FAQ semantics and SSR static content are present.
-- **PASS:** Persistence supports immutable revisions, lifecycle states, slug constraints/history, optimistic concurrency and separately authorised editing/publishing.
-- **PASS:** Synthetic projects avoid exact addresses, tenant data, testimonials, accreditation and unverified client-work claims.
-- **BLOCKED:** The Angular pages currently render repository fixtures rather than fetching published public API revisions during SSR. End-to-end draft exclusion and publication freshness therefore are not demonstrated.
-- **BLOCKED:** A07 staff editor screens are not implemented; only the secured backend update surface exists.
-- **BLOCKED:** API and renderer cache invalidation on publication is not implemented or verified within five minutes.
-- **BLOCKED:** Dynamic missing/draft service and project routes do not yet prove a genuine HTTP 404 status.
-- **BLOCKED:** Canonical link output is invalid and structured metadata is incomplete.
-- **BLOCKED:** The OpenAPI contract and generated TypeScript client do not include the Phase 03 editorial APIs.
-- **BLOCKED:** Media metadata exists, but publication does not yet enforce all DEMO_ONLY/PENDING/PRIVATE/unscanned and claim-verification clearance rules through references.
-- **NOT RUN:** Publish/edit/archive through the staff UI, renderer/API freshness, complete keyboard/screen-reader gallery checks, automated accessibility scan and the required responsive/zoom matrix.
+- **PASS:** Required public route set, primary-offer positioning, synthetic/demonstration labelling, disabled real contact actions and production-safe unavailable routes.
+- **PASS:** Published-only public APIs, stable keyset pagination, project ordering, category filtering, complete published-only sitemap and 60-second public cache policy.
+- **PASS:** API-backed SSR contains content and SEO without JavaScript; missing/draft/archived details return a genuine HTTP 404.
+- **PASS:** Create/publish/stale-update/archive was exercised through a fresh MFA-simulated federated session. Changes were visible immediately, within the five-minute requirement.
+- **PASS:** Separate edit/publish authorization, server-side permission checks, 428/412 concurrency behavior, sanitisation and media publication clearance are implemented.
+- **PASS:** Production cannot publish referenced DEMO_ONLY, PENDING/PRIVATE, unscanned or uncleared media. No unsigned/public-original shortcut exists.
+- **PASS (partial):** Responsive overflow checks and keyboard activation for menu/FAQ passed; CSS includes focus, reduced-motion and non-covering layout safeguards.
+- **NOT RUN:** Complete gallery focus-trap/return-focus evidence, 200% zoom, screen-reader checks and an automated accessibility scan. These keep overall status **BLOCKED** under the prompt's completion rule.
 
 ## Limitations and provider checks pending
 
-The phase is not complete. The Phase 02 local provider and live backend remain unverified because of the host runtime issue above. No real Cognito/IdP/MFA or production provider check was attempted. The public UI needs API-backed SSR, a complete editor, cache invalidation, canonical/structured metadata correction, dynamic 404 handling, media publication enforcement, OpenAPI generation and full accessibility/manual-browser verification.
+- Run the public app in a normal supported browser with the pinned Node runtime and capture the remaining accessibility matrix: 200% zoom, mobile menu, FAQs, gallery focus trap/Escape/return focus, image-position announcement and an automated scanner with findings fixed.
+- Real Cognito/IdP/MFA federation remains a Phase 02 production-readiness check; this phase used only the explicitly local, MFA-simulated provider.
+- Replace demo copy and illustrations only through A07 revisions and cleared `MediaAsset` references. Genuine media ingestion remains Phase 06.
 
 ## Next-phase handoff
 
-Do not begin Phase 04 yet. First close the Phase 03 blockers, rerun all checks, and exercise publishing against a working local backend. Reusable foundations are the `content_entry`/`content_revision` schema, `ContentService` permission and concurrency checks, charcoal/off-white/timber CSS tokens, the public route inventory, and visibly synthetic seed data. Genuine media ingestion remains deferred to Phase 06 without adding an unsigned or public-original shortcut.
+Do not start Phase 04 until the remaining accessibility evidence is completed and this report can move from BLOCKED to PASS. Reuse the nested public content DTOs, `ContentService` permission helpers, quoted ETag workflow, revision/redirect rules, media-clearance gate, CSS tokens, public SSR proxy/cache behavior and generated client. Board catalogue content must attach to these publication guards rather than bypass them.
 
 No changes were committed or pushed.

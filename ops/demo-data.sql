@@ -38,7 +38,8 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO takura.staff_grant(id,staff_identity_id,operation_code,granted_at) VALUES
  ('20000000-0000-4000-8000-000000000010','10000000-0000-4000-8000-000000000005','content:write','2026-10-05T00:00:00Z'),
- ('20000000-0000-4000-8000-000000000011','10000000-0000-4000-8000-000000000001','content:publish','2026-10-05T00:00:00Z')
+ ('20000000-0000-4000-8000-000000000011','10000000-0000-4000-8000-000000000001','content:publish','2026-10-05T00:00:00Z'),
+ ('20000000-0000-4000-8000-000000000012','10000000-0000-4000-8000-000000000001','content:write','2026-10-05T00:00:00Z')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO takura.content_entry(id,content_type,slug,state,current_revision,published_revision,featured,category_code,published_at,created_at) VALUES

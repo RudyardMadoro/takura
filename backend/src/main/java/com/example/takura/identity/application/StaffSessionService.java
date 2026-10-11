@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.sql.Timestamp;
 import java.util.Base64;
 import java.util.List;
 import java.util.Set;
@@ -50,7 +51,7 @@ public class StaffSessionService {
             throw new CredentialsExpiredException("Identity is inactive or authentication predates revocation");
         }
         jdbc.update("UPDATE takura.staff_session SET revoked_at=? WHERE staff_identity_id=? AND revoked_at IS NULL",
-                now, identity.id);
+                Timestamp.from(now), identity.id);
         byte[] bytes = new byte[32];
         random.nextBytes(bytes);
         String handle = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
@@ -60,7 +61,7 @@ public class StaffSessionService {
                   authenticated_at,created_at,last_interactive_at,absolute_expires_at)
                 VALUES (?,?,?,?,?,?,?,?,?,?)
                 """, UUID.randomUUID(), hash(handle), identity.id, issuer, subject, clientId,
-                authenticatedAt, now, now, absoluteExpiry);
+                Timestamp.from(authenticatedAt), Timestamp.from(now), Timestamp.from(now), Timestamp.from(absoluteExpiry));
         return new CreatedSession(handle, now.plus(idleTimeout), absoluteExpiry);
     }
 
@@ -82,7 +83,7 @@ public class StaffSessionService {
             throw new CredentialsExpiredException("Staff session expired or revoked");
         }
         if (interactive) {
-            jdbc.update("UPDATE takura.staff_session SET last_interactive_at=? WHERE handle_hash=?", now, hash(handle));
+            jdbc.update("UPDATE takura.staff_session SET last_interactive_at=? WHERE handle_hash=?", Timestamp.from(now), hash(handle));
         }
         Set<String> roles = Set.copyOf(jdbc.queryForList(
                 "SELECT role_code FROM takura.staff_role WHERE staff_identity_id=?", String.class, session.identityId));
@@ -95,7 +96,7 @@ public class StaffSessionService {
 
     public void revoke(String handle) {
         jdbc.update("UPDATE takura.staff_session SET revoked_at=? WHERE handle_hash=? AND revoked_at IS NULL",
-                clock.instant(), hash(handle));
+                Timestamp.from(clock.instant()), hash(handle));
     }
 
     private IdentityRow identityForUpdate(String issuer, String subject) {

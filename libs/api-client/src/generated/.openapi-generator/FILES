@@ -8,9 +8,13 @@ configuration.ts
 encoder.ts
 git_push.sh
 index.ts
+model/adminContent.ts
 model/apiError.ts
 model/configurationStatus.ts
 model/contact.ts
+model/contentDraft.ts
+model/contentEditor.ts
+model/createContent.ts
 model/fieldError.ts
 model/getPrivateProbe200Response.ts
 model/healthResponse.ts
@@ -19,6 +23,8 @@ model/models.ts
 model/money.ts
 model/pageMetadata.ts
 model/publicConfig.ts
+model/publicContent.ts
+model/publicContentPage.ts
 model/setting.ts
 model/settingUpdate.ts
 model/staffAccessUpdate.ts

@@ -34,15 +34,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Configuration @Profile("local")
 @ConditionalOnProperty(name="takura.security.local-provider-enabled",havingValue="true")
 class LocalOidcProvider {
     @Bean RSAKey localOidcKey() throws Exception {var pair=KeyPairGenerator.getInstance("RSA");pair.initialize(2048);var keys=pair.generateKeyPair();return new RSAKey.Builder((RSAPublicKey)keys.getPublic()).privateKey((RSAPrivateKey)keys.getPrivate()).keyID(UUID.randomUUID().toString()).build();}
     @Bean JwtEncoder localJwtEncoder(RSAKey key){return new NimbusJwtEncoder(new ImmutableJWKSet<SecurityContext>(new JWKSet(key)));}
-    @Bean LocalOidcController localOidcController(RSAKey key,JwtEncoder encoder){return new LocalOidcController(key,encoder);}
 }
 
+@RestController @Profile("local")
+@ConditionalOnProperty(name="takura.security.local-provider-enabled",havingValue="true")
 class LocalOidcController {
     private static final String ISSUER="http://127.0.0.1:8080/dev-oidc";
     private static final Map<String,String> IDENTITIES=Map.of("owner","demo-owner","coordinator","demo-coordinator","estimator","demo-estimator","approver","demo-approver","editor","demo-editor","reviewer","demo-reviewer");

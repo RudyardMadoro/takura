@@ -2,6 +2,7 @@ package com.example.takura.shared.web;
 
 import com.example.takura.identity.infrastructure.StaffSessionFilter;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.DispatcherType;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -34,8 +35,9 @@ class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/health", "/api/v1/public/config").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/services/**", "/api/v1/projects/**", "/api/v1/sitemap.xml").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/services", "/api/v1/services/**", "/api/v1/projects", "/api/v1/projects/**", "/api/v1/sitemap.xml").permitAll()
                         .requestMatchers("/actuator/health/liveness", "/actuator/health/readiness").permitAll()
                         .requestMatchers("/dev-oidc/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/session").authenticated()
