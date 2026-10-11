@@ -11,10 +11,12 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+const publicSiteMode = (process.env['TAKURA_PUBLIC_SITE_MODE'] || 'DEMO').toUpperCase();
+const nonProduction = publicSiteMode !== 'PRODUCTION';
 
 app.disable('x-powered-by');
 app.use((_req, res, next) => {
-  res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  if (nonProduction) res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   next();

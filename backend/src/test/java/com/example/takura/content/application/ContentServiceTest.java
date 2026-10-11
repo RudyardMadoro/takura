@@ -3,6 +3,7 @@ package com.example.takura.content.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.example.takura.content.application.ContentService.Draft;
 import com.example.takura.identity.application.PermissionService;
@@ -16,6 +17,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.server.ResponseStatusException;
 
 class ContentServiceTest {
     private final ContentService service = new ContentService(mock(JdbcTemplate.class), new PermissionService(),
@@ -33,6 +35,23 @@ class ContentServiceTest {
         Draft draft = new Draft("valid-slug", "Title", "Summary", "<p>Body</p>", "{}");
         assertThatThrownBy(() -> service.revise(editor, UUID.randomUUID(), 1, draft, true))
                 .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    void productionPublicationRejectsReferencedUnclearedMedia() {
+        JdbcTemplate jdbc = mock(JdbcTemplate.class);
+        ContentService guarded = new ContentService(jdbc, new PermissionService(),
+                Clock.fixed(Instant.parse("2026-10-11T08:00:00Z"), ZoneOffset.UTC), new ObjectMapper());
+        UUID id = UUID.randomUUID();
+        when(jdbc.queryForMap("SELECT slug,content_type,current_revision FROM takura.content_entry WHERE id=? FOR UPDATE", id))
+                .thenReturn(java.util.Map.of("slug", "valid-slug", "content_type", "PROJECT", "current_revision", 1L));
+        when(jdbc.queryForObject(org.mockito.ArgumentMatchers.startsWith("SELECT count(*) FROM takura.content_media_reference"),
+                org.mockito.ArgumentMatchers.eq(Integer.class), org.mockito.ArgumentMatchers.eq(id))).thenReturn(1);
+        Draft draft = new Draft("valid-slug", "Title", "Summary", "<p>Body</p>", "{}");
+
+        assertThatThrownBy(() -> guarded.revise(principal(Set.of("content:write", "content:publish")), id, 1, draft, true))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(error -> assertThat(((ResponseStatusException) error).getStatusCode().value()).isEqualTo(422));
     }
 
     private static StaffPrincipal principal(Set<String> operations) {

@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
 
 @Component({
   imports: [RouterLink, RouterOutlet],
@@ -7,4 +8,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
   styleUrl: './app.scss',
   templateUrl: './app.html',
 })
-export class App {}
+export class App {
+  readonly siteMode = inject(PUBLIC_SITE_MODE);
+  readonly nonProduction = isNonProduction(this.siteMode);
+}

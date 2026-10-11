@@ -1,6 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable, InjectionToken } from '@angular/core';
-import { catchError, Observable, throwError } from 'rxjs';
+import { ResolveFn } from '@angular/router';
+import { catchError, Observable, of, throwError } from 'rxjs';
 
 export const PUBLIC_API_ORIGIN = new InjectionToken<string>('PUBLIC_API_ORIGIN', {
   providedIn: 'root',
@@ -25,6 +26,10 @@ export interface PublicContentPage {
   page_size: number;
 }
 
+export interface ResolvedContentError {
+  error: 'not-found' | 'unavailable';
+}
+
 @Injectable({ providedIn: 'root' })
 export class ContentApiService {
   private readonly http = inject(HttpClient);
@@ -40,3 +45,19 @@ export class ContentApiService {
       .pipe(catchError((error: HttpErrorResponse) => throwError(() => error)));
   }
 }
+
+export const publicContentResolver: ResolveFn<
+  PublicContentPage | PublicContent | ResolvedContentError
+> = (route) => {
+  const api = inject(ContentApiService);
+  const kind = route.data['kind'] as string;
+  const request: Observable<PublicContentPage | PublicContent> =
+    kind === 'services' || kind === 'projects'
+      ? api.list(kind)
+      : api.detail(kind === 'service' ? 'services' : 'projects', route.paramMap.get('slug') ?? '');
+  return request.pipe(
+    catchError((failure: HttpErrorResponse) =>
+      of({ error: failure.status === 404 ? 'not-found' : 'unavailable' } as ResolvedContentError),
+    ),
+  );
+};

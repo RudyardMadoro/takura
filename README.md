@@ -11,7 +11,7 @@ Reproducible three-tier monorepo foundation for a public property-services and b
 - `contracts`: OpenAPI 1.0 source and deterministic generator configuration.
 - `infra`: Contabo launch and AWS migration-target documentation.
 - `ops`: guarded demo/reset tooling and operational notes.
-- `tests/e2e`: future vertical-slice browser journeys.
+- `tests/e2e`: repeatable vertical-slice browser and accessibility journeys.
 - `docs/source`: authoritative Requirements v1.2, Specification v1.1 and Architecture v1.0 documents plus mechanical Markdown extracts.
 
 ## Prerequisites
@@ -30,6 +30,16 @@ pnpm api:check
 pnpm format:check
 pnpm test
 pnpm build
+```
+
+Public SSR builds default to `DEMO`. Set `TAKURA_PUBLIC_SITE_MODE` to `STAGING` or `PRODUCTION`
+for the matching artifact. Demo/staging builds emit global noindex controls and expose labelled
+upcoming-route previews; production builds remove noindex and omit non-functional routes from
+navigation while retaining direct useful unavailable states.
+
+```powershell
+$env:TAKURA_PUBLIC_SITE_MODE='PRODUCTION'
+pnpm build:public
 ```
 
 Run the applications in separate terminals:

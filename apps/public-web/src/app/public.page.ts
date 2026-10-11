@@ -5,15 +5,14 @@ import {
   DOCUMENT,
   ElementRef,
   inject,
-  OnDestroy,
   OnInit,
   PLATFORM_ID,
   ViewChild,
 } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { ContentApiService, PublicContent } from './content-api.service';
+import { PublicContent, PublicContentPage, ResolvedContentError } from './content-api.service';
+import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
 
 @Component({
   standalone: true,
@@ -54,10 +53,19 @@ import { ContentApiService, PublicContent } from './content-api.service';
                 ><h2>Custom cabinetry</h2>
                 <p>Supply-only or fix-and-supply routes.</p></a
               >
-              <a class="timber" routerLink="/boards"
-                ><h2>Standalone board supply</h2>
-                <p>A prominent quotation proposition. The live catalogue arrives in Phase 04.</p></a
-              >
+              @if (nonProduction) {
+                <a class="timber" routerLink="/boards"
+                  ><h2>Standalone board supply</h2>
+                  <p>
+                    A prominent quotation proposition. The live catalogue arrives in Phase 04.
+                  </p></a
+                >
+              } @else {
+                <article class="timber pending-offer">
+                  <h2>Standalone board supply</h2>
+                  <p>Catalogue access is pending launch readiness.</p>
+                </article>
+              }
             </section>
             <section>
               <h2>A careful process</h2>
@@ -228,14 +236,13 @@ import { ContentApiService, PublicContent } from './content-api.service';
     </dialog>
   `,
 })
-export class PublicPage implements OnInit, AfterViewInit, OnDestroy {
+export class PublicPage implements OnInit, AfterViewInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly api = inject(ContentApiService);
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
   private readonly document = inject(DOCUMENT);
   private readonly platform = inject(PLATFORM_ID);
-  private readonly subscriptions = new Subscription();
+  private readonly siteMode = inject(PUBLIC_SITE_MODE);
   private returnFocus?: HTMLElement;
   @ViewChild('heading') heading?: ElementRef<HTMLElement>;
   @ViewChild('galleryDialog') galleryDialog?: ElementRef<HTMLDialogElement>;
@@ -263,62 +270,45 @@ export class PublicPage implements OnInit, AfterViewInit, OnDestroy {
       className: 'after',
     },
   ];
+  readonly nonProduction = isNonProduction(this.siteMode);
 
   ngOnInit() {
     this.kind = this.route.snapshot.data['kind'];
     this.pageTitle = this.route.snapshot.data['title'];
-    if (this.kind === 'services' || this.kind === 'projects') this.loadList(this.kind);
-    if (this.kind === 'service') this.loadDetail('services');
-    if (this.kind === 'project') this.loadDetail('projects');
-    this.updateMetadata();
+    const resolved = this.route.snapshot.data['publicContent'] as
+      | PublicContentPage
+      | PublicContent
+      | ResolvedContentError
+      | undefined;
+    if (resolved && 'error' in resolved) {
+      this.error = resolved.error;
+      if (resolved.error === 'not-found') this.pageTitle = 'Page not found';
+    } else if (resolved && 'items' in resolved) {
+      this.items = resolved.items;
+    } else if (resolved) {
+      this.content = resolved;
+      this.pageTitle = resolved.title;
+    }
+    this.updateMetadata(this.content?.summary);
   }
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platform)) this.heading?.nativeElement.focus();
-  }
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
-  }
-  private loadList(kind: 'services' | 'projects') {
-    this.loading = true;
-    this.subscriptions.add(
-      this.api.list(kind).subscribe({
-        next: (page) => {
-          this.items = page.items;
-          this.loading = false;
-        },
-        error: () => {
-          this.error = 'unavailable';
-          this.loading = false;
-        },
-      }),
-    );
-  }
-  private loadDetail(kind: 'services' | 'projects') {
-    this.loading = true;
-    const slug = this.route.snapshot.paramMap.get('slug') ?? '';
-    this.subscriptions.add(
-      this.api.detail(kind, slug).subscribe({
-        next: (item) => {
-          this.content = item;
-          this.pageTitle = item.title;
-          this.loading = false;
-          this.updateMetadata(item.summary);
-        },
-        error: (failure) => {
-          this.error = failure.status === 404 ? 'not-found' : 'unavailable';
-          this.pageTitle = failure.status === 404 ? 'Page not found' : this.pageTitle;
-          this.loading = false;
-          this.updateMetadata();
-        },
-      }),
-    );
   }
   private updateMetadata(
     description = `Synthetic demonstration: ${this.pageTitle}. No unverified business claims.`,
   ) {
     this.title.setTitle(`${this.pageTitle} | Example Property Transformation`);
     this.meta.updateTag({ name: 'description', content: description });
-    this.meta.updateTag({ name: 'robots', content: 'noindex, nofollow, noarchive' });
+    const environment =
+      this.document.querySelector<HTMLMetaElement>('meta[name="takura-environment"]') ??
+      this.document.head.appendChild(this.document.createElement('meta'));
+    environment.name = 'takura-environment';
+    environment.content = this.siteMode;
+    if (this.nonProduction) {
+      this.meta.updateTag({ name: 'robots', content: 'noindex, nofollow, noarchive' });
+    } else {
+      this.meta.removeTag('name="robots"');
+    }
     const canonical =
       this.document.querySelector<HTMLLinkElement>('link[rel="canonical"]') ??
       this.document.head.appendChild(this.document.createElement('link'));

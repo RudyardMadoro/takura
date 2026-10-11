@@ -112,6 +112,7 @@ h1 {
   margin: 2rem 0;
 }
 .cards a,
+.cards .pending-offer,
 .card {
   display: block;
   padding: 1.4rem;
@@ -123,6 +124,9 @@ h1 {
 .cards .timber {
   background: #55371f;
   color: #fff;
+}
+.pending-offer {
+  margin: 0;
 }
 .cards a:focus-visible {
   outline-color: #f4d88e;

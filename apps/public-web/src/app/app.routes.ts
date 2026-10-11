@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { PublicPage } from './public.page';
+import { publicContentResolver } from './content-api.service';
 export const routes: Routes = [
   {
     path: '',
@@ -11,21 +12,29 @@ export const routes: Routes = [
     component: PublicPage,
     data: { kind: 'property', title: 'Property transformation' },
   },
-  { path: 'services', component: PublicPage, data: { kind: 'services', title: 'Services' } },
+  {
+    path: 'services',
+    component: PublicPage,
+    data: { kind: 'services', title: 'Services' },
+    resolve: { publicContent: publicContentResolver },
+  },
   {
     path: 'services/:slug',
     component: PublicPage,
     data: { kind: 'service', title: 'Service detail' },
+    resolve: { publicContent: publicContentResolver },
   },
   {
     path: 'projects',
     component: PublicPage,
     data: { kind: 'projects', title: 'Synthetic owner-development concepts' },
+    resolve: { publicContent: publicContentResolver },
   },
   {
     path: 'projects/:slug',
     component: PublicPage,
     data: { kind: 'project', title: 'Owner-development concept' },
+    resolve: { publicContent: publicContentResolver },
   },
   {
     path: 'cabinetry',
