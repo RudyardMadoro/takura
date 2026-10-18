@@ -49,6 +49,13 @@ logging:
 takura:
   enquiries:
     privacy-notice-version: ${PRIVACY_NOTICE_VERSION:demo-privacy-v1}
+    routing-precedence: ${ENQUIRY_ROUTING_PRECEDENCE:PROPERTY,CABINETRY,BOARDS,GENERAL}
+    business-clock:
+      timezone: ${BUSINESS_TIMEZONE:Africa/Johannesburg}
+      opens: ${BUSINESS_OPENS:08:00}
+      closes: ${BUSINESS_CLOSES:17:00}
+      holidays: ${BUSINESS_HOLIDAYS:}
+      rule-version: ${BUSINESS_CLOCK_RULE_VERSION:demo-business-hours-v1}
   security:
     allowed-origins: ${STAFF_ALLOWED_ORIGINS:http://localhost:4201}
     oidc:

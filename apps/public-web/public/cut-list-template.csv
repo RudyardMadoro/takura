@@ -1,0 +1,2 @@
+part_id,material_or_board_code,colour_or_finish,thickness_mm,finished_length_mm,finished_width_mm,quantity,grain_direction,rotation_allowed,edge_length_a,edge_length_b,edge_width_a,edge_width_b,drilling_notes,remarks
+DEMO-PART-01,DEMO-BOARD,RAW,18,600,300,1,ALONG_LENGTH,FALSE,NONE,NONE,NONE,NONE,Example only,Do not use as production instruction

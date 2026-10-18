@@ -58,6 +58,10 @@ header {
   min-height: 44px;
   padding: 0.6rem;
 }
+.menu {
+  min-width: 0;
+  max-width: 100%;
+}
 .menu nav {
   display: grid;
   gap: 0.4rem;
@@ -68,6 +72,8 @@ header {
   border: 1px solid #b9aa99;
   padding: 1rem;
   box-shadow: 0 0.6rem 2rem #0002;
+  max-width: calc(100vw - 2rem);
+  overflow-wrap: anywhere;
 }
 .menu span,
 .tag {
@@ -100,6 +106,7 @@ h1 {
   font-size: clamp(2.25rem, 7vw, 5rem);
   line-height: 1.04;
   margin: 0.2em 0;
+  overflow-wrap: anywhere;
 }
 .lead {
   font-size: clamp(1.15rem, 2.5vw, 1.5rem);
@@ -210,6 +217,8 @@ label {
 input,
 select,
 textarea {
+  min-width: 0;
+  max-width: 100%;
   min-height: 44px;
   padding: 0.55rem;
   border: 1px solid #665d54;
@@ -222,9 +231,16 @@ textarea {
   resize: vertical;
 }
 fieldset {
+  min-width: 0;
   border: 1px solid #b9aa98;
   margin: 1rem 0;
   padding: 1rem;
+}
+legend,
+h2,
+h3,
+strong {
+  overflow-wrap: anywhere;
 }
 .filters {
   display: grid;
@@ -243,8 +259,13 @@ fieldset {
 }
 .wizard-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
   margin-top: 1.5rem;
+}
+.wizard-actions button {
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 footer {
   border-top: 1px solid #d8d0c5;
@@ -282,8 +303,13 @@ footer nav {
 @media (max-width: 360px) {
   header {
     align-items: flex-start;
+    flex-wrap: wrap;
   }
   .brand {
-    max-width: 13rem;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .menu {
+    margin-left: auto;
   }
 }

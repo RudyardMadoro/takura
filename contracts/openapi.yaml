@@ -496,7 +496,7 @@ components:
           requested_specification: { type: [string, 'null'] },
           quantity: { type: integer, minimum: 1, maximum: 9999 },
           unit: { type: string, enum: [SHEET] },
-          fulfilment: { type: string, enum: [FULL_SHEET] },
+          fulfilment: { type: string, enum: [FULL_SHEET, CUT_TO_SIZE] },
           collection_preference: { type: string, enum: [COLLECTION, DELIVERY, UNDECIDED] },
           substitutes_allowed: { type: string, enum: [YES, NO, DISCUSS] },
         }
@@ -505,7 +505,25 @@ components:
       type: object
       properties:
         services:
-          { type: array, minItems: 1, maxItems: 1, items: { type: string, enum: [BOARD_SALES] } }
+          type: array
+          minItems: 1
+          maxItems: 10
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              [
+                PROPERTY_TRANSFORMATION,
+                CONSTRUCTION,
+                RENOVATION,
+                EXTENSION,
+                MAINTENANCE,
+                INTERIORS,
+                CABINETRY,
+                BOARD_SALES,
+                BOARD_CUTTING,
+                HARDWARE,
+              ]
         contact: { $ref: '#/components/schemas/EnquiryContact' }
         location:
           {
@@ -514,6 +532,10 @@ components:
             required: [country_code, town_or_suburb],
           }
         description: { type: string, minLength: 10, maxLength: 5000 }
+        service_details:
+          type: object
+          description: Versioned service-code keyed qualification details; only selected service keys are accepted.
+          additionalProperties: { type: object, additionalProperties: true }
         request_lines:
           {
             type: array,
@@ -522,6 +544,9 @@ components:
             items: { $ref: '#/components/schemas/BoardRequestLine' },
           }
         attachment_ids: { type: array, maxItems: 0, items: { type: string } }
+        budget_band: { type: [string, 'null'] }
+        budget_currency: { type: [string, 'null'], pattern: '^[A-Z]{3}$' }
+        desired_start: { type: [string, 'null'], format: date }
         privacy_acknowledged: { type: boolean }
         privacy_notice_version: { type: string }
         marketing_opt_in: { type: boolean, default: false }
@@ -531,7 +556,7 @@ components:
           contact,
           location,
           description,
-          request_lines,
+          service_details,
           privacy_acknowledged,
           privacy_notice_version,
           marketing_opt_in,

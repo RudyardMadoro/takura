@@ -12,16 +12,32 @@ import { EnquiryContact } from './enquiryContact';
 import { CreateBoardEnquiryLocation } from './createBoardEnquiryLocation';
 
 export interface CreateBoardEnquiry {
-  services: Array<CreateBoardEnquiryServicesEnum>;
+  services: Set<CreateBoardEnquiryServicesEnum>;
   contact: EnquiryContact;
   location: CreateBoardEnquiryLocation;
   description: string;
-  request_lines: Array<BoardRequestLine>;
+  /**
+   * Versioned service-code keyed qualification details; only selected service keys are accepted.
+   */
+  service_details: { [key: string]: { [key: string]: any } };
+  request_lines?: Array<BoardRequestLine>;
   attachment_ids?: Array<string>;
+  budget_band?: string | null;
+  budget_currency?: string | null;
+  desired_start?: string | null;
   privacy_acknowledged: boolean;
   privacy_notice_version: string;
   marketing_opt_in: boolean;
 }
 export enum CreateBoardEnquiryServicesEnum {
+  PropertyTransformation = 'PROPERTY_TRANSFORMATION',
+  Construction = 'CONSTRUCTION',
+  Renovation = 'RENOVATION',
+  Extension = 'EXTENSION',
+  Maintenance = 'MAINTENANCE',
+  Interiors = 'INTERIORS',
+  Cabinetry = 'CABINETRY',
   BoardSales = 'BOARD_SALES',
+  BoardCutting = 'BOARD_CUTTING',
+  Hardware = 'HARDWARE',
 }

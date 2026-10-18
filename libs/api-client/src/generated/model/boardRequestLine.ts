@@ -22,6 +22,7 @@ export enum BoardRequestLineUnitEnum {
 }
 export enum BoardRequestLineFulfilmentEnum {
   FullSheet = 'FULL_SHEET',
+  CutToSize = 'CUT_TO_SIZE',
 }
 export enum BoardRequestLineCollectionPreferenceEnum {
   Collection = 'COLLECTION',

@@ -32,7 +32,7 @@ class PostgresqlMigrationTest {
                 .defaultSchema("takura")
                 .schemas("takura")
                 .load();
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(5);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(6);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
 
         try (var runtime = DriverManager.getConnection(POSTGRES.getJdbcUrl(), "takura_runtime", "runtime-test");
@@ -40,6 +40,7 @@ class PostgresqlMigrationTest {
             assertThat(statement.executeQuery("SELECT count(*) FROM takura.service_code").next()).isTrue();
             assertThat(statement.executeQuery("SELECT count(*) FROM takura.board_variant").next()).isTrue();
             assertThat(statement.executeQuery("SELECT count(*) FROM takura.notification_outbox").next()).isTrue();
+            assertThat(statement.executeQuery("SELECT count(*) FROM takura.enquiry_service_detail").next()).isTrue();
             assertThrows(SQLException.class, () -> statement.execute("DROP TABLE takura.service_code"));
             assertThrows(SQLException.class, () -> statement.execute("CREATE TABLE takura.forbidden(id integer)"));
         }

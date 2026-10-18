@@ -9,13 +9,13 @@ test('published board can be selected and submitted as two full sheets', async (
   await expect(page.getByText('2440 × 1220 mm', { exact: false })).toBeVisible();
   await page.getByRole('link', { name: 'Request full sheets' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByLabel('Quantity in full sheets').fill('2');
+  await page.getByLabel(/Quantity in full sheets or part count/).fill('2');
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByLabel('Full name').fill('Synthetic Browser Customer');
   await page.getByRole('textbox', { name: 'Email', exact: true }).fill('browser@example.com');
   await page.getByLabel('Town or suburb').fill('Demo Suburb');
   await page
-    .getByLabel('Describe your request')
+    .getByLabel('Describe the overall request')
     .fill('Please quote two synthetic full board sheets.');
   await page.getByRole('button', { name: 'Continue' }).click();
   await page.getByLabel(/acknowledge the current/).check();

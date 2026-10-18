@@ -1,12 +1,15 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
 import { CatalogueApiService } from './catalogue-api.service';
+import { ENQUIRY_SERVICES, serviceLabel, supportedService } from './enquiry-services';
+
 interface Line {
   variant_id: string;
   requested_specification: string;
   quantity: number;
+  fulfilment: string;
   collection_preference: string;
   substitutes_allowed: string;
 }
@@ -15,8 +18,8 @@ interface Line {
   imports: [FormsModule],
   selector: 'app-board-quote',
   template: `<article class="page">
-    <p class="eyebrow">Board quotation request · not an order or reservation</p>
-    <h1 tabindex="-1">Request full board sheets</h1>
+    <p class="eyebrow">Quotation request · not an order, reservation or automated quote</p>
+    <h1 tabindex="-1">Request a quotation</h1>
     <p aria-live="polite">Step {{ step }} of 4 — {{ titles[step - 1] }}</p>
     @if (errors.length) {
       <div #summary class="error" role="alert" tabindex="-1">
@@ -35,67 +38,272 @@ interface Line {
           Your committed reference is <strong>{{ receipt }}</strong
           >.
         </p>
-        <p>The Boards Team will review it. This is not an order, stock reservation or payment.</p>
+        <p>
+          One coordinating team will review the complete request. This is not an order, booking or
+          payment.
+        </p>
       </section>
     } @else {
       <form (ngSubmit)="next()">
         @if (step === 1) {
           <fieldset>
-            <legend>Service selection</legend>
-            <label><input type="checkbox" checked disabled /> Standalone board sales</label>
-            <p>Cutting, construction and installation selections are not needed for full sheets.</p>
+            <legend>Select one to ten services</legend>
+            @for (option of serviceOptions; track option[0]) {
+              <label class="choice"
+                ><input
+                  type="checkbox"
+                  [checked]="selected.includes(option[0])"
+                  (change)="toggle(option[0], $any($event.target).checked, $any($event.target))"
+                />
+                {{ option[1] }}</label
+              >
+            }
           </fieldset>
         }
         @if (step === 2) {
           <h2>Requirements</h2>
-          @for (line of lines; track $index; let i = $index) {
+          @if (selected.includes('PROPERTY_TRANSFORMATION')) {
             <fieldset>
-              <legend>Board line {{ i + 1 }}</legend>
+              <legend>Property transformation</legend>
               <label
-                >Published variant ID (optional)<input
-                  [(ngModel)]="line.variant_id"
-                  name="variant{{ i }}" /></label
-              ><label
-                >Or describe the board<input
-                  [(ngModel)]="line.requested_specification"
-                  name="spec{{ i }}"
-                  maxlength="500" /></label
-              ><label
-                >Quantity in full sheets<input
-                  type="number"
-                  [(ngModel)]="line.quantity"
-                  name="qty{{ i }}"
-                  min="1"
-                  max="9999"
-              /></label>
-              <p>Unit: SHEET · Fulfilment: FULL_SHEET</p>
-              <label
-                >Collection preference<select
-                  [(ngModel)]="line.collection_preference"
-                  name="collection{{ i }}"
+                >Representative status<select
+                  [(ngModel)]="details.propertyRepresentative"
+                  name="propertyRepresentative"
                 >
-                  <option>COLLECTION</option>
-                  <option>DELIVERY</option>
+                  <option>OWNER</option>
+                  <option>AUTHORISED_REPRESENTATIVE</option>
+                  <option>NOT_AUTHORISED</option>
+                </select></label
+              ><label
+                >Site scope<select [(ngModel)]="details.propertyScope" name="propertyScope">
+                  <option>EXISTING_HOUSE</option>
+                  <option>ADDITIONAL_LAND</option>
+                  <option>BOTH</option>
+                </select></label
+              ><label
+                >Intended use<select [(ngModel)]="details.propertyUse" name="propertyUse">
+                  <option>RENTAL</option>
+                  <option>SHORT_STAY</option>
+                  <option>PERSONAL</option>
                   <option>UNDECIDED</option>
                 </select></label
               ><label
-                >Substitutes<select [(ngModel)]="line.substitutes_allowed" name="sub{{ i }}">
-                  <option>DISCUSS</option>
-                  <option>YES</option>
-                  <option>NO</option>
-                </select></label
-              >
-              @if (lines.length > 1) {
-                <button type="button" (click)="remove(i)">Remove line</button>
-              }
+                >Optional land area m²<input
+                  type="number"
+                  min="1"
+                  max="1000000"
+                  [(ngModel)]="details.landArea"
+                  name="landArea"
+              /></label>
+              <p>No unit count, approval or return is calculated or guaranteed.</p>
             </fieldset>
           }
-          <button type="button" (click)="add()" [disabled]="lines.length >= 10">
-            Add board line
-          </button>
+          @for (service of selected; track service) {
+            @if (service === 'CONSTRUCTION' || service === 'EXTENSION') {
+              <fieldset>
+                <legend>{{ label(service) }}</legend>
+                <label
+                  >Work type<input
+                    [(ngModel)]="details[service + 'WorkType']"
+                    [name]="service + 'WorkType'"
+                /></label>
+              </fieldset>
+            }
+            @if (service === 'RENOVATION' || service === 'MAINTENANCE') {
+              <fieldset>
+                <legend>{{ label(service) }}</legend>
+                <label
+                  >Affected area<input
+                    [(ngModel)]="details[service + 'Area']"
+                    [name]="service + 'Area'" /></label
+                ><label
+                  >Urgency<select
+                    [(ngModel)]="details[service + 'Urgency']"
+                    [name]="service + 'Urgency'"
+                  >
+                    <option>ROUTINE</option>
+                    <option>SOON</option>
+                    <option>URGENT</option>
+                  </select></label
+                >
+                <p>Urgent does not promise emergency dispatch.</p>
+              </fieldset>
+            }
+          }
+          @if (selected.includes('INTERIORS')) {
+            <fieldset>
+              <legend>Interiors</legend>
+              <label>Rooms, comma separated<input [(ngModel)]="details.rooms" name="rooms" /></label
+              ><label
+                >Design objective<input
+                  [(ngModel)]="details.designObjective"
+                  name="designObjective"
+              /></label>
+            </fieldset>
+          }
+          @if (selected.includes('CABINETRY')) {
+            <fieldset>
+              <legend>Cabinetry</legend>
+              <label
+                >Product category<select
+                  [(ngModel)]="details.cabinetryProduct"
+                  name="cabinetryProduct"
+                >
+                  <option>KITCHEN</option>
+                  <option>CABINET</option>
+                  <option>WARDROBE</option>
+                  <option>VANITY</option>
+                  <option>TV_UNIT</option>
+                  <option>COMPONENT</option>
+                  <option>OTHER</option>
+                </select></label
+              >
+              @if (details.cabinetryProduct === 'OTHER') {
+                <label
+                  >Explain other product<input
+                    [(ngModel)]="details.cabinetryOther"
+                    name="cabinetryOther"
+                /></label>
+              }
+              <label
+                >Fulfilment<select
+                  [(ngModel)]="details.cabinetryFulfilment"
+                  name="cabinetryFulfilment"
+                >
+                  <option>SUPPLY_ONLY</option>
+                  <option>FIX_AND_SUPPLY</option>
+                  <option>UNDECIDED</option>
+                </select></label
+              ><label
+                ><input type="checkbox" [(ngModel)]="details.measuringHelp" name="measuringHelp" />
+                Measuring help requested</label
+              ><label
+                >Material or finish (optional)<input
+                  [(ngModel)]="details.cabinetryMaterial"
+                  name="cabinetryMaterial" /></label
+              ><label
+                >Approximate dimensions (unverified)<input
+                  [(ngModel)]="details.cabinetryDimensions"
+                  name="cabinetryDimensions" /></label
+              ><label
+                ><input type="checkbox" [(ngModel)]="details.exclusions" name="exclusions" /> I
+                understand plumbing, wiring, structural work, appliances and countertops are
+                excluded unless explicitly agreed.</label
+              >
+            </fieldset>
+          }
+          @if (hasBoards()) {
+            <fieldset>
+              <legend>Board requirements</legend>
+              @for (line of lines; track $index; let i = $index) {
+                <section>
+                  <h3>Board line {{ i + 1 }}</h3>
+                  <label
+                    >Published variant ID (optional)<input
+                      [(ngModel)]="line.variant_id"
+                      name="variant{{ i }}" /></label
+                  ><label
+                    >Or describe material, finish, thickness and size<input
+                      [(ngModel)]="line.requested_specification"
+                      name="spec{{ i }}"
+                      maxlength="500" /></label
+                  ><label
+                    >Quantity in full sheets or part count<input
+                      type="number"
+                      [(ngModel)]="line.quantity"
+                      name="qty{{ i }}"
+                      min="1"
+                      max="9999" /></label
+                  ><label
+                    >Fulfilment<select [(ngModel)]="line.fulfilment" name="fulfilment{{ i }}">
+                      <option>FULL_SHEET</option>
+                      @if (selected.includes('BOARD_CUTTING')) {
+                        <option>CUT_TO_SIZE</option>
+                      }
+                    </select></label
+                  ><label
+                    >Collection preference<select
+                      [(ngModel)]="line.collection_preference"
+                      name="collection{{ i }}"
+                    >
+                      <option>COLLECTION</option>
+                      <option>DELIVERY</option>
+                      <option>UNDECIDED</option>
+                    </select></label
+                  ><label
+                    >Substitutes<select [(ngModel)]="line.substitutes_allowed" name="sub{{ i }}">
+                      <option>DISCUSS</option>
+                      <option>YES</option>
+                      <option>NO</option>
+                    </select></label
+                  >
+                  @if (lines.length > 1) {
+                    <button type="button" (click)="removeLine(i)">Remove line</button>
+                  }
+                </section>
+              }
+              <button type="button" (click)="addLine()" [disabled]="lines.length >= 10">
+                Add board line
+              </button>
+            </fieldset>
+          }
+          @if (selected.includes('BOARD_CUTTING')) {
+            <fieldset>
+              <legend>Cut-to-size qualification</legend>
+              <label
+                >Material source<select [(ngModel)]="details.materialSource" name="materialSource">
+                  <option>BUSINESS_SUPPLIED</option>
+                  <option>CUSTOMER_SUPPLIED</option>
+                  <option>UNDECIDED</option>
+                </select></label
+              ><label
+                >Input mode<select [(ngModel)]="details.cuttingMode" name="cuttingMode">
+                  <option>NEED_HELP</option>
+                  <option disabled>ATTACHMENT — available in Phase 06</option>
+                </select></label
+              ><label
+                >Describe the help needed<textarea
+                  [(ngModel)]="details.cuttingHelp"
+                  name="cuttingHelp"
+                ></textarea>
+              </label>
+              <p>
+                Dimensions use <strong>FINISHED_PART_SIZE</strong>. No kerf, nesting or production
+                instruction is calculated.
+              </p>
+              <a href="/cut-list-template.csv" download>Download inert cut-list template</a>
+            </fieldset>
+          }
+          @if (selected.includes('HARDWARE')) {
+            <fieldset>
+              <legend>Hardware supplies</legend>
+              <label
+                >Category or item description<input
+                  [(ngModel)]="details.hardwareDescription"
+                  name="hardwareDescription" /></label
+              ><label
+                >Quantity<input
+                  type="number"
+                  min="1"
+                  [(ngModel)]="details.hardwareQuantity"
+                  name="hardwareQuantity" /></label
+              ><label
+                >Unit<select [(ngModel)]="details.hardwareUnit" name="hardwareUnit">
+                  <option>EACH</option>
+                  <option>PACK</option>
+                  <option>LITRE</option>
+                  <option>METRE</option>
+                </select></label
+              ><label
+                >Pack size or preference (optional)<input
+                  [(ngModel)]="details.hardwarePack"
+                  name="hardwarePack"
+              /></label>
+            </fieldset>
+          }
         }
         @if (step === 3) {
-          <h2>Contact and location</h2>
+          <h2>Contact and files</h2>
           <label
             >Full name<input
               required
@@ -122,20 +330,40 @@ interface Line {
           <label>Country code<input [(ngModel)]="country" name="country" maxlength="2" /></label
           ><label>Town or suburb<input [(ngModel)]="suburb" name="suburb" maxlength="120" /></label
           ><label
-            >Describe your request<textarea
+            >Describe the overall request<textarea
               [(ngModel)]="description"
               name="description"
               minlength="10"
               maxlength="5000"
-            ></textarea>
-          </label>
-          <p>Attachments are not required for full-sheet sales.</p>
+            ></textarea></label
+          ><label
+            >Budget band (optional)<select [(ngModel)]="budgetBand" name="budgetBand">
+              <option value="">Not supplied</option>
+              <option>NOT_SURE</option>
+              <option>DEMO_LOW</option>
+              <option>DEMO_MEDIUM</option>
+            </select></label
+          ><label
+            >Currency snapshot (optional)<input
+              [(ngModel)]="budgetCurrency"
+              name="budgetCurrency"
+              maxlength="3" /></label
+          ><label
+            >Desired start (optional)<input
+              type="date"
+              [(ngModel)]="desiredStart"
+              name="desiredStart"
+          /></label>
+          <p>
+            Secure uploads arrive in Phase 06. No file is accepted or represented as saved here.
+          </p>
         }
         @if (step === 4) {
           <h2>Review and submit</h2>
+          <p>Services: {{ selected.join(', ') }}</p>
           <p>
-            {{ lines.length }} full-sheet line(s), preferred contact {{ preference }}, location
-            {{ suburb }}, {{ country }}.
+            {{ lines.length }} board line(s) where relevant; preferred contact {{ preference }};
+            location {{ suburb }}, {{ country }}.
           </p>
           <p>{{ description }}</p>
           <label
@@ -162,17 +390,22 @@ export class QuotePage {
   @ViewChild('summary') summary?: ElementRef<HTMLElement>;
   private readonly api = inject(CatalogueApiService);
   private readonly changeDetector = inject(ChangeDetectorRef);
+  readonly serviceOptions = ENQUIRY_SERVICES;
   readonly titles = ['Service selection', 'Requirements', 'Contact and files', 'Review and submit'];
   step = 1;
-  lines: Line[] = [
-    {
-      variant_id: inject(ActivatedRoute).snapshot.queryParamMap.get('variant') ?? '',
-      requested_specification: '',
-      quantity: 1,
-      collection_preference: 'UNDECIDED',
-      substitutes_allowed: 'DISCUSS',
-    },
-  ];
+  selected: string[] = [];
+  details: any = {
+    propertyRepresentative: 'OWNER',
+    propertyScope: 'EXISTING_HOUSE',
+    propertyUse: 'UNDECIDED',
+    cabinetryProduct: 'KITCHEN',
+    cabinetryFulfilment: 'UNDECIDED',
+    materialSource: 'UNDECIDED',
+    cuttingMode: 'NEED_HELP',
+    hardwareQuantity: 1,
+    hardwareUnit: 'EACH',
+  };
+  lines: Line[] = [];
   fullName = '';
   preference = 'EMAIL';
   email = '';
@@ -180,37 +413,166 @@ export class QuotePage {
   country = 'ZA';
   suburb = '';
   description = '';
+  budgetBand = '';
+  budgetCurrency = '';
+  desiredStart = '';
   privacy = false;
   marketing = false;
   submitting = false;
   errors: string[] = [];
   receipt = '';
   private key = crypto.randomUUID();
-  add() {
-    if (this.lines.length < 10)
-      this.lines.push({
-        variant_id: '',
-        requested_specification: '',
-        quantity: 1,
-        collection_preference: 'UNDECIDED',
-        substitutes_allowed: 'DISCUSS',
-      });
+  constructor() {
+    const route = inject(ActivatedRoute).snapshot;
+    const variant = route.queryParamMap.get('variant') ?? '';
+    const requested = supportedService(route.queryParamMap.get('service'));
+    this.selected = [requested ?? 'BOARD_SALES'];
+    this.lines = [this.newLine(variant)];
   }
-  remove(i: number) {
+  label(code: string) {
+    return serviceLabel(code);
+  }
+  hasBoards() {
+    return this.selected.includes('BOARD_SALES') || this.selected.includes('BOARD_CUTTING');
+  }
+  toggle(code: string, on: boolean, checkbox?: HTMLInputElement) {
+    if (on) {
+      if (!this.selected.includes(code)) this.selected.push(code);
+      if ((code === 'BOARD_SALES' || code === 'BOARD_CUTTING') && !this.lines.length)
+        this.lines.push(this.newLine(''));
+      return;
+    }
+    if (
+      this.hasPopulatedDetails(code) &&
+      !confirm('Removing this service clears its entered requirements. Continue?')
+    ) {
+      // The native checkbox toggles before confirmation; restore it when removal is cancelled.
+      if (checkbox) checkbox.checked = true;
+      return;
+    }
+    this.selected = this.selected.filter((x) => x !== code);
+    this.clearDetails(code);
+  }
+  hasPopulatedDetails(code: string) {
+    return (
+      (code === 'CABINETRY' && !!this.details.cabinetryMaterial) ||
+      (code === 'BOARD_CUTTING' && !!this.details.cuttingHelp) ||
+      (code === 'PROPERTY_TRANSFORMATION' && !!this.details.landArea)
+    );
+  }
+  clearDetails(code: string) {
+    if (code === 'CABINETRY') {
+      this.details.cabinetryMaterial = '';
+      this.details.cabinetryDimensions = '';
+    }
+    if (code === 'BOARD_CUTTING') this.details.cuttingHelp = '';
+    if (code === 'PROPERTY_TRANSFORMATION') this.details.landArea = null;
+  }
+  newLine(variant: string): Line {
+    return {
+      variant_id: variant,
+      requested_specification: '',
+      quantity: 1,
+      fulfilment: 'FULL_SHEET',
+      collection_preference: 'UNDECIDED',
+      substitutes_allowed: 'DISCUSS',
+    };
+  }
+  addLine() {
+    if (this.lines.length < 10) this.lines.push(this.newLine(''));
+  }
+  removeLine(i: number) {
     this.lines.splice(i, 1);
   }
   next() {
     this.errors = [];
+    if (this.step === 1 && !this.selected.length) {
+      this.errors = ['Select at least one service.'];
+      return;
+    }
     if (this.step < 4) {
       this.step++;
       return;
     }
     this.submit();
   }
+  private serviceDetails() {
+    const out: any = {};
+    for (const s of this.selected) {
+      switch (s) {
+        case 'PROPERTY_TRANSFORMATION':
+          out[s] = {
+            representative_status: this.details.propertyRepresentative,
+            site_scope: this.details.propertyScope,
+            intended_use: this.details.propertyUse,
+            ...(this.details.landArea ? { land_area_m2: this.details.landArea } : {}),
+          };
+          break;
+        case 'CONSTRUCTION':
+        case 'EXTENSION':
+          out[s] = { work_type: this.details[s + 'WorkType'] ?? '' };
+          break;
+        case 'RENOVATION':
+        case 'MAINTENANCE':
+          out[s] = {
+            affected_area: this.details[s + 'Area'] ?? '',
+            urgency: this.details[s + 'Urgency'] ?? 'ROUTINE',
+          };
+          break;
+        case 'INTERIORS':
+          out[s] = {
+            rooms: (this.details.rooms ?? '')
+              .split(',')
+              .map((x: string) => x.trim())
+              .filter(Boolean),
+            design_objective: this.details.designObjective ?? '',
+          };
+          break;
+        case 'CABINETRY':
+          out[s] = {
+            product_types: [this.details.cabinetryProduct],
+            fulfilment: this.details.cabinetryFulfilment,
+            other_explanation: this.details.cabinetryOther ?? '',
+            measurement_help: !!this.details.measuringHelp,
+            material: this.details.cabinetryMaterial ?? '',
+            approximate_dimensions: this.details.cabinetryDimensions ?? '',
+            measurement_status: 'UNVERIFIED',
+            exclusions_acknowledged: !!this.details.exclusions,
+            exclusions: ['PLUMBING', 'WIRING', 'STRUCTURAL_WORK', 'APPLIANCES', 'COUNTERTOPS'],
+          };
+          break;
+        case 'BOARD_SALES':
+          out[s] = { collection_preference: this.lines[0]?.collection_preference ?? 'UNDECIDED' };
+          break;
+        case 'BOARD_CUTTING':
+          out[s] = {
+            material_source: this.details.materialSource,
+            input_mode: 'NEED_HELP',
+            help_description: this.details.cuttingHelp ?? '',
+            dimension_convention: 'FINISHED_PART_SIZE',
+          };
+          break;
+        case 'HARDWARE':
+          out[s] = {
+            lines: [
+              {
+                description: this.details.hardwareDescription ?? '',
+                quantity: this.details.hardwareQuantity,
+                unit: this.details.hardwareUnit,
+                pack_size: this.details.hardwarePack ?? '',
+              },
+            ],
+            collection_preference: 'UNDECIDED',
+            substitutes_allowed: 'DISCUSS',
+          };
+      }
+    }
+    return out;
+  }
   private submit() {
     this.submitting = true;
     const body = {
-      services: ['BOARD_SALES'],
+      services: this.selected,
       contact: {
         full_name: this.fullName,
         email: this.email || null,
@@ -219,16 +581,19 @@ export class QuotePage {
       },
       location: { country_code: this.country, town_or_suburb: this.suburb },
       description: this.description,
-      request_lines: this.lines.map((l) => ({
-        variant_id: l.variant_id || null,
-        requested_specification: l.requested_specification || null,
-        quantity: l.quantity,
-        unit: 'SHEET',
-        fulfilment: 'FULL_SHEET',
-        collection_preference: l.collection_preference,
-        substitutes_allowed: l.substitutes_allowed,
-      })),
+      service_details: this.serviceDetails(),
+      request_lines: this.hasBoards()
+        ? this.lines.map((l) => ({
+            ...l,
+            variant_id: l.variant_id || null,
+            requested_specification: l.requested_specification || null,
+            unit: 'SHEET',
+          }))
+        : [],
       attachment_ids: [],
+      budget_band: this.budgetBand || null,
+      budget_currency: this.budgetCurrency || null,
+      desired_start: this.desiredStart || null,
       privacy_acknowledged: this.privacy,
       privacy_notice_version: 'demo-privacy-v1',
       marketing_opt_in: this.marketing,
@@ -245,7 +610,7 @@ export class QuotePage {
           (x: { user_message: string }) => x.user_message,
         ) ?? [
           e.error?.message ??
-            'The request could not be submitted. Your entries are preserved; retrying uses the same request key.',
+            'The request could not be submitted. Your entries are preserved; retry with the same content.',
         ];
         this.changeDetector.markForCheck();
         setTimeout(() => this.summary?.nativeElement.focus());

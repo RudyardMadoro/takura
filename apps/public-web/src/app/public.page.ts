@@ -78,6 +78,14 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
               does not promise legal unit counts, permission, income or regulated professional
               services.
             </p>
+            <p>
+              <a
+                class="action"
+                routerLink="/request-quote"
+                [queryParams]="{ service: 'PROPERTY_TRANSFORMATION' }"
+                >Request a property discussion</a
+              >
+            </p>
           }
           @case ('services') {
             @for (item of items; track item.id) {
@@ -96,7 +104,12 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
               <p class="lead">{{ content.summary }}</p>
               <div class="rich-text" [innerHTML]="content.body_html"></div>
               <p>
-                <a class="action" routerLink="/request-quote">Request full board sheets</a>
+                <a
+                  class="action"
+                  routerLink="/request-quote"
+                  [queryParams]="{ service: serviceCode(content.slug) }"
+                  >Request this service</a
+                >
               </p>
             }
           }
@@ -139,6 +152,14 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                   </figure>
                 }
               </div>
+              <p>
+                <a
+                  class="action"
+                  routerLink="/request-quote"
+                  [queryParams]="{ service: 'PROPERTY_TRANSFORMATION' }"
+                  >Discuss a related property brief</a
+                >
+              </p>
             }
           }
           @case ('cabinetry') {
@@ -148,6 +169,11 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
             </p>
             <h2>Material-led decisions</h2>
             <p>Layout, hardware, finish and installation responsibility are recorded separately.</p>
+            <p>
+              <a class="action" routerLink="/request-quote" [queryParams]="{ service: 'CABINETRY' }"
+                >Request cabinetry</a
+              >
+            </p>
           }
           @case ('about') {
             <p>
@@ -179,9 +205,9 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
           }
           @case ('privacy') {
             <p>
-              This demonstration collects no public contact submission in this phase. A confirmed
-              notice must identify the real business, processors, purposes, retention and rights
-              process before launch.
+              This demonstration quotation form stores synthetic contact and qualification details
+              under the labelled demo notice. A confirmed notice must identify the real business,
+              processors, purposes, retention and rights process before launch.
             </p>
           }
           @case ('terms') {
@@ -285,6 +311,19 @@ export class PublicPage implements OnInit, AfterViewInit {
   }
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platform)) this.heading?.nativeElement.focus();
+  }
+  serviceCode(slug: string) {
+    const normalised = slug.toLowerCase();
+    if (normalised.includes('cabinet')) return 'CABINETRY';
+    if (normalised.includes('board') && normalised.includes('cut')) return 'BOARD_CUTTING';
+    if (normalised.includes('board')) return 'BOARD_SALES';
+    if (normalised.includes('construct')) return 'CONSTRUCTION';
+    if (normalised.includes('renovat')) return 'RENOVATION';
+    if (normalised.includes('extension')) return 'EXTENSION';
+    if (normalised.includes('maintenance')) return 'MAINTENANCE';
+    if (normalised.includes('interior')) return 'INTERIORS';
+    if (normalised.includes('hardware')) return 'HARDWARE';
+    return 'PROPERTY_TRANSFORMATION';
   }
   private updateMetadata(
     description = `Synthetic demonstration: ${this.pageTitle}. No unverified business claims.`,
