@@ -25,5 +25,48 @@ services:
           memory: 768M
         reservations:
           memory: 256M
+  minio:
+    image: localstack/localstack:4.14.0
+    environment:
+      SERVICES: s3
+      AWS_DEFAULT_REGION: af-south-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      S3_SKIP_SIGNATURE_VALIDATION: '0'
+      S3_VALIDATE_SIGNATURES: '1'
+    ports:
+      - '127.0.0.1:19000:4566'
+    volumes:
+      - takura-minio-data:/var/lib/localstack
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://localhost:4566/_localstack/health']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  minio-init:
+    image: localstack/localstack:4.14.0
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: ['/bin/bash', '/init-storage.sh']
+    environment:
+      AWS_DEFAULT_REGION: af-south-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    volumes:
+      - ./infra/local/init-storage.sh:/init-storage.sh:ro
+  clamav:
+    image: clamav/clamav:1.4.3
+    ports:
+      - '127.0.0.1:13310:3310'
+    volumes:
+      - takura-clamav-signatures:/var/lib/clamav
+    healthcheck:
+      test: ['CMD', '/usr/local/bin/clamdcheck.sh']
+      interval: 10s
+      timeout: 5s
+      retries: 30
 volumes:
   takura-postgres-data:
+  takura-minio-data:
+  takura-clamav-signatures:

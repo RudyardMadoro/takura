@@ -21,7 +21,8 @@ export interface CreateBoardEnquiry {
    */
   service_details: { [key: string]: { [key: string]: any } };
   request_lines?: Array<BoardRequestLine>;
-  attachment_ids?: Array<string>;
+  attachment_ids?: Set<string>;
+  upload_capability?: string | null;
   budget_band?: string | null;
   budget_currency?: string | null;
   desired_start?: string | null;

@@ -31,7 +31,8 @@ app.use('/api/v1', async (req, res, next) => {
         /^\/(services|projects)(\/[^/]+)?$|^\/catalogue\/(boards(\/[^/]+)?|hardware)$|^\/sitemap\.xml$|^\/public\/config$/.test(
           req.path,
         )) ||
-      (req.method === 'POST' && req.path === '/enquiries')
+      (req.method === 'POST' &&
+        (req.path === '/enquiries' || /^\/upload-sessions(?:\/.*)?$/.test(req.path)))
     )
   ) {
     return next();
@@ -45,6 +46,7 @@ app.use('/api/v1', async (req, res, next) => {
           'content-type': req.get('content-type') ?? 'application/json',
           'idempotency-key': req.get('idempotency-key') ?? '',
           'x-correlation-id': req.get('x-correlation-id') ?? '',
+          'x-upload-capability': req.get('x-upload-capability') ?? '',
         },
         body: req.method === 'POST' ? JSON.stringify(req.body) : undefined,
         redirect: 'manual',

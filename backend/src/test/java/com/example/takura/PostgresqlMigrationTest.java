@@ -32,7 +32,7 @@ class PostgresqlMigrationTest {
                 .defaultSchema("takura")
                 .schemas("takura")
                 .load();
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(6);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(7);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
 
         try (var runtime = DriverManager.getConnection(POSTGRES.getJdbcUrl(), "takura_runtime", "runtime-test");

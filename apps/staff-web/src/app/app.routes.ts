@@ -9,6 +9,7 @@ import {
 } from './staff.pages';
 import { ContentEditorPage } from './content-editor.page';
 import { BoardInboxPage, CatalogueAdminPage } from './board-operations.page';
+import { MediaLibraryPage } from './media-library.page';
 export const routes: Routes = [
   { path: '', component: SignInPage },
   { path: 'auth/callback', component: SignInPage },
@@ -20,6 +21,7 @@ export const routes: Routes = [
     component: ContentEditorPage,
     canActivate: [permissionGuard('content:write')],
   },
+  { path: 'media', component: MediaLibraryPage, canActivate: [permissionGuard('content:write')] },
   {
     path: 'catalogue',
     component: CatalogueAdminPage,

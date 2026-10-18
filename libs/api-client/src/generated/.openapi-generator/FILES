@@ -21,6 +21,7 @@ model/contentEditor.ts
 model/createBoardEnquiry.ts
 model/createBoardEnquiryLocation.ts
 model/createContent.ts
+model/createUploadSession.ts
 model/enquiryContact.ts
 model/enquiryReceipt.ts
 model/fieldError.ts
@@ -40,6 +41,7 @@ model/staffAccessUpdate.ts
 model/staffAuthorization.ts
 model/staffIdentity.ts
 model/staffSession.ts
+model/uploadFileAllocation.ts
 ng-package.json
 package.json
 param.ts

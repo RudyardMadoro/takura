@@ -38,7 +38,7 @@ test('wizard remains usable at mobile width and 200 percent zoom', async ({ page
   await expect(page.getByLabel('Input mode')).toHaveValue('NEED_HELP');
   await expect(
     page.getByLabel('Input mode').locator('option', { hasText: 'ATTACHMENT' }),
-  ).toHaveAttribute('disabled', '');
+  ).toBeEnabled();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,

@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, ElementRef, inject, ViewChild } from '@an
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { CatalogueApiService } from './catalogue-api.service';
+import { firstValueFrom } from 'rxjs';
 import { ENQUIRY_SERVICES, serviceLabel, supportedService } from './enquiry-services';
 
 interface Line {
@@ -259,14 +260,17 @@ interface Line {
               ><label
                 >Input mode<select [(ngModel)]="details.cuttingMode" name="cuttingMode">
                   <option>NEED_HELP</option>
-                  <option disabled>ATTACHMENT — available in Phase 06</option>
+                  <option>ATTACHMENT</option>
                 </select></label
-              ><label
-                >Describe the help needed<textarea
-                  [(ngModel)]="details.cuttingHelp"
-                  name="cuttingHelp"
-                ></textarea>
-              </label>
+              >
+              @if (details.cuttingMode === 'NEED_HELP') {
+                <label
+                  >Describe the help needed<textarea
+                    [(ngModel)]="details.cuttingHelp"
+                    name="cuttingHelp"
+                  ></textarea>
+                </label>
+              }
               <p>
                 Dimensions use <strong>FINISHED_PART_SIZE</strong>. No kerf, nesting or production
                 instruction is calculated.
@@ -354,9 +358,24 @@ interface Line {
               [(ngModel)]="desiredStart"
               name="desiredStart"
           /></label>
+          <label
+            >Plans, photos or cutting list
+            <input
+              type="file"
+              multiple
+              accept=".jpg,.jpeg,.png,.webp,.pdf,.xlsx"
+              (change)="uploadFiles($event)"
+              [disabled]="uploading"
+            />
+          </label>
           <p>
-            Secure uploads arrive in Phase 06. No file is accepted or represented as saved here.
+            Up to five JPEG, PNG, WebP, PDF or non-macro XLSX files; 10 MiB each and 50 MiB
+            combined. Files remain private while validation and scanning are pending.
           </p>
+          <p aria-live="polite">{{ uploadStatus }}</p>
+          @if (uploading) {
+            <button type="button" (click)="cancelUpload()">Cancel upload</button>
+          }
         }
         @if (step === 4) {
           <h2>Review and submit</h2>
@@ -421,6 +440,11 @@ export class QuotePage {
   submitting = false;
   errors: string[] = [];
   receipt = '';
+  uploading = false;
+  uploadStatus = 'No files selected.';
+  attachmentIds: string[] = [];
+  uploadCapability = '';
+  private activeUpload?: XMLHttpRequest;
   private key = crypto.randomUUID();
   constructor() {
     const route = inject(ActivatedRoute).snapshot;
@@ -496,6 +520,93 @@ export class QuotePage {
     }
     this.submit();
   }
+  async uploadFiles(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    if (!files.length) return;
+    this.errors = [];
+    if (
+      files.length > 5 ||
+      files.some((file) => file.size > 10 * 1024 * 1024) ||
+      files.reduce((n, f) => n + f.size, 0) > 50 * 1024 * 1024
+    ) {
+      this.errors = ['Choose at most five files, no larger than 10 MiB each or 50 MiB combined.'];
+      input.value = '';
+      return;
+    }
+    this.uploading = true;
+    this.uploadStatus = 'Preparing secure uploads…';
+    try {
+      const requested = await Promise.all(
+        files.map(async (file) => ({
+          file_name: file.name,
+          byte_size: file.size,
+          content_type: file.type || 'application/octet-stream',
+          checksum_sha256: Array.from(
+            new Uint8Array(await crypto.subtle.digest('SHA-256', await file.arrayBuffer())),
+          )
+            .map((b) => b.toString(16).padStart(2, '0'))
+            .join(''),
+        })),
+      );
+      const session = await firstValueFrom(this.api.createUploadSession(requested));
+      for (let i = 0; i < files.length; i++) {
+        this.uploadStatus = `Uploading file ${i + 1} of ${files.length}…`;
+        const allocation = session.files[i];
+        const form = new FormData();
+        for (const [key, value] of Object.entries(allocation.upload.fields))
+          form.append(key, value);
+        form.append('file', files[i]);
+        await this.postFile(allocation.upload.url, form, i, files.length);
+        const completed = await firstValueFrom(
+          this.api.completeUpload(session.session_id, allocation.attachment_id, session.capability),
+        );
+        if (completed.state === 'REJECTED')
+          throw new Error('A file failed safety validation. Remove it or use NEED_HELP.');
+      }
+      this.attachmentIds = session.files.map((file) => file.attachment_id);
+      this.uploadCapability = session.capability;
+      this.uploadStatus = `${files.length} file(s) uploaded and awaiting or passing safety scanning.`;
+    } catch (error) {
+      this.attachmentIds = [];
+      this.uploadCapability = '';
+      this.errors = [
+        error instanceof Error ? error.message : 'Upload failed. Retry or continue without files.',
+      ];
+      this.uploadStatus =
+        error instanceof Error && error.message === 'Upload cancelled.'
+          ? 'Upload cancelled. Select the files again to retry.'
+          : 'No usable files are attached.';
+    } finally {
+      this.activeUpload = undefined;
+      this.uploading = false;
+      this.changeDetector.markForCheck();
+    }
+  }
+  cancelUpload() {
+    this.activeUpload?.abort();
+    this.uploadStatus = 'Upload cancelled. Select the files again to retry.';
+    this.uploading = false;
+  }
+  private postFile(url: string, body: FormData, index: number, total: number) {
+    return new Promise<void>((resolve, reject) => {
+      const request = new XMLHttpRequest();
+      this.activeUpload = request;
+      request.open('POST', url);
+      request.upload.onprogress = (event) => {
+        if (event.lengthComputable)
+          this.uploadStatus = `Uploading file ${index + 1} of ${total}: ${Math.round((event.loaded / event.total) * 100)}%`;
+      };
+      request.onload = () =>
+        request.status >= 200 && request.status < 300
+          ? resolve()
+          : reject(new Error('The storage service rejected an upload.'));
+      request.onerror = () =>
+        reject(new Error('The upload was interrupted. Select the files again to retry.'));
+      request.onabort = () => reject(new Error('Upload cancelled.'));
+      request.send(body);
+    });
+  }
   private serviceDetails() {
     const out: any = {};
     for (const s of this.selected) {
@@ -547,8 +658,10 @@ export class QuotePage {
         case 'BOARD_CUTTING':
           out[s] = {
             material_source: this.details.materialSource,
-            input_mode: 'NEED_HELP',
-            help_description: this.details.cuttingHelp ?? '',
+            input_mode: this.details.cuttingMode,
+            ...(this.details.cuttingMode === 'NEED_HELP'
+              ? { help_description: this.details.cuttingHelp ?? '' }
+              : {}),
             dimension_convention: 'FINISHED_PART_SIZE',
           };
           break;
@@ -590,7 +703,8 @@ export class QuotePage {
             unit: 'SHEET',
           }))
         : [],
-      attachment_ids: [],
+      attachment_ids: this.attachmentIds,
+      upload_capability: this.uploadCapability || null,
       budget_band: this.budgetBand || null,
       budget_currency: this.budgetCurrency || null,
       desired_start: this.desiredStart || null,

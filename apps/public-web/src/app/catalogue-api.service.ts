@@ -38,6 +38,17 @@ export interface HardwareItem {
   availability_wording: string;
   revision: number;
 }
+export interface UploadAllocation {
+  attachment_id: string;
+  safe_display_name: string;
+  upload: { url: string; fields: Record<string, string>; expires_at: string };
+}
+export interface UploadSession {
+  session_id: string;
+  capability: string;
+  expires_at: string;
+  files: UploadAllocation[];
+}
 @Injectable({ providedIn: 'root' })
 export class CatalogueApiService {
   private readonly http = inject(HttpClient);
@@ -60,6 +71,23 @@ export class CatalogueApiService {
       `${this.origin}/api/v1/enquiries`,
       body,
       { headers: new HttpHeaders({ 'Idempotency-Key': key }) },
+    );
+  }
+  createUploadSession(
+    files: Array<{
+      file_name: string;
+      byte_size: number;
+      content_type: string;
+      checksum_sha256: string;
+    }>,
+  ) {
+    return this.http.post<UploadSession>(`${this.origin}/api/v1/upload-sessions`, { files });
+  }
+  completeUpload(session: string, attachment: string, capability: string) {
+    return this.http.post<{ attachment_id: string; state: string; rejection_code?: string }>(
+      `${this.origin}/api/v1/upload-sessions/${session}/files/${attachment}/complete`,
+      {},
+      { headers: new HttpHeaders({ 'X-Upload-Capability': capability }) },
     );
   }
 }

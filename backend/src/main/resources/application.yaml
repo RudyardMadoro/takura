@@ -47,6 +47,21 @@ logging:
   level:
     org.springframework.web.filter.CommonsRequestLoggingFilter: OFF
 takura:
+  media:
+    reviewed-video-enabled: ${REVIEWED_STAFF_VIDEO_ENABLED:false}
+  storage:
+    region: ${STORAGE_REGION:af-south-1}
+    endpoint: ${STORAGE_ENDPOINT:http://localhost:19000}
+    upload-origin: ${STORAGE_UPLOAD_ORIGIN:http://localhost:19000}
+    access-key: ${STORAGE_ACCESS_KEY:test}
+    secret-key: ${STORAGE_SECRET_KEY:test}
+    path-style: ${STORAGE_PATH_STYLE:true}
+    quarantine-bucket: ${STORAGE_QUARANTINE_BUCKET:takura-quarantine-local}
+    private-bucket: ${STORAGE_PRIVATE_BUCKET:takura-private-clean-local}
+    public-bucket: ${STORAGE_PUBLIC_BUCKET:takura-public-derivatives-local}
+  scanner:
+    host: ${CLAMAV_HOST:localhost}
+    port: ${CLAMAV_PORT:13310}
   enquiries:
     privacy-notice-version: ${PRIVACY_NOTICE_VERSION:demo-privacy-v1}
     routing-precedence: ${ENQUIRY_ROUTING_PRECEDENCE:PROPERTY,CABINETRY,BOARDS,GENERAL}

@@ -16,6 +16,7 @@
     "test:e2e:phase03": "playwright test tests/e2e/phase-03-public.spec.ts",
     "test:e2e:phase04": "playwright test tests/e2e/phase-04-board-journey.spec.ts",
     "test:e2e:phase05": "playwright test tests/e2e/phase-04-board-journey.spec.ts tests/e2e/phase-05-mixed-enquiries.spec.ts",
+    "test:e2e:phase06": "playwright test tests/e2e/phase-06-secure-upload.spec.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "api:generate": "openapi-generator-cli generate -c contracts/openapi-generator.yaml && prettier --write libs/api-client/src/generated",
     "api:check": "pnpm api:generate && git diff --exit-code -- libs/api-client/src/generated",

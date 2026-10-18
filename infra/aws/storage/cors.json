@@ -1,0 +1,15 @@
+[
+  {
+    "AllowedOrigins": ["https://preview.example.invalid"],
+    "AllowedMethods": ["POST"],
+    "AllowedHeaders": [
+      "content-type",
+      "x-amz-checksum-sha256",
+      "x-amz-meta-attachment-id",
+      "x-amz-meta-sha256",
+      "x-amz-server-side-encryption"
+    ],
+    "ExposeHeaders": ["x-amz-version-id", "x-amz-checksum-sha256"],
+    "MaxAgeSeconds": 300
+  }
+]
