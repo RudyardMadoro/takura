@@ -136,7 +136,8 @@
               "buildTarget": "staff-web:build:production"
             },
             "development": {
-              "buildTarget": "staff-web:build:development"
+              "buildTarget": "staff-web:build:development",
+              "proxyConfig": "apps/staff-web/proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

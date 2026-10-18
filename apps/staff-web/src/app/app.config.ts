@@ -4,12 +4,12 @@ import { provideRouter } from '@angular/router';
 import {
   AbstractSecurityStorage,
   authInterceptor,
+  DefaultSessionStorageService,
   LogLevel,
   provideAuth,
   withAppInitializerAuthCheck,
 } from 'angular-auth-oidc-client';
 import { routes } from './app.routes';
-import { MemorySecurityStorage } from './auth/memory-security-storage';
 import { sessionInterceptor } from './auth/session.interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -34,6 +34,6 @@ export const appConfig: ApplicationConfig = {
       },
       withAppInitializerAuthCheck(),
     ),
-    { provide: AbstractSecurityStorage, useClass: MemorySecurityStorage },
+    { provide: AbstractSecurityStorage, useClass: DefaultSessionStorageService },
   ],
 };

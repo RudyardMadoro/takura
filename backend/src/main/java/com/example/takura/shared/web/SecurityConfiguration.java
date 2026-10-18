@@ -84,6 +84,7 @@ class SecurityConfiguration {
         config.setAllowCredentials(false);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);
+        source.registerCorsConfiguration("/dev-oidc/**", config);
         return source;
     }
 }
