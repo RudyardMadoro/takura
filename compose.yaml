@@ -3,18 +3,18 @@ services:
   postgres:
     image: postgres:17.11-alpine3.24
     environment:
-      POSTGRES_DB: takura
-      POSTGRES_USER: takura_admin
-      POSTGRES_PASSWORD: local-admin-only
-      TAKURA_MIGRATION_PASSWORD: local-migration-only
-      TAKURA_RUNTIME_PASSWORD: local-runtime-only
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${POSTGRES_ADMIN_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_MIGRATION_PASSWORD}
+      TAKURA_MIGRATION_PASSWORD: ${DATABASE_MIGRATION_PASSWORD}
+      TAKURA_RUNTIME_PASSWORD: ${DATABASE_RUNTIME_PASSWORD}
     ports:
-      - '127.0.0.1:15432:5432'
+      - '127.0.0.1:${DATABASE_HOST_PORT}:5432'
     volumes:
       - takura-postgres-data:/var/lib/postgresql
       - ./infra/contabo/postgres/init-local.sh:/docker-entrypoint-initdb.d/01-roles.sh:ro
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U takura_admin -d takura']
+      test: ['CMD-SHELL', 'pg_isready -U ${DATABASE_MIGRATION_USER} -d ${DATABASE_NAME}']
       interval: 5s
       timeout: 3s
       retries: 12
