@@ -48,6 +48,10 @@ import { HardwareItem } from '../model/hardwareItem';
 // @ts-ignore
 import { HealthResponse } from '../model/healthResponse';
 // @ts-ignore
+import { LeadDashboard } from '../model/leadDashboard';
+// @ts-ignore
+import { LeadTransition } from '../model/leadTransition';
+// @ts-ignore
 import { PublicConfig } from '../model/publicConfig';
 // @ts-ignore
 import { PublicContent } from '../model/publicContent';
@@ -367,6 +371,92 @@ export class DefaultService extends BaseService {
     }
 
     let localVarPath = `/upload-sessions/${this.configuration.encodeParam({ name: 'session', value: session, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid' })}/files/${this.configuration.encodeParam({ name: 'attachment', value: attachment, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid' })}/complete`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint post /admin/enquiries/{id}/assessments
+   * @param id
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public createAssessment(
+    id: string,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public createAssessment(
+    id: string,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public createAssessment(
+    id: string,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public createAssessment(
+    id: string,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    if (id === null || id === undefined) {
+      throw new Error('Required parameter id was null or undefined when calling createAssessment.');
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/enquiries/${this.configuration.encodeParam({ name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid' })}/assessments`;
     const { basePath, withCredentials } = this.configuration;
     return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
       context: localVarHttpContext,
@@ -1057,6 +1147,186 @@ export class DefaultService extends BaseService {
     let localVarPath = `/admin/content/${this.configuration.encodeParam({ name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid' })}`;
     const { basePath, withCredentials } = this.configuration;
     return this.httpClient.request<ContentEditor>('get', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint get /admin/dashboard
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public getLeadDashboard(
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json' | 'application/problem+json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<LeadDashboard>;
+  public getLeadDashboard(
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json' | 'application/problem+json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<HttpResponse<LeadDashboard>>;
+  public getLeadDashboard(
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: {
+      httpHeaderAccept?: 'application/json' | 'application/problem+json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<HttpEvent<LeadDashboard>>;
+  public getLeadDashboard(
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: {
+      httpHeaderAccept?: 'application/json' | 'application/problem+json';
+      context?: HttpContext;
+      transferCache?: boolean;
+    },
+  ): Observable<any> {
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ??
+      this.configuration.selectHeaderAccept(['application/json', 'application/problem+json']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/dashboard`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<LeadDashboard>('get', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint get /admin/enquiries/{id}
+   * @param id
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public getLeadEnquiry(
+    id: string,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public getLeadEnquiry(
+    id: string,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public getLeadEnquiry(
+    id: string,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public getLeadEnquiry(
+    id: string,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    if (id === null || id === undefined) {
+      throw new Error('Required parameter id was null or undefined when calling getLeadEnquiry.');
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/enquiries/${this.configuration.encodeParam({ name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid' })}`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('get', `${basePath}${localVarPath}`, {
       context: localVarHttpContext,
       responseType: <any>responseType_,
       ...(withCredentials ? { withCredentials } : {}),
@@ -1777,6 +2047,190 @@ export class DefaultService extends BaseService {
   }
 
   /**
+   * @endpoint get /admin/enquiries
+   * @param state
+   * @param team
+   * @param service
+   * @param area
+   * @param unassigned
+   * @param overdue
+   * @param cursor
+   * @param pageSize
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public listLeadEnquiries(
+    state?: string,
+    team?: string,
+    service?: string,
+    area?: string,
+    unassigned?: boolean,
+    overdue?: boolean,
+    cursor?: string,
+    pageSize?: number,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public listLeadEnquiries(
+    state?: string,
+    team?: string,
+    service?: string,
+    area?: string,
+    unassigned?: boolean,
+    overdue?: boolean,
+    cursor?: string,
+    pageSize?: number,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public listLeadEnquiries(
+    state?: string,
+    team?: string,
+    service?: string,
+    area?: string,
+    unassigned?: boolean,
+    overdue?: boolean,
+    cursor?: string,
+    pageSize?: number,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public listLeadEnquiries(
+    state?: string,
+    team?: string,
+    service?: string,
+    area?: string,
+    unassigned?: boolean,
+    overdue?: boolean,
+    cursor?: string,
+    pageSize?: number,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    let localVarQueryParameters = new OpenApiHttpParams(this.encoder);
+
+    localVarQueryParameters = this.addToHttpParams(
+      localVarQueryParameters,
+      'state',
+      <any>state,
+      QueryParamStyle.Form,
+      true,
+    );
+
+    localVarQueryParameters = this.addToHttpParams(
+      localVarQueryParameters,
+      'team',
+      <any>team,
+      QueryParamStyle.Form,
+      true,
+    );
+
+    localVarQueryParameters = this.addToHttpParams(
+      localVarQueryParameters,
+      'service',
+      <any>service,
+      QueryParamStyle.Form,
+      true,
+    );
+
+    localVarQueryParameters = this.addToHttpParams(
+      localVarQueryParameters,
+      'area',
+      <any>area,
+      QueryParamStyle.Form,
+      true,
+    );
+
+    localVarQueryParameters = this.addToHttpParams(
+      localVarQueryParameters,
+      'unassigned',
+      <any>unassigned,
+      QueryParamStyle.Form,
+      true,
+    );
+
+    localVarQueryParameters = this.addToHttpParams(
+      localVarQueryParameters,
+      'overdue',
+      <any>overdue,
+      QueryParamStyle.Form,
+      true,
+    );
+
+    localVarQueryParameters = this.addToHttpParams(
+      localVarQueryParameters,
+      'cursor',
+      <any>cursor,
+      QueryParamStyle.Form,
+      true,
+    );
+
+    localVarQueryParameters = this.addToHttpParams(
+      localVarQueryParameters,
+      'page_size',
+      <any>pageSize,
+      QueryParamStyle.Form,
+      true,
+    );
+
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/enquiries`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('get', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      params: localVarQueryParameters.toHttpParams(),
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
    * @endpoint get /admin/media
    * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
    * @param reportProgress flag to report request and response progress.
@@ -1841,6 +2295,160 @@ export class DefaultService extends BaseService {
     }
 
     let localVarPath = `/admin/media`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('get', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint get /admin/audit
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public listOperationalAudit(
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public listOperationalAudit(
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public listOperationalAudit(
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public listOperationalAudit(
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/audit`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('get', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint get /admin/notifications
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public listOperationalNotifications(
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public listOperationalNotifications(
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public listOperationalNotifications(
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public listOperationalNotifications(
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/notifications`;
     const { basePath, withCredentials } = this.configuration;
     return this.httpClient.request<any>('get', `${basePath}${localVarPath}`, {
       context: localVarHttpContext,
@@ -2807,6 +3415,126 @@ export class DefaultService extends BaseService {
       context: localVarHttpContext,
       body: contentDraft,
       params: localVarQueryParameters.toHttpParams(),
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint post /admin/enquiries/{id}/transition
+   * @param id
+   * @param ifMatch
+   * @param leadTransition
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public transitionLeadEnquiry(
+    id: string,
+    ifMatch: string,
+    leadTransition: LeadTransition,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public transitionLeadEnquiry(
+    id: string,
+    ifMatch: string,
+    leadTransition: LeadTransition,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public transitionLeadEnquiry(
+    id: string,
+    ifMatch: string,
+    leadTransition: LeadTransition,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public transitionLeadEnquiry(
+    id: string,
+    ifMatch: string,
+    leadTransition: LeadTransition,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    if (id === null || id === undefined) {
+      throw new Error(
+        'Required parameter id was null or undefined when calling transitionLeadEnquiry.',
+      );
+    }
+    if (ifMatch === null || ifMatch === undefined) {
+      throw new Error(
+        'Required parameter ifMatch was null or undefined when calling transitionLeadEnquiry.',
+      );
+    }
+    if (leadTransition === null || leadTransition === undefined) {
+      throw new Error(
+        'Required parameter leadTransition was null or undefined when calling transitionLeadEnquiry.',
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+    if (ifMatch !== undefined && ifMatch !== null) {
+      localVarHeaders = localVarHeaders.set('If-Match', String(ifMatch));
+    }
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    // to determine the Content-Type header
+    const consumes: string[] = ['application/json'];
+    const httpContentTypeSelected: string | undefined =
+      this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+    }
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/enquiries/${this.configuration.encodeParam({ name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid' })}/transition`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      body: leadTransition,
       responseType: <any>responseType_,
       ...(withCredentials ? { withCredentials } : {}),
       headers: localVarHeaders,

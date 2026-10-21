@@ -28,6 +28,8 @@ model/fieldError.ts
 model/getPrivateProbe200Response.ts
 model/hardwareItem.ts
 model/healthResponse.ts
+model/leadDashboard.ts
+model/leadTransition.ts
 model/location.ts
 model/models.ts
 model/money.ts

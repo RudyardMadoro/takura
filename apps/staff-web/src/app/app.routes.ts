@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { permissionGuard } from './auth/permission.guard';
+import { anyPermissionGuard, permissionGuard } from './auth/permission.guard';
 import {
   AccessDeniedPage,
   DashboardPage,
@@ -13,6 +13,7 @@ import { MediaLibraryPage } from './media-library.page';
 export const routes: Routes = [
   { path: '', component: SignInPage },
   { path: 'auth/callback', component: SignInPage },
+  { path: 'unauthorized', component: SignInPage },
   { path: 'workspace', component: DashboardPage },
   { path: 'access', component: DashboardPage, canActivate: [permissionGuard('staff_access:read')] },
   { path: 'settings', component: SettingsPage, canActivate: [permissionGuard('settings:read')] },
@@ -30,7 +31,9 @@ export const routes: Routes = [
   {
     path: 'enquiries',
     component: BoardInboxPage,
-    canActivate: [permissionGuard('enquiry:assigned:read')],
+    canActivate: [
+      anyPermissionGuard('enquiry:assigned:read', 'enquiry:all:read', 'record:granted:read'),
+    ],
   },
   { path: 'forbidden', component: AccessDeniedPage },
   { path: '**', component: NotFoundPage },

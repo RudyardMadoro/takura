@@ -18,6 +18,8 @@ export * from './fieldError';
 export * from './getPrivateProbe200Response';
 export * from './hardwareItem';
 export * from './healthResponse';
+export * from './leadDashboard';
+export * from './leadTransition';
 export * from './location';
 export * from './money';
 export * from './pageMetadata';

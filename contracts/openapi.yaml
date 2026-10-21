@@ -442,6 +442,75 @@ paths:
         '200': { description: Approved derivative published }
         '412': { description: Stale media revision or failed clearance precondition }
         '428': { description: Missing If-Match }
+  /admin/dashboard:
+    get:
+      operationId: getLeadDashboard
+      security: [{ staffBearer: [], staffSession: [] }]
+      responses:
+        '200':
+          {
+            description: Scope-filtered operational queue counts,
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/LeadDashboard' } } },
+          }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/enquiries:
+    get:
+      operationId: listLeadEnquiries
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: state, in: query, schema: { type: string } }
+        - { name: team, in: query, schema: { type: string } }
+        - { name: service, in: query, schema: { type: string } }
+        - { name: area, in: query, schema: { type: string } }
+        - { name: unassigned, in: query, schema: { type: boolean } }
+        - { name: overdue, in: query, schema: { type: boolean } }
+        - { name: cursor, in: query, schema: { type: string, format: uuid } }
+        - { name: page_size, in: query, schema: { type: integer, default: 25, maximum: 100 } }
+      responses: { '200': { description: Stable scope-filtered lead page } }
+  /admin/enquiries/{id}:
+    get:
+      operationId: getLeadEnquiry
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200':
+          { description: Scoped lead aggregate, headers: { ETag: { schema: { type: string } } } }
+        '404': { description: Missing or outside caller scope }
+  /admin/enquiries/{id}/transition:
+    post:
+      operationId: transitionLeadEnquiry
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: If-Match, in: header, required: true, schema: { type: string } }
+      requestBody:
+        {
+          required: true,
+          content:
+            { application/json: { schema: { $ref: '#/components/schemas/LeadTransition' } } },
+        }
+      responses:
+        '204': { description: Guarded transition accepted }
+        '409': { description: STATE_CONFLICT or missing evidence }
+        '412': { description: Stale revision }
+        '428': { description: Missing If-Match }
+  /admin/enquiries/{id}/assessments:
+    post:
+      operationId: createAssessment
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '201': { description: Proposed or confirmed assessment } }
+  /admin/audit:
+    get:
+      operationId: listOperationalAudit
+      security: [{ staffBearer: [], staffSession: [] }]
+      responses: { '200': { description: Redacted restricted operational audit } }
+  /admin/notifications:
+    get:
+      operationId: listOperationalNotifications
+      security: [{ staffBearer: [], staffSession: [] }]
+      responses: { '200': { description: Redacted event attempts } }
 components:
   securitySchemes:
     staffBearer:
@@ -471,6 +540,41 @@ components:
         application/problem+json:
           schema: { $ref: '#/components/schemas/ApiError' }
   schemas:
+    LeadDashboard:
+      type: object
+      additionalProperties: false
+      properties:
+        new_count: { type: integer, format: int64 }
+        unassigned_count: { type: integer, format: int64 }
+        overdue_count: { type: integer, format: int64 }
+        scan_backlog_count: { type: integer, format: int64 }
+        quote_queue_count: { type: integer, format: int64 }
+      required: [new_count, unassigned_count, overdue_count, scan_backlog_count, quote_queue_count]
+    LeadTransition:
+      type: object
+      additionalProperties: false
+      properties:
+        next_state:
+          {
+            type: string,
+            enum:
+              [
+                NEW,
+                CONTACTED,
+                AWAITING_INFORMATION,
+                ASSESSMENT_SCHEDULED,
+                ASSESSMENT_COMPLETE,
+                QUOTE_IN_PREPARATION,
+                QUOTE_SENT,
+                WON,
+                LOST,
+                CLOSED,
+                SPAM,
+              ],
+          }
+        reason: { type: [string, 'null'], maxLength: 500 }
+        evidence_reference: { type: [string, 'null'], maxLength: 200 }
+      required: [next_state]
     BoardVariant:
       type: object
       properties:
