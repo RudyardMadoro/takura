@@ -83,6 +83,15 @@ INSERT INTO takura.business_setting
  ('00000000-0000-4000-8000-000000000021','business_clock.timezone','Africa/Johannesburg','STRING','DEMO','DEMO','2026-10-05T00:00:00Z',0,'demo-seed','2026-10-05T00:00:00Z'),
  ('00000000-0000-4000-8000-000000000022','business_clock.open_hours','08:00-17:00 weekdays','STRING','DEMO','DEMO','2026-10-05T00:00:00Z',0,'demo-seed','2026-10-05T00:00:00Z') ON CONFLICT(setting_key,environment) DO NOTHING;
 
+-- Phase 08 quotation grants remain independent from administrator status.
+INSERT INTO takura.staff_grant(id,staff_identity_id,operation_code,granted_at) VALUES
+ ('28000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000003','enquiry:assigned:read','2026-10-05T00:00:00Z'),
+ ('28000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000004','enquiry:assigned:read','2026-10-05T00:00:00Z'),
+ ('28000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000004','quote:issue','2026-10-05T00:00:00Z'),
+ ('28000000-0000-4000-8000-000000000004','10000000-0000-4000-8000-000000000004','quote:revoke','2026-10-05T00:00:00Z'),
+ ('28000000-0000-4000-8000-000000000005','10000000-0000-4000-8000-000000000004','commercial:confirm','2026-10-05T00:00:00Z')
+ON CONFLICT DO NOTHING;
+
 INSERT INTO takura.content_entry(id,content_type,slug,state,current_revision,published_revision,featured,category_code,published_at,created_at) VALUES
  ('30000000-0000-4000-8000-000000000001','SERVICE','property-transformation','PUBLISHED',1,1,true,'PROPERTY','2026-10-05T00:00:00Z','2026-10-05T00:00:00Z'),
  ('30000000-0000-4000-8000-000000000002','SERVICE','custom-cabinetry','PUBLISHED',1,1,true,'CABINETRY','2026-10-05T00:00:00Z','2026-10-05T00:00:00Z'),

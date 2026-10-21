@@ -10,6 +10,7 @@ import {
 import { ContentEditorPage } from './content-editor.page';
 import { BoardInboxPage, CatalogueAdminPage } from './board-operations.page';
 import { MediaLibraryPage } from './media-library.page';
+import { QuoteAdminPage } from './quote-admin.page';
 export const routes: Routes = [
   { path: '', component: SignInPage },
   { path: 'auth/callback', component: SignInPage },
@@ -34,6 +35,11 @@ export const routes: Routes = [
     canActivate: [
       anyPermissionGuard('enquiry:assigned:read', 'enquiry:all:read', 'record:granted:read'),
     ],
+  },
+  {
+    path: 'enquiries/:enquiry/quotes',
+    component: QuoteAdminPage,
+    canActivate: [anyPermissionGuard('quote:draft', 'quote:approve', 'quote:issue')],
   },
   { path: 'forbidden', component: AccessDeniedPage },
   { path: '**', component: NotFoundPage },

@@ -3,5 +3,9 @@ spring:
     import: optional:file:../.env[.properties]
 
 takura:
+  quote:
+    delivery-key: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+    configuration-version: demo-quote-v1
+    timezone: Africa/Johannesburg
   security:
     local-provider-enabled: true

@@ -21,5 +21,6 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'boards/:slug', renderMode: RenderMode.Server },
   { path: 'hardware', renderMode: RenderMode.Server },
   { path: 'request-quote', renderMode: RenderMode.Server },
+  { path: 'quote/view', renderMode: RenderMode.Client },
   { path: '**', renderMode: RenderMode.Server, status: 404 },
 ];

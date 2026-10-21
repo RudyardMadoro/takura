@@ -511,6 +511,182 @@ paths:
       operationId: listOperationalNotifications
       security: [{ staffBearer: [], staffSession: [] }]
       responses: { '200': { description: Redacted event attempts } }
+  /admin/enquiries/{id}/quote-revisions:
+    get:
+      operationId: listQuoteRevisions
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200':
+          {
+            description: Scoped immutable quote revision history,
+            content:
+              {
+                application/json:
+                  {
+                    schema: { type: array, items: { $ref: '#/components/schemas/QuoteRevision' } },
+                  },
+              },
+          }
+    post:
+      operationId: createQuoteRevision
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody:
+        {
+          required: true,
+          content: { application/json: { schema: { $ref: '#/components/schemas/QuoteDraft' } } },
+        }
+      responses:
+        {
+          '201': { description: Draft revision created },
+          '409': { description: Clean PDF or metadata precondition failed },
+        }
+  /admin/quote-revisions/{id}/submit-approval:
+    post:
+      operationId: submitQuoteApproval
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: If-Match, in: header, required: true, schema: { type: string } }
+      responses:
+        {
+          '200': { description: Exact revision submitted },
+          '412': { description: Stale revision },
+          '428': { description: Missing precondition },
+        }
+  /admin/quote-revisions/{id}:
+    get:
+      operationId: getQuoteRevision
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200':
+          {
+            description: Scoped quote revision,
+            headers: { ETag: { schema: { type: string } } },
+            content:
+              { application/json: { schema: { $ref: '#/components/schemas/QuoteRevision' } } },
+          }
+        '404': { description: Missing or outside caller scope }
+    put:
+      operationId: updateQuoteRevision
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: If-Match, in: header, required: true, schema: { type: string } }
+      requestBody:
+        {
+          required: true,
+          content: { application/json: { schema: { $ref: '#/components/schemas/QuoteDraft' } } },
+        }
+      responses:
+        '200': { description: Draft updated and any prior approval invalidated }
+        '412': { description: Stale revision }
+        '428': { description: Missing precondition }
+  /admin/quote-revisions/{id}/approve:
+    post:
+      operationId: approveQuoteRevision
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: If-Match, in: header, required: true, schema: { type: string } }
+      responses:
+        {
+          '200': { description: Digest-bound approval recorded },
+          '409': { description: Self approval or state conflict },
+        }
+  /admin/quote-revisions/{id}/send:
+    post:
+      operationId: issueQuoteRevision
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: If-Match, in: header, required: true, schema: { type: string } }
+        - {
+            name: Idempotency-Key,
+            in: header,
+            required: true,
+            schema: { type: string, maxLength: 120 },
+          }
+      responses: { '200': { description: 'Immutable issue, grant and durable event committed' } }
+  /admin/quote-revisions/{id}/revoke:
+    post:
+      operationId: revokeQuoteRevision
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '204': { description: New exchanges and active sessions revoked } }
+  /admin/quote-revisions/{id}/dispatch:
+    post:
+      operationId: recordQuoteDispatch
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        { '204': { description: Provider acceptance or controlled manual evidence recorded } }
+  /admin/quote-revisions/{id}/cancel:
+    post:
+      operationId: cancelQuoteRevision
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: If-Match, in: header, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Unissued revision cancelled with audit reason }
+        '412': { description: Stale revision }
+        '428': { description: Missing precondition }
+  /admin/quote-revisions/{id}/outcomes:
+    post:
+      operationId: recordQuoteOutcome
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '201': { description: Exact-revision offline commercial evidence recorded }
+        '409': { description: Revision or evidence state conflict }
+  /quote-access/exchange:
+    post:
+      operationId: exchangeQuoteAccess
+      security: []
+      requestBody:
+        {
+          required: true,
+          content:
+            {
+              application/json:
+                {
+                  schema:
+                    { type: object, properties: { token: { type: string } }, required: [token] },
+                },
+            },
+        }
+      responses:
+        {
+          '200': { description: Short-lived one-revision session },
+          '401': { description: Generic invalid access response },
+        }
+  /customer/quote:
+    get:
+      operationId: getCustomerQuote
+      security: []
+      parameters: [{ name: X-Quote-Session, in: header, required: true, schema: { type: string } }]
+      responses:
+        {
+          '200': { description: No-store authorised revision metadata },
+          '401': { description: Generic invalid access response },
+        }
+  /customer/quote/document:
+    get:
+      operationId: downloadCustomerQuote
+      security: []
+      parameters: [{ name: X-Quote-Session, in: header, required: true, schema: { type: string } }]
+      responses:
+        {
+          '200':
+            {
+              description: Revocable no-store proxied PDF,
+              content: { application/pdf: { schema: { type: string, format: binary } } },
+            },
+          '401': { description: Generic invalid access response },
+        }
 components:
   securitySchemes:
     staffBearer:
@@ -540,6 +716,68 @@ components:
         application/problem+json:
           schema: { $ref: '#/components/schemas/ApiError' }
   schemas:
+    QuoteDraft:
+      type: object
+      additionalProperties: false
+      properties:
+        group_id: { type: [string, 'null'], format: uuid }
+        pdf_attachment_id: { type: string, format: uuid }
+        amount: { type: string, pattern: '^[0-9]+(\.[0-9]{1,2})?$' }
+        currency: { type: string, pattern: '^[A-Z]{3}$' }
+        tax_mode: { type: string, enum: [NOT_APPLICABLE, INCLUSIVE, EXCLUSIVE, UNCONFIRMED] }
+        scope_summary: { type: string, maxLength: 5000 }
+        material_snapshot: { type: object, additionalProperties: true }
+        commercial_terms: { type: object, additionalProperties: true }
+        review_checklist: { type: object, additionalProperties: { type: boolean } }
+      required:
+        [
+          pdf_attachment_id,
+          amount,
+          currency,
+          tax_mode,
+          scope_summary,
+          material_snapshot,
+          commercial_terms,
+          review_checklist,
+        ]
+    QuoteRevision:
+      type: object
+      additionalProperties: false
+      properties:
+        id: { type: string, format: uuid }
+        group_id: { type: string, format: uuid }
+        enquiry_id: { type: string, format: uuid }
+        quote_number: { type: string }
+        revision_number: { type: integer }
+        state:
+          {
+            type: string,
+            enum:
+              [DRAFT, AWAITING_APPROVAL, APPROVED, ISSUED, SUPERSEDED, EXPIRED, REVOKED, CANCELLED],
+          }
+        amount: { type: string }
+        currency: { type: string }
+        tax_mode: { type: string }
+        scope_summary: { type: string }
+        expires_at: { type: string, format: date-time }
+        dispatch_state: { type: string }
+        revision: { type: integer, format: int64 }
+      required:
+        [
+          id,
+          group_id,
+          enquiry_id,
+          quote_number,
+          revision_number,
+          state,
+          amount,
+          currency,
+          tax_mode,
+          scope_summary,
+          expires_at,
+          dispatch_state,
+          revision,
+        ]
     LeadDashboard:
       type: object
       additionalProperties: false

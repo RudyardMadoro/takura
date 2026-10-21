@@ -22,6 +22,12 @@ app.use((_req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   next();
 });
+app.use('/quote/view', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  next();
+});
 
 const apiOrigin = (process.env['TAKURA_API_ORIGIN'] || 'http://127.0.0.1:8080').replace(/\/$/, '');
 app.use('/api/v1', async (req, res, next) => {
@@ -32,7 +38,10 @@ app.use('/api/v1', async (req, res, next) => {
           req.path,
         )) ||
       (req.method === 'POST' &&
-        (req.path === '/enquiries' || /^\/upload-sessions(?:\/.*)?$/.test(req.path)))
+        (req.path === '/enquiries' ||
+          req.path === '/quote-access/exchange' ||
+          /^\/upload-sessions(?:\/.*)?$/.test(req.path))) ||
+      (req.method === 'GET' && /^\/customer\/quote(?:\/document)?$/.test(req.path))
     )
   ) {
     return next();
@@ -47,12 +56,22 @@ app.use('/api/v1', async (req, res, next) => {
           'idempotency-key': req.get('idempotency-key') ?? '',
           'x-correlation-id': req.get('x-correlation-id') ?? '',
           'x-upload-capability': req.get('x-upload-capability') ?? '',
+          'x-quote-session': req.get('x-quote-session') ?? '',
         },
         body: req.method === 'POST' ? JSON.stringify(req.body) : undefined,
         redirect: 'manual',
       },
     );
-    for (const header of ['cache-control', 'content-type', 'etag', 'location']) {
+    for (const header of [
+      'cache-control',
+      'content-type',
+      'content-disposition',
+      'content-length',
+      'etag',
+      'location',
+      'referrer-policy',
+      'x-robots-tag',
+    ]) {
       const value = response.headers.get(header);
       if (value) res.setHeader(header, value);
     }

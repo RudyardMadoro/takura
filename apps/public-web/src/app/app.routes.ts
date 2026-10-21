@@ -4,6 +4,7 @@ import { publicContentResolver } from './content-api.service';
 import { CataloguePage } from './catalogue.page';
 import { QuotePage } from './quote.page';
 import { catalogueResolver } from './catalogue-api.service';
+import { CustomerQuotePage } from './customer-quote.page';
 export const routes: Routes = [
   {
     path: '',
@@ -86,5 +87,6 @@ export const routes: Routes = [
     component: QuotePage,
     data: { title: 'Request full board sheets' },
   },
+  { path: 'quote/view', component: CustomerQuotePage, data: { title: 'Private quotation' } },
   { path: '**', component: PublicPage, data: { kind: 'notfound', title: 'Page not found' } },
 ];

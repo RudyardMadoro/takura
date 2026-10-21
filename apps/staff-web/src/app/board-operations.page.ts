@@ -2,9 +2,10 @@ import { DatePipe } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 @Component({
   standalone: true,
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, RouterLink],
   selector: 'app-board-operations',
   template: `<h1 tabindex="-1">Lead operations</h1>
     <p>Every count, list, detail and action is restricted by server-side scope.</p>
@@ -107,6 +108,9 @@ import { FormsModule } from '@angular/forms';
         <p>{{ selected().enquiry.area }}, {{ selected().enquiry.country_code }}</p>
         <p>{{ selected().enquiry.description }}</p>
         <div class="actions" aria-label="Lead commands">
+          <a [routerLink]="['/enquiries', selected().enquiry.id, 'quotes']"
+            >Prepare quote revisions</a
+          >
           <button (click)="openCommand('activity')">Record human activity</button>
           <button (click)="openCommand('task')">Create follow-up task</button>
           <button (click)="openCommand('assessment')">Schedule assessment</button>

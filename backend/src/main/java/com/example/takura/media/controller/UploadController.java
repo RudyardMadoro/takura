@@ -41,6 +41,11 @@ public class UploadController {
         return ResponseEntity.status(HttpStatus.CREATED).body(uploads.createStaff(actor, request));
     }
 
+    @PostMapping("/admin/quote-upload-sessions")
+    ResponseEntity<?> createQuotePdf(@StaffRequestPrincipal StaffPrincipal actor,@RequestBody UploadService.CreateSession request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(uploads.createQuotePdf(actor, request));
+    }
+
     @GetMapping("/admin/enquiries/{enquiry}/attachments")
     Object list(@StaffRequestPrincipal StaffPrincipal actor,@PathVariable UUID enquiry) {
         return uploads.enquiryAttachments(actor, enquiry);
