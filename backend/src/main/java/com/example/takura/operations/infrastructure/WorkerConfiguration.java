@@ -4,6 +4,7 @@ import com.example.takura.communications.application.OutboxWorker;
 import com.example.takura.media.application.AttachmentScanWorker;
 import com.example.takura.media.application.StorageMaintenanceWorker;
 import com.example.takura.enquiries.application.LeadOperationsService;
+import com.example.takura.privacy.application.PrivacyOperationsService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -13,8 +14,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 @EnableScheduling
 @Profile("worker")
 class WorkerConfiguration {
-    private final OutboxWorker outbox; private final AttachmentScanWorker scans; private final StorageMaintenanceWorker storage; private final LeadOperationsService leads;
-    WorkerConfiguration(OutboxWorker outbox,AttachmentScanWorker scans,StorageMaintenanceWorker storage,LeadOperationsService leads) { this.outbox = outbox; this.scans = scans; this.storage=storage; this.leads=leads; }
+    private final OutboxWorker outbox; private final AttachmentScanWorker scans; private final StorageMaintenanceWorker storage; private final LeadOperationsService leads; private final PrivacyOperationsService privacy;
+    WorkerConfiguration(OutboxWorker outbox,AttachmentScanWorker scans,StorageMaintenanceWorker storage,LeadOperationsService leads,PrivacyOperationsService privacy) { this.outbox = outbox; this.scans = scans; this.storage=storage; this.leads=leads; this.privacy=privacy; }
     @Scheduled(fixedDelayString = "${takura.worker.poll-delay-ms:5000}")
     void poll() {
         outbox.runOnce();
@@ -23,4 +24,5 @@ class WorkerConfiguration {
         leads.scheduleReminders();
     }
     @Scheduled(fixedDelayString = "${takura.worker.reconcile-delay-ms:3600000}") void reconcile(){storage.reconcileOnce();}
+    @Scheduled(fixedDelayString = "${takura.worker.privacy-review-delay-ms:86400000}") void privacyReview(){privacy.markRetentionEligible();privacy.replayTombstones();}
 }

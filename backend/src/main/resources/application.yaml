@@ -40,6 +40,20 @@ management:
       probes:
         enabled: true
       show-details: never
+  metrics:
+    tags:
+      service: takura-backend
+      environment: ${TAKURA_ENVIRONMENT:local}
+      release: ${TAKURA_RELEASE_DIGEST:development}
+    distribution:
+      percentiles-histogram:
+        takura.http.server.duration: true
+  tracing:
+    sampling:
+      probability: ${TRACE_SAMPLING_PROBABILITY:0.10}
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://127.0.0.1:4318/v1/traces}
 logging:
   structured:
     format:
@@ -47,6 +61,24 @@ logging:
   level:
     org.springframework.web.filter.CommonsRequestLoggingFilter: OFF
 takura:
+  communications:
+    staff-alert-recipient: ${STAFF_ALERT_RECIPIENT:staff-operations@example.invalid}
+    ses:
+      enabled: ${SES_ENABLED:false}
+      sender: ${SES_APPROVED_SENDER:disabled@example.invalid}
+      region: ${SES_REGION:af-south-1}
+      sns-topic-arn: ${SES_SNS_TOPIC_ARN:disabled}
+    sms-enabled: ${SMS_ENABLED:false}
+    whatsapp-enabled: ${WHATSAPP_ENABLED:false}
+  payments:
+    enabled: ${PAYMENT_ENABLED:false}
+  privacy:
+    unsuccessful-review-days: ${PRIVACY_UNSUCCESSFUL_REVIEW_DAYS:365}
+    won-auto-delete-enabled: false
+  telemetry:
+    log-retention-days: ${LOG_RETENTION_DAYS:14}
+    trace-retention-days: ${TRACE_RETENTION_DAYS:7}
+    metric-retention-days: ${METRIC_RETENTION_DAYS:30}
   media:
     reviewed-video-enabled: ${REVIEWED_STAFF_VIDEO_ENABLED:false}
   storage:

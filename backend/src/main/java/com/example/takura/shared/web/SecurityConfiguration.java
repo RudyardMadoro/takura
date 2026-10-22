@@ -41,6 +41,7 @@ class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/v1/catalogue/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/enquiries").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/quote-access/exchange").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/provider-events/ses").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/customer/quote", "/api/v1/customer/quote/document").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/upload-sessions", "/api/v1/upload-sessions/**").permitAll()
                         .requestMatchers("/actuator/health/liveness", "/actuator/health/readiness").permitAll()

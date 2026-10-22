@@ -687,6 +687,72 @@ paths:
             },
           '401': { description: Generic invalid access response },
         }
+  /provider-events/ses:
+    post:
+      operationId: receiveSesEvent
+      security: []
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses:
+        '204': { description: Authenticated provider event accepted or replay ignored }
+        '400': { description: Malformed or oversized event }
+        '403': { description: 'Signature, topic or environment rejected' }
+  /admin/privacy/requests:
+    post:
+      operationId: createPrivacyRequest
+      security: [{ staffBearer: [], staffSession: [] }]
+      responses: { '201': { description: Scoped staff-assisted request recorded } }
+  /admin/privacy/requests/{id}/approve:
+    post:
+      operationId: approvePrivacyRequest
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: If-Match, in: header, required: true, schema: { type: integer, format: int64 } }
+      responses:
+        '200': { description: Independently approved request }
+        '412': { description: 'Stale, self-approved or invalid state' }
+  /admin/privacy/requests/{id}/export:
+    get:
+      operationId: exportPrivacyRequest
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200':
+          {
+            description: Formula-neutralised single-request CSV,
+            content: { text/csv: { schema: { type: string } } },
+          }
+  /admin/privacy/requests/{id}/delete:
+    post:
+      operationId: executePrivacyDeletion
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: If-Match, in: header, required: true, schema: { type: integer, format: int64 } }
+      responses:
+        '200': { description: Hold-aware deletion or blocked state recorded }
+        '412': { description: Stale or unapproved request }
+  /admin/privacy/requests/{id}/correct:
+    post:
+      operationId: executePrivacyCorrection
+      security: [{ staffBearer: [], staffSession: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: If-Match, in: header, required: true, schema: { type: integer, format: int64 } }
+      responses:
+        '200': { description: Approved scoped correction applied }
+        '412': { description: Stale or unapproved request }
+  /admin/privacy/holds:
+    post:
+      operationId: createPrivacyLegalHold
+      security: [{ staffBearer: [], staffSession: [] }]
+      responses: { '201': { description: Audited legal hold placed } }
+  /admin/privacy/marketing-withdrawals:
+    post:
+      operationId: withdrawMarketingConsent
+      security: [{ staffBearer: [], staffSession: [] }]
+      responses:
+        { '204': { description: Versioned withdrawal and destination suppression recorded } }
 components:
   securitySchemes:
     staffBearer:

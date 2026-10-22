@@ -5,4 +5,5 @@ public interface CommunicationPort {
     default void sendQuoteToTestSink(String templateCode, String syntheticRecipient, String customerUrl) {
         sendToTestSink(templateCode, syntheticRecipient);
     }
+    default String lastProviderReference() { return null; }
 }

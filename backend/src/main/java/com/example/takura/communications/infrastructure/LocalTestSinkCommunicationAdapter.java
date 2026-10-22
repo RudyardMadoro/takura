@@ -10,12 +10,10 @@ import org.springframework.stereotype.Component;
 @Profile("local | test")
 public class LocalTestSinkCommunicationAdapter implements CommunicationPort {
     private final Set<String> deliveredKeys = ConcurrentHashMap.newKeySet();
+    private static final String SINK = "mailpit@example.invalid";
 
     @Override
     public void sendToTestSink(String templateCode, String syntheticRecipient) {
-        if (!syntheticRecipient.endsWith("@example.invalid")) {
-            throw new IllegalArgumentException("Local messages may only use the example.invalid test sink");
-        }
-        deliveredKeys.add(templateCode + ":" + syntheticRecipient);
+        deliveredKeys.add(templateCode + ":" + SINK);
     }
 }

@@ -5,6 +5,11 @@ spring:
   flyway:
     clean-disabled: true
 takura:
+  communications:
+    ses:
+      enabled: ${SES_ENABLED:false}
+  payments:
+    enabled: false
   catalogue:
     demo-fixtures-enabled: false
   security:

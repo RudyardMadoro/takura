@@ -94,6 +94,107 @@ export class DefaultService extends BaseService {
   }
 
   /**
+   * @endpoint post /admin/privacy/requests/{id}/approve
+   * @param id
+   * @param ifMatch
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public approvePrivacyRequest(
+    id: string,
+    ifMatch: number,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public approvePrivacyRequest(
+    id: string,
+    ifMatch: number,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public approvePrivacyRequest(
+    id: string,
+    ifMatch: number,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public approvePrivacyRequest(
+    id: string,
+    ifMatch: number,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    if (id === null || id === undefined) {
+      throw new Error(
+        'Required parameter id was null or undefined when calling approvePrivacyRequest.',
+      );
+    }
+    if (ifMatch === null || ifMatch === undefined) {
+      throw new Error(
+        'Required parameter ifMatch was null or undefined when calling approvePrivacyRequest.',
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+    if (ifMatch !== undefined && ifMatch !== null) {
+      localVarHeaders = localVarHeaders.set('If-Match', String(ifMatch));
+    }
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/privacy/requests/${this.configuration.encodeParam({ name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid' })}/approve`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
    * @endpoint post /admin/quote-revisions/{id}/approve
    * @param id
    * @param ifMatch
@@ -902,6 +1003,160 @@ export class DefaultService extends BaseService {
   }
 
   /**
+   * @endpoint post /admin/privacy/holds
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public createPrivacyLegalHold(
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public createPrivacyLegalHold(
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public createPrivacyLegalHold(
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public createPrivacyLegalHold(
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/privacy/holds`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint post /admin/privacy/requests
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public createPrivacyRequest(
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public createPrivacyRequest(
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public createPrivacyRequest(
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public createPrivacyRequest(
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/privacy/requests`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
    * @endpoint post /admin/enquiries/{id}/quote-revisions
    * @param id
    * @param quoteDraft
@@ -1522,6 +1777,296 @@ export class DefaultService extends BaseService {
     return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
       context: localVarHttpContext,
       body: exchangeQuoteAccessRequest,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint post /admin/privacy/requests/{id}/correct
+   * @param id
+   * @param ifMatch
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public executePrivacyCorrection(
+    id: string,
+    ifMatch: number,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public executePrivacyCorrection(
+    id: string,
+    ifMatch: number,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public executePrivacyCorrection(
+    id: string,
+    ifMatch: number,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public executePrivacyCorrection(
+    id: string,
+    ifMatch: number,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    if (id === null || id === undefined) {
+      throw new Error(
+        'Required parameter id was null or undefined when calling executePrivacyCorrection.',
+      );
+    }
+    if (ifMatch === null || ifMatch === undefined) {
+      throw new Error(
+        'Required parameter ifMatch was null or undefined when calling executePrivacyCorrection.',
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+    if (ifMatch !== undefined && ifMatch !== null) {
+      localVarHeaders = localVarHeaders.set('If-Match', String(ifMatch));
+    }
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/privacy/requests/${this.configuration.encodeParam({ name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid' })}/correct`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint post /admin/privacy/requests/{id}/delete
+   * @param id
+   * @param ifMatch
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public executePrivacyDeletion(
+    id: string,
+    ifMatch: number,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public executePrivacyDeletion(
+    id: string,
+    ifMatch: number,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public executePrivacyDeletion(
+    id: string,
+    ifMatch: number,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public executePrivacyDeletion(
+    id: string,
+    ifMatch: number,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    if (id === null || id === undefined) {
+      throw new Error(
+        'Required parameter id was null or undefined when calling executePrivacyDeletion.',
+      );
+    }
+    if (ifMatch === null || ifMatch === undefined) {
+      throw new Error(
+        'Required parameter ifMatch was null or undefined when calling executePrivacyDeletion.',
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+    if (ifMatch !== undefined && ifMatch !== null) {
+      localVarHeaders = localVarHeaders.set('If-Match', String(ifMatch));
+    }
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/privacy/requests/${this.configuration.encodeParam({ name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid' })}/delete`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint get /admin/privacy/requests/{id}/export
+   * @param id
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public exportPrivacyRequest(
+    id: string,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'text/csv'; context?: HttpContext; transferCache?: boolean },
+  ): Observable<string>;
+  public exportPrivacyRequest(
+    id: string,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'text/csv'; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<string>>;
+  public exportPrivacyRequest(
+    id: string,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'text/csv'; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<string>>;
+  public exportPrivacyRequest(
+    id: string,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: 'text/csv'; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    if (id === null || id === undefined) {
+      throw new Error(
+        'Required parameter id was null or undefined when calling exportPrivacyRequest.',
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept(['text/csv']);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/privacy/requests/${this.configuration.encodeParam({ name: 'id', value: id, in: 'path', style: 'simple', explode: false, dataType: 'string', dataFormat: 'uuid' })}/export`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<string>('get', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
       responseType: <any>responseType_,
       ...(withCredentials ? { withCredentials } : {}),
       headers: localVarHeaders,
@@ -4086,6 +4631,88 @@ export class DefaultService extends BaseService {
   }
 
   /**
+   * @endpoint post /provider-events/ses
+   * @param body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public receiveSesEvent(
+    body: object,
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public receiveSesEvent(
+    body: object,
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public receiveSesEvent(
+    body: object,
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public receiveSesEvent(
+    body: object,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    if (body === null || body === undefined) {
+      throw new Error(
+        'Required parameter body was null or undefined when calling receiveSesEvent.',
+      );
+    }
+
+    let localVarHeaders = this.defaultHeaders;
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    // to determine the Content-Type header
+    const consumes: string[] = ['application/json'];
+    const httpContentTypeSelected: string | undefined =
+      this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+    }
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/provider-events/ses`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
+      body: body,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
    * @endpoint post /admin/quote-revisions/{id}/dispatch
    * @param id
    * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -5132,6 +5759,83 @@ export class DefaultService extends BaseService {
     return this.httpClient.request<any>('put', `${basePath}${localVarPath}`, {
       context: localVarHttpContext,
       body: staffAccessUpdate,
+      responseType: <any>responseType_,
+      ...(withCredentials ? { withCredentials } : {}),
+      headers: localVarHeaders,
+      observe: observe,
+      ...(localVarTransferCache !== undefined ? { transferCache: localVarTransferCache } : {}),
+      reportProgress: reportProgress,
+    });
+  }
+
+  /**
+   * @endpoint post /admin/privacy/marketing-withdrawals
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   * @param options additional options
+   */
+  public withdrawMarketingConsent(
+    observe?: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any>;
+  public withdrawMarketingConsent(
+    observe?: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpResponse<any>>;
+  public withdrawMarketingConsent(
+    observe?: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<HttpEvent<any>>;
+  public withdrawMarketingConsent(
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: undefined; context?: HttpContext; transferCache?: boolean },
+  ): Observable<any> {
+    let localVarHeaders = this.defaultHeaders;
+
+    // authentication (staffBearer) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffBearer',
+      'Authorization',
+      localVarHeaders,
+      'Bearer ',
+    );
+
+    // authentication (staffSession) required
+    localVarHeaders = this.configuration.addCredentialToHeaders(
+      'staffSession',
+      'X-Staff-Session',
+      localVarHeaders,
+    );
+
+    const localVarHttpHeaderAcceptSelected: string | undefined =
+      options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([]);
+    if (localVarHttpHeaderAcceptSelected !== undefined) {
+      localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+    }
+
+    const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+    const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+    let responseType_: 'text' | 'json' | 'blob' = 'json';
+    if (localVarHttpHeaderAcceptSelected) {
+      if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+        responseType_ = 'text';
+      } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+        responseType_ = 'json';
+      } else {
+        responseType_ = 'blob';
+      }
+    }
+
+    let localVarPath = `/admin/privacy/marketing-withdrawals`;
+    const { basePath, withCredentials } = this.configuration;
+    return this.httpClient.request<any>('post', `${basePath}${localVarPath}`, {
+      context: localVarHttpContext,
       responseType: <any>responseType_,
       ...(withCredentials ? { withCredentials } : {}),
       headers: localVarHeaders,

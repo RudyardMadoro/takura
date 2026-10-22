@@ -1,0 +1,38 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.7.1
+    profiles: [observability]
+    ports: ['127.0.0.1:19090:9090']
+    volumes:
+      - ./infra/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infra/observability/alerts.yml:/etc/prometheus/alerts.yml:ro
+    deploy: { resources: { limits: { cpus: '0.50', memory: 384M } } }
+  grafana:
+    image: grafana/grafana:12.2.0
+    profiles: [observability]
+    ports: ['127.0.0.1:13000:3000']
+    environment: { GF_AUTH_ANONYMOUS_ENABLED: 'false' }
+    volumes:
+      - ./infra/observability/grafana-datasources.yml:/etc/grafana/provisioning/datasources/takura.yml:ro
+      - ./infra/observability/grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/takura.yml:ro
+      - ./infra/observability/takura-operations-dashboard.json:/var/lib/grafana/dashboards/takura.json:ro
+    deploy: { resources: { limits: { cpus: '0.50', memory: 384M } } }
+  loki:
+    image: grafana/loki:3.5.7
+    profiles: [observability]
+    command: ['-config.file=/etc/loki/takura.yml']
+    volumes: ['./infra/observability/loki.yml:/etc/loki/takura.yml:ro']
+    deploy: { resources: { limits: { cpus: '0.50', memory: 384M } } }
+  tempo:
+    image: grafana/tempo:2.8.2
+    profiles: [observability]
+    command: ['-config.file=/etc/tempo.yaml']
+    volumes: ['./infra/observability/tempo.yml:/etc/tempo.yaml:ro']
+    deploy: { resources: { limits: { cpus: '0.50', memory: 384M } } }
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.137.0
+    profiles: [observability]
+    ports: ['127.0.0.1:14318:4318']
+    command: ['--config=/etc/otelcol/config.yml']
+    volumes: ['./infra/observability/otel-collector.yml:/etc/otelcol/config.yml:ro']
+    deploy: { resources: { limits: { cpus: '0.50', memory: 256M } } }

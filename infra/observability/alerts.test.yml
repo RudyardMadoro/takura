@@ -1,0 +1,50 @@
+rule_files: [alerts.yml]
+evaluation_interval: 1m
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'takura_notification_oldest_seconds'
+        values: '901x15'
+      - series: 'takura_scan_oldest_seconds'
+        values: '1801x15'
+      - series: 'takura_backup_last_success_seconds'
+        values: '-100000x15'
+      - series: 'takura_synthetic_submission_failures_total'
+        values: '0 1 2 2 2 2 2 2 2 2 2 2 2 2 2'
+      - series: 'takura_http_server_errors_total{route="/api/v1/enquiries",status="500"}'
+        values: '0+4x25'
+      - series: 'node_filesystem_avail_bytes{mountpoint="/data"}'
+        values: '10x15'
+      - series: 'node_filesystem_size_bytes{mountpoint="/data"}'
+        values: '100x15'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: SyntheticSubmissionFailedTwice
+        exp_alerts:
+          - exp_labels: { severity: page }
+            exp_annotations: { summary: 'Two consecutive synthetic submissions failed' }
+      - eval_time: 5m
+        alertname: NotificationBacklogTooOld
+        exp_alerts:
+          - exp_labels: { severity: page }
+            exp_annotations: { summary: 'Notification backlog exceeds 15 minutes' }
+      - eval_time: 5m
+        alertname: ScanBacklogTooOld
+        exp_alerts:
+          - exp_labels: { severity: page }
+            exp_annotations: { summary: 'Scan backlog exceeds 30 minutes' }
+      - eval_time: 6m
+        alertname: BackupTooOld
+        exp_alerts:
+          - exp_labels: { severity: page }
+            exp_annotations: { summary: 'Latest successful backup is too old' }
+      - eval_time: 12m
+        alertname: DiskUsageHigh
+        exp_alerts:
+          - exp_labels: { severity: page, mountpoint: /data }
+            exp_annotations: { summary: 'Disk usage exceeds 80 percent' }
+      - eval_time: 20m
+        alertname: ApiErrorsSustained
+        exp_alerts:
+          - exp_labels: { severity: page }
+            exp_annotations: { summary: 'API error rate is sustained' }
