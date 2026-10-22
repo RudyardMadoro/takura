@@ -18,10 +18,32 @@ interface Line {
   standalone: true,
   imports: [FormsModule],
   selector: 'app-board-quote',
-  template: `<article class="page">
-    <p class="eyebrow">Quotation request · not an order, reservation or automated quote</p>
-    <h1 tabindex="-1">Request a quotation</h1>
-    <p aria-live="polite">Step {{ step }} of 4 — {{ titles[step - 1] }}</p>
+  template: `<article class="page quote-page">
+    <header class="quote-heading">
+      <div>
+        <p class="eyebrow">Project brief</p>
+        <h1 tabindex="-1">Request a quotation</h1>
+      </div>
+      <p>
+        One guided request for full sheets, cutting assistance or a mixed property brief. Submission
+        creates an enquiry—not an order, reservation, payment or fabrication instruction.
+      </p>
+    </header>
+    <nav class="quote-progress" aria-label="Quotation request progress">
+      <ol>
+        @for (title of titles; track title; let index = $index) {
+          <li
+            [class.current]="step === index + 1"
+            [class.complete]="step > index + 1"
+            [attr.aria-current]="step === index + 1 ? 'step' : null"
+          >
+            <span>{{ index + 1 }}</span
+            ><strong>{{ title }}</strong>
+          </li>
+        }
+      </ol>
+    </nav>
+    <p class="visually-hidden" aria-live="polite">Step {{ step }} of 4 — {{ titles[step - 1] }}</p>
     @if (errors.length) {
       <div #summary class="error" role="alert" tabindex="-1">
         <h2>Check your request</h2>
@@ -45,7 +67,7 @@ interface Line {
         </p>
       </section>
     } @else {
-      <form (ngSubmit)="next()">
+      <form class="quote-form" (ngSubmit)="next()">
         @if (step === 1) {
           <fieldset>
             <legend>Select one to ten services</legend>
@@ -358,8 +380,12 @@ interface Line {
               [(ngModel)]="desiredStart"
               name="desiredStart"
           /></label>
-          <label
+          <label class="upload-panel"
             >Plans, photos or cutting list
+            <span
+              >Select files only when they help explain the request. Cutting assistance remains
+              available without an attachment.</span
+            >
             <input
               type="file"
               multiple
@@ -373,6 +399,9 @@ interface Line {
             combined. Files remain private while validation and scanning are pending.
           </p>
           <p aria-live="polite">{{ uploadStatus }}</p>
+          @if (selectedFileSummary) {
+            <p class="file-selection-summary">{{ selectedFileSummary }}</p>
+          }
           @if (uploading) {
             <button type="button" (click)="cancelUpload()">Cancel upload</button>
           }
@@ -442,6 +471,7 @@ export class QuotePage {
   receipt = '';
   uploading = false;
   uploadStatus = 'No files selected.';
+  selectedFileSummary = '';
   attachmentIds: string[] = [];
   uploadCapability = '';
   private activeUpload?: XMLHttpRequest;
@@ -524,6 +554,8 @@ export class QuotePage {
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files ?? []);
     if (!files.length) return;
+    const combinedBytes = files.reduce((total, file) => total + file.size, 0);
+    this.selectedFileSummary = `${files.length} file(s) selected · ${(combinedBytes / 1024 / 1024).toFixed(1)} MiB combined.`;
     this.errors = [];
     if (
       files.length > 5 ||
@@ -531,6 +563,7 @@ export class QuotePage {
       files.reduce((n, f) => n + f.size, 0) > 50 * 1024 * 1024
     ) {
       this.errors = ['Choose at most five files, no larger than 10 MiB each or 50 MiB combined.'];
+      this.selectedFileSummary = '';
       input.value = '';
       return;
     }

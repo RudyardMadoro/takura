@@ -6,24 +6,36 @@ import { BoardPage, BoardProduct, HardwareItem } from './catalogue-api.service';
   standalone: true,
   imports: [FormsModule, RouterLink],
   selector: 'app-catalogue',
-  template: `<article class="page">
-    <p class="eyebrow">Quotation catalogue · prices intentionally hidden</p>
-    <h1 tabindex="-1">
-      {{
-        kind === 'hardware'
-          ? 'Supporting hardware'
-          : kind === 'board'
-            ? (product?.name ?? 'Board detail')
-            : 'Standalone board supply'
-      }}
-    </h1>
+  template: `<article class="page catalogue-page">
+    <header class="catalogue-heading">
+      <div>
+        <p class="eyebrow">Materials catalogue</p>
+        <h1 tabindex="-1">
+          {{
+            kind === 'hardware'
+              ? 'Supporting hardware'
+              : kind === 'board'
+                ? (product?.name ?? 'Board detail')
+                : 'Standalone board supply'
+          }}
+        </h1>
+      </div>
+      <p>
+        Published specifications for quotation requests. Prices and stock quantities remain
+        intentionally absent; availability wording is explicit.
+      </p>
+    </header>
     @if (error) {
       <div class="error" role="alert">
         <h2>Catalogue unavailable</h2>
         <p>Please try again later.</p>
       </div>
     } @else if (kind === 'boards') {
-      <form class="filters" (ngSubmit)="apply()" aria-label="Board filters">
+      <form class="filters catalogue-filters" (ngSubmit)="apply()" aria-label="Board filters">
+        <div class="filter-heading">
+          <strong>Refine published boards</strong
+          ><span>Filters update the URL so results can be revisited.</span>
+        </div>
         <label
           >Material type<select name="type" [(ngModel)]="type">
             <option value="">All</option>
@@ -44,20 +56,40 @@ import { BoardPage, BoardProduct, HardwareItem } from './catalogue-api.service';
           </select></label
         ><button>Apply filters</button><a routerLink="/boards">Clear</a>
       </form>
-      <div class="cards">
-        @for (item of products; track item.id) {
-          <article class="card">
-            <h2>
-              <a [routerLink]="['/boards', item.slug]" [queryParams]="route.snapshot.queryParams">{{
-                item.name
-              }}</a>
-            </h2>
-            <p>{{ item.description }}</p>
-            <p>
-              {{ item.variants[0].material_type }} · {{ item.variants[0].finish }} ·
-              {{ item.variants[0].thickness_mm }} mm
-            </p>
-            <p>{{ item.variants[0].availability_wording }}</p>
+      <div class="board-product-grid">
+        @for (item of products; track item.id; let index = $index) {
+          <article class="board-product-card">
+            <a
+              class="board-product-art"
+              [class]="'board-product-art board-product-art-' + ((index % 3) + 1)"
+              [routerLink]="['/boards', item.slug]"
+              [queryParams]="route.snapshot.queryParams"
+              aria-hidden="true"
+              tabindex="-1"
+              ><span aria-hidden="true"></span
+            ></a>
+            <div class="board-product-copy">
+              <p class="tag">Published board specification</p>
+              <h2>
+                <a
+                  [routerLink]="['/boards', item.slug]"
+                  [queryParams]="route.snapshot.queryParams"
+                  >{{ item.name }}</a
+                >
+              </h2>
+              <p>{{ item.description }}</p>
+              <p>
+                {{ item.variants[0].material_type }} · {{ item.variants[0].finish }} ·
+                {{ item.variants[0].thickness_mm }} mm
+              </p>
+              <p>{{ item.variants[0].availability_wording }}</p>
+              <a
+                class="text-link"
+                [routerLink]="['/boards', item.slug]"
+                [queryParams]="route.snapshot.queryParams"
+                >View specifications</a
+              >
+            </div>
           </article>
         } @empty {
           <p>
@@ -67,8 +99,25 @@ import { BoardPage, BoardProduct, HardwareItem } from './catalogue-api.service';
         }
       </div>
     } @else if (kind === 'board' && product) {
-      <p class="lead">{{ product.description }}</p>
-      <fieldset>
+      <section class="board-detail-hero">
+        <div>
+          <p class="eyebrow">Published board</p>
+          <h2>{{ product.name }}</h2>
+          <p class="lead">{{ product.description }}</p>
+          <p>
+            Choose a published variant below. This is a quotation path, not a cart, reservation or
+            stock promise.
+          </p>
+        </div>
+        <div
+          class="board-detail-art"
+          role="img"
+          [attr.aria-label]="'Abstract board material study for ' + product.name"
+        >
+          <span></span><span></span><span></span>
+        </div>
+      </section>
+      <fieldset class="variant-selector">
         <legend>Choose a published variant</legend>
         @for (v of product.variants; track v.id) {
           <label class="variant"
@@ -82,31 +131,32 @@ import { BoardPage, BoardProduct, HardwareItem } from './catalogue-api.service';
           >
         }
       </fieldset>
-      <p>
+      <div class="board-detail-actions">
         <a
           class="action"
           routerLink="/request-quote"
           [queryParams]="{ variant: selected || product.variants[0].id }"
           >Request full sheets</a
         >
-      </p>
-      <p>
+
         <a routerLink="/boards" [queryParams]="route.snapshot.queryParams"
           >Back to preserved results</a
         >
-      </p>
+      </div>
     } @else if (kind === 'hardware') {
-      @for (item of hardware; track item.id) {
-        <article class="card">
-          <p class="tag">{{ item.category }} · {{ item.unit }}</p>
-          <h2>{{ item.name }}</h2>
-          <p>{{ item.description }}</p>
-          <p><strong>Supply item only:</strong> this is not painting or installation labour.</p>
-          <p>{{ item.availability_wording }}</p>
-        </article>
-      } @empty {
-        <p>No published supporting supplies are available.</p>
-      }
+      <div class="hardware-grid">
+        @for (item of hardware; track item.id) {
+          <article class="card hardware-card">
+            <p class="tag">{{ item.category }} · {{ item.unit }}</p>
+            <h2>{{ item.name }}</h2>
+            <p>{{ item.description }}</p>
+            <p><strong>Supply item only:</strong> this is not painting or installation labour.</p>
+            <p>{{ item.availability_wording }}</p>
+          </article>
+        } @empty {
+          <p>No published supporting supplies are available.</p>
+        }
+      </div>
     }
   </article>`,
 })
