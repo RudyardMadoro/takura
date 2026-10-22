@@ -35,6 +35,27 @@ async function expectWcagAa(page: Page) {
 }
 
 test.describe('Phase 03 public experience', () => {
+  test('premium home renders imagery, working calls to action and published concepts', async ({
+    page,
+  }) => {
+    const response = await page.goto('/');
+    expect(response?.status()).toBe(200);
+    await expect(
+      page.getByRole('heading', { name: 'Thoughtful spaces, shaped around real constraints.' }),
+    ).toBeVisible();
+    await expect(page.locator('.home-hero img')).toHaveAttribute(
+      'alt',
+      /Synthetic concept of a contemporary home/,
+    );
+    await expect(page.getByRole('link', { name: 'Start a project brief' })).toHaveAttribute(
+      'href',
+      '/request-quote',
+    );
+    await expect(page.locator('.project-showcase article').first()).toContainText(
+      'Owner-development concept',
+    );
+  });
+
   for (const width of viewports) {
     test(`home reflows without horizontal overflow at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });

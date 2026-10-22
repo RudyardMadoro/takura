@@ -61,3 +61,8 @@ export const publicContentResolver: ResolveFn<
     ),
   );
 };
+
+export const homeProjectsResolver: ResolveFn<PublicContentPage> = () =>
+  inject(ContentApiService)
+    .list('projects')
+    .pipe(catchError(() => of({ items: [], next_cursor: null, page_size: 12 })));

@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { PublicPage } from './public.page';
-import { publicContentResolver } from './content-api.service';
+import { homeProjectsResolver, publicContentResolver } from './content-api.service';
 import { CataloguePage } from './catalogue.page';
 import { QuotePage } from './quote.page';
 import { catalogueResolver } from './catalogue-api.service';
@@ -10,6 +10,7 @@ export const routes: Routes = [
     path: '',
     component: PublicPage,
     data: { kind: 'home', title: 'Property transformation, cabinetry and board supply' },
+    resolve: { homeProjects: homeProjectsResolver },
   },
   {
     path: 'property-transformation',
