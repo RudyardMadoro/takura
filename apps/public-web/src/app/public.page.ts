@@ -67,6 +67,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                 height="817"
                 alt="Synthetic concept of a contemporary home with charcoal walls, timber screening and indigenous landscaping"
                 fetchpriority="high"
+                decoding="async"
               />
               <div class="home-hero-overlay"></div>
               <div class="home-hero-copy">
@@ -156,6 +157,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                   width="1536"
                   height="1024"
                   loading="lazy"
+                  decoding="async"
                   alt="Synthetic cabinetry concept with timber veneer doors and charcoal stone surfaces"
                 />
                 <figcaption>Synthetic cabinetry concept · design direction only</figcaption>
@@ -502,6 +504,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                 height="1024"
                 alt="Synthetic cabinetry concept with timber veneer doors and charcoal stone surfaces"
                 fetchpriority="high"
+                decoding="async"
               />
               <div class="cabinetry-hero-shade"></div>
               <div>
@@ -1130,8 +1133,13 @@ export class PublicPage implements OnInit, AfterViewInit {
   private updateMetadata(
     description = `Synthetic demonstration: ${this.pageTitle}. No unverified business claims.`,
   ) {
-    this.title.setTitle(`${this.pageTitle} | Example Property Transformation`);
+    const title = `${this.pageTitle} | Example Property Transformation`;
+    this.title.setTitle(title);
     this.meta.updateTag({ name: 'description', content: description });
+    this.meta.updateTag({ property: 'og:title', content: title });
+    this.meta.updateTag({ property: 'og:description', content: description });
+    this.meta.updateTag({ property: 'og:type', content: 'website' });
+    this.meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
     const environment =
       this.document.querySelector<HTMLMetaElement>('meta[name="takura-environment"]') ??
       this.document.head.appendChild(this.document.createElement('meta'));
@@ -1147,6 +1155,7 @@ export class PublicPage implements OnInit, AfterViewInit {
       this.document.head.appendChild(this.document.createElement('link'));
     canonical.rel = 'canonical';
     canonical.href = `https://example.invalid${this.route.snapshot.url.map((segment) => '/' + segment.path).join('')}`;
+    this.meta.updateTag({ property: 'og:url', content: canonical.href });
     let structured = this.document.querySelector<HTMLScriptElement>(
       'script[data-public-structured]',
     );
