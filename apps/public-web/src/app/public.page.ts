@@ -23,9 +23,13 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
       class="page"
       [class.home-page]="kind === 'home'"
       [class.service-page]="kind === 'service' || kind === 'service-overview'"
+      [class.portfolio-page]="kind === 'projects' || kind === 'project'"
       [attr.aria-busy]="loading"
     >
-      @if (!['home', 'services', 'service', 'service-overview'].includes(kind)) {
+      @if (
+        error ||
+        !['home', 'services', 'service', 'service-overview', 'projects', 'project'].includes(kind)
+      ) {
         <p class="eyebrow">Demonstration content</p>
         <h1 #heading tabindex="-1">{{ pageTitle }}</h1>
       }
@@ -317,52 +321,168 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
             <ng-container *ngTemplateOutlet="serviceDetail"></ng-container>
           }
           @case ('projects') {
-            @for (item of items; track item.id) {
-              <article class="card">
-                <p class="tag">Owner-development concept · synthetic</p>
-                <h2>
-                  <a [routerLink]="['/projects', item.slug]">{{ item.title }}</a>
-                </h2>
-                <p>{{ item.summary }}</p>
-              </article>
-            } @empty {
-              <p>No published projects are available.</p>
-            }
+            <header class="portfolio-hero">
+              <div>
+                <p class="eyebrow">Published concepts</p>
+                <h1 #heading tabindex="-1">
+                  Property ideas presented with their status made clear.
+                </h1>
+              </div>
+              <p class="lead">
+                Browse published owner-development concepts and material studies. Every entry is
+                labelled honestly and contains no availability, price or completed-client-work
+                claim.
+              </p>
+            </header>
+            <section class="portfolio-grid" aria-label="Published project concepts">
+              @for (item of items; track item.id; let index = $index) {
+                <article [class.featured]="item.featured">
+                  <a
+                    class="portfolio-image-link"
+                    [routerLink]="['/projects', item.slug]"
+                    [attr.aria-label]="'View ' + item.title"
+                  >
+                    <span
+                      class="portfolio-art"
+                      [class]="'portfolio-art portfolio-art-' + ((index % 3) + 1)"
+                      role="img"
+                      [attr.aria-label]="'Synthetic architectural study for ' + item.title"
+                    ></span>
+                  </a>
+                  <div class="portfolio-card-copy">
+                    <div class="portfolio-meta">
+                      <span>Owner-development concept</span><span>{{ projectLocation(item) }}</span>
+                    </div>
+                    <h2>
+                      <a [routerLink]="['/projects', item.slug]">{{ item.title }}</a>
+                    </h2>
+                    <p>{{ item.summary }}</p>
+                    <a class="text-link" [routerLink]="['/projects', item.slug]">View concept</a>
+                  </div>
+                </article>
+              } @empty {
+                <p>No published projects are available.</p>
+              }
+            </section>
+            <section class="portfolio-note">
+              <p class="eyebrow">Publication standard</p>
+              <h2>Only cleared, published concepts appear here.</h2>
+              <p>
+                Draft, archived, private and uncleared media remain excluded by the existing
+                publication workflow.
+              </p>
+            </section>
           }
           @case ('project') {
             @if (content) {
-              <p class="tag">
-                Owner-development concept · not a client commission · not completed work
-              </p>
-              <p class="lead">{{ content.summary }}</p>
-              <div class="rich-text" [innerHTML]="content.body_html"></div>
-              <div class="gallery" aria-label="Concept stages">
-                @for (stage of stages; track stage.label; let index = $index) {
-                  <figure>
-                    <button
-                      type="button"
-                      (click)="openGallery(index, $event.currentTarget)"
-                      [attr.aria-label]="'Open ' + stage.label + ' illustration'"
-                    >
-                      <span
-                        class="placeholder"
-                        [class]="stage.className"
-                        role="img"
-                        [attr.aria-label]="stage.alt"
-                      ></span>
-                    </button>
-                    <figcaption>{{ stage.label }}</figcaption>
-                  </figure>
-                }
-              </div>
-              <p>
+              <header class="project-detail-hero">
+                <div>
+                  <p class="eyebrow">Owner-development concept</p>
+                  <h1 #heading tabindex="-1">{{ content.title }}</h1>
+                  <p class="lead">{{ content.summary }}</p>
+                  <dl>
+                    <div>
+                      <dt>Status</dt>
+                      <dd>Synthetic concept</dd>
+                    </div>
+                    <div>
+                      <dt>Approximate context</dt>
+                      <dd>{{ projectLocation(content) }}</dd>
+                    </div>
+                    <div>
+                      <dt>Publication</dt>
+                      <dd>Published revision {{ content.revision }}</dd>
+                    </div>
+                  </dl>
+                </div>
+                <div
+                  class="project-hero-art portfolio-art portfolio-art-1"
+                  role="img"
+                  [attr.aria-label]="'Synthetic architectural study for ' + content.title"
+                ></div>
+              </header>
+              <section class="project-narrative">
+                <div>
+                  <p class="eyebrow">Concept narrative</p>
+                  <h2>Exploring an idea without presenting it as completed work.</h2>
+                </div>
+                <div>
+                  <div class="rich-text" [innerHTML]="content.body_html"></div>
+                  <p class="project-disclaimer">
+                    This is not a client commission, completed project, property listing or
+                    statement of availability.
+                  </p>
+                </div>
+              </section>
+              <section class="project-gallery-section" aria-labelledby="gallery-heading">
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">Concept sequence</p>
+                    <h2 id="gallery-heading">Before, during and after studies.</h2>
+                  </div>
+                  <p>
+                    Static synthetic illustrations communicate stages without implying verified
+                    construction photography.
+                  </p>
+                </div>
+                <div class="gallery portfolio-gallery" aria-label="Concept stages">
+                  @for (stage of stages; track stage.label; let index = $index) {
+                    <figure>
+                      <button
+                        type="button"
+                        (click)="openGallery(index, $event.currentTarget)"
+                        [attr.aria-label]="'Open ' + stage.label + ' illustration'"
+                      >
+                        <span
+                          class="placeholder"
+                          [class]="stage.className"
+                          role="img"
+                          [attr.aria-label]="stage.alt"
+                        ></span>
+                      </button>
+                      <figcaption>{{ stage.label }}</figcaption>
+                    </figure>
+                  }
+                </div>
+              </section>
+              <section class="project-enquiry-cta">
+                <div>
+                  <p class="eyebrow">Discuss your own property</p>
+                  <h2>Use this concept as a starting point, not a promised solution.</h2>
+                </div>
                 <a
                   class="action"
                   routerLink="/request-quote"
                   [queryParams]="{ service: 'PROPERTY_TRANSFORMATION' }"
                   >Discuss a related property brief</a
                 >
-              </p>
+              </section>
+              @if (relatedProjects().length) {
+                <section class="related-projects" aria-labelledby="related-projects-heading">
+                  <div class="section-heading">
+                    <div>
+                      <p class="eyebrow">Continue exploring</p>
+                      <h2 id="related-projects-heading">Other published concepts.</h2>
+                    </div>
+                    <a class="text-link" routerLink="/projects">View portfolio</a>
+                  </div>
+                  <div>
+                    @for (item of relatedProjects(); track item.id; let index = $index) {
+                      <article>
+                        <span
+                          class="portfolio-art"
+                          [class]="'portfolio-art portfolio-art-' + ((index % 3) + 1)"
+                          aria-hidden="true"
+                        ></span>
+                        <h3>
+                          <a [routerLink]="['/projects', item.slug]">{{ item.title }}</a>
+                        </h3>
+                        <p>{{ projectLocation(item) }}</p>
+                      </article>
+                    }
+                  </div>
+                </section>
+              }
             }
           }
           @case ('cabinetry') {
@@ -565,6 +685,7 @@ export class PublicPage implements OnInit, AfterViewInit {
   loading = false;
   error: 'not-found' | 'unavailable' | null = null;
   items: PublicContent[] = [];
+  projectItems: PublicContent[] = [];
   content?: PublicContent;
   serviceSummary = '';
   currentServiceCode = 'PROPERTY_TRANSFORMATION';
@@ -668,6 +789,10 @@ export class PublicPage implements OnInit, AfterViewInit {
     }
     const homeProjects = this.route.snapshot.data['homeProjects'] as PublicContentPage | undefined;
     if (homeProjects) this.items = homeProjects.items;
+    const relatedProjects = this.route.snapshot.data['relatedProjects'] as
+      | PublicContentPage
+      | undefined;
+    if (relatedProjects) this.projectItems = relatedProjects.items;
     if (this.kind === 'service-overview') {
       this.configureService(
         this.route.snapshot.data['serviceCode'],
@@ -700,6 +825,18 @@ export class PublicPage implements OnInit, AfterViewInit {
   relatedServices() {
     const currentPath = '/' + this.route.snapshot.url.map((segment) => segment.path).join('/');
     return this.serviceNavigation.filter((service) => service.path !== currentPath).slice(0, 4);
+  }
+  relatedProjects() {
+    return this.projectItems.filter((item) => item.id !== this.content?.id).slice(0, 2);
+  }
+  projectLocation(item: PublicContent) {
+    try {
+      const metadata = JSON.parse(item.metadata_json) as Record<string, unknown>;
+      const location = metadata['approximate_location'];
+      return typeof location === 'string' && location.trim() ? location : 'Concept context';
+    } catch {
+      return 'Concept context';
+    }
   }
   private configureService(code: string, summary?: string, scope?: string[], note?: string) {
     this.currentServiceCode = code || 'PROPERTY_TRANSFORMATION';

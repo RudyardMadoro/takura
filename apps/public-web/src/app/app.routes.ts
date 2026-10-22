@@ -1,6 +1,10 @@
 import { Routes } from '@angular/router';
 import { PublicPage } from './public.page';
-import { homeProjectsResolver, publicContentResolver } from './content-api.service';
+import {
+  homeProjectsResolver,
+  publicContentResolver,
+  relatedProjectsResolver,
+} from './content-api.service';
 import { CataloguePage } from './catalogue.page';
 import { QuotePage } from './quote.page';
 import { catalogueResolver } from './catalogue-api.service';
@@ -124,7 +128,10 @@ export const routes: Routes = [
     path: 'projects/:slug',
     component: PublicPage,
     data: { kind: 'project', title: 'Owner-development concept' },
-    resolve: { publicContent: publicContentResolver },
+    resolve: {
+      publicContent: publicContentResolver,
+      relatedProjects: relatedProjectsResolver,
+    },
   },
   {
     path: 'cabinetry',

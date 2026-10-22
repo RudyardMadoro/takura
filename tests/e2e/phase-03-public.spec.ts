@@ -105,7 +105,13 @@ test.describe('Phase 03 public experience', () => {
     for (const route of publicRoutes) {
       await page.goto(route);
       await expect(page.locator('h1')).toBeVisible();
-      await expectNoHorizontalOverflow(page);
+      const dimensions = await page.evaluate(() => ({
+        client: document.documentElement.clientWidth,
+        scroll: document.documentElement.scrollWidth,
+      }));
+      expect(dimensions.scroll, `${route} must not overflow horizontally`).toBeLessThanOrEqual(
+        dimensions.client,
+      );
     }
   });
 
@@ -157,6 +163,8 @@ test.describe('Phase 03 public experience', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       'Compact home owner-development concept',
     );
+    await expect(page.getByText('Gauteng concept area')).toBeVisible();
+    await expect(page.getByText(/not a client commission, completed project/i)).toBeVisible();
     const opener = page.getByRole('button', { name: 'Open Before concept illustration' });
     await opener.focus();
     await page.keyboard.press('Enter');
@@ -173,6 +181,22 @@ test.describe('Phase 03 public experience', () => {
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();
     await expect(opener).toBeFocused();
+    await expect(page.getByRole('heading', { name: 'Other published concepts.' })).toBeVisible();
+    await expect(page.locator('.related-projects article')).toHaveCount(2);
+  });
+
+  test('project portfolio exposes published concepts without unsupported claims', async ({
+    page,
+  }) => {
+    const response = await page.goto('/projects');
+    expect(response?.status()).toBe(200);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(
+      'Property ideas presented with their status made clear',
+    );
+    await expect(page.locator('.portfolio-grid article')).toHaveCount(3);
+    await expect(page.getByText('Owner-development concept', { exact: true })).toHaveCount(3);
+    await expect(page.locator('.portfolio-grid')).not.toContainText(/price|available for sale/i);
+    await expectWcagAa(page);
   });
 
   test('representative states have no automatically detectable WCAG A/AA findings', async ({
