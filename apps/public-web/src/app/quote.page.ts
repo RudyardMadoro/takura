@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectorRef, Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CatalogueApiService } from './catalogue-api.service';
 import { firstValueFrom } from 'rxjs';
 import { ENQUIRY_SERVICES, serviceLabel, supportedService } from './enquiry-services';
@@ -16,7 +16,7 @@ interface Line {
 }
 @Component({
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   selector: 'app-board-quote',
   template: `<article class="page quote-page">
     <header class="quote-heading">
@@ -29,6 +29,16 @@ interface Line {
         creates an enquiry—not an order, reservation, payment or fabrication instruction.
       </p>
     </header>
+    <aside class="enquiry-context" aria-label="Current enquiry context">
+      <div>
+        <p class="tag">Starting with</p>
+        <strong>{{ contextLabel }}</strong>
+      </div>
+      <p>
+        You can add other services in the next step. One submission creates one reference and one
+        coordinating owner.
+      </p>
+    </aside>
     <nav class="quote-progress" aria-label="Quotation request progress">
       <ol>
         @for (title of titles; track title; let index = $index) {
@@ -55,7 +65,8 @@ interface Line {
       </div>
     }
     @if (receipt) {
-      <section role="status" tabindex="-1">
+      <section class="enquiry-receipt" role="status" tabindex="-1">
+        <p class="eyebrow">Submission complete</p>
         <h2>Request received</h2>
         <p>
           Your committed reference is <strong>{{ receipt }}</strong
@@ -65,26 +76,44 @@ interface Line {
           One coordinating team will review the complete request. This is not an order, booking or
           payment.
         </p>
+        <div class="receipt-next">
+          <h3>What happens next</h3>
+          <ol>
+            <li>Your request is routed to the appropriate team.</li>
+            <li>Staff review the scope and scanned attachments.</li>
+          </ol>
+        </div>
+        <a class="action" routerLink="/">Return to the homepage</a>
       </section>
     } @else {
       <form class="quote-form" (ngSubmit)="next()">
         @if (step === 1) {
-          <fieldset>
+          <fieldset class="service-selection">
             <legend>Select one to ten services</legend>
-            @for (option of serviceOptions; track option[0]) {
-              <label class="choice"
-                ><input
-                  type="checkbox"
-                  [checked]="selected.includes(option[0])"
-                  (change)="toggle(option[0], $any($event.target).checked, $any($event.target))"
-                />
-                {{ option[1] }}</label
-              >
-            }
+            <p class="field-intro">Choose each area that belongs to this project brief.</p>
+            <div class="service-choice-grid">
+              @for (option of serviceOptions; track option[0]) {
+                <label class="choice"
+                  ><input
+                    type="checkbox"
+                    [attr.aria-label]="option[1]"
+                    [checked]="selected.includes(option[0])"
+                    (change)="toggle(option[0], $any($event.target).checked, $any($event.target))"
+                  />
+                  <span
+                    ><strong>{{ option[1] }}</strong></span
+                  ></label
+                >
+              }
+            </div>
           </fieldset>
         }
         @if (step === 2) {
-          <h2>Requirements</h2>
+          <div class="form-step-heading">
+            <p class="tag">Step 2 of 4</p>
+            <h2 #stepHeading tabindex="-1">Tell us what the work involves</h2>
+            <p>Only fields relevant to your selected services are shown.</p>
+          </div>
           @if (selected.includes('PROPERTY_TRANSFORMATION')) {
             <fieldset>
               <legend>Property transformation</legend>
@@ -329,9 +358,14 @@ interface Line {
           }
         }
         @if (step === 3) {
-          <h2>Contact and files</h2>
+          <div class="form-step-heading">
+            <p class="tag">Step 3 of 4</p>
+            <h2 #stepHeading tabindex="-1">Contact and supporting files</h2>
+            <p>We need a usable contact route and approximate location—not a street address.</p>
+          </div>
           <label
-            >Full name<input
+            >Full name <span class="required-marker" aria-hidden="true">Required</span
+            ><input
               required
               [(ngModel)]="fullName"
               name="fullName"
@@ -346,17 +380,29 @@ interface Line {
           >
           @if (preference === 'EMAIL') {
             <label
-              >Email<input type="email" [(ngModel)]="email" name="email" autocomplete="email"
+              >Email <span class="required-marker" aria-hidden="true">Required</span
+              ><input required type="email" [(ngModel)]="email" name="email" autocomplete="email"
             /></label>
           } @else {
             <label
-              >Phone<input type="tel" [(ngModel)]="phone" name="phone" autocomplete="tel"
+              >Phone <span class="required-marker" aria-hidden="true">Required</span
+              ><input required type="tel" [(ngModel)]="phone" name="phone" autocomplete="tel"
             /></label>
           }
-          <label>Country code<input [(ngModel)]="country" name="country" maxlength="2" /></label
-          ><label>Town or suburb<input [(ngModel)]="suburb" name="suburb" maxlength="120" /></label
+          <div class="form-row">
+            <label
+              >Country code <span class="required-marker" aria-hidden="true">Required</span
+              ><input required [(ngModel)]="country" name="country" maxlength="2" /></label
+            ><label
+              >Town or suburb <span class="required-marker" aria-hidden="true">Required</span
+              ><input required [(ngModel)]="suburb" name="suburb" maxlength="120"
+            /></label>
+          </div>
           ><label
-            >Describe the overall request<textarea
+            >Describe the overall request
+            <span class="required-marker" aria-hidden="true">Required</span
+            ><textarea
+              required
               [(ngModel)]="description"
               name="description"
               minlength="10"
@@ -407,24 +453,40 @@ interface Line {
           }
         }
         @if (step === 4) {
-          <h2>Review and submit</h2>
-          <p>Services: {{ selected.join(', ') }}</p>
-          <p>
-            {{ lines.length }} board line(s) where relevant; preferred contact {{ preference }};
-            location {{ suburb }}, {{ country }}.
-          </p>
-          <p>{{ description }}</p>
-          <label
-            ><input type="checkbox" [(ngModel)]="privacy" name="privacy" /> I acknowledge the
-            current demonstration privacy notice (demo-privacy-v1).</label
-          ><label
-            ><input type="checkbox" [(ngModel)]="marketing" name="marketing" /> Optional marketing
-            updates</label
-          >
+          <div class="form-step-heading">
+            <p class="tag">Step 4 of 4</p>
+            <h2 #stepHeading tabindex="-1">Review before submitting</h2>
+            <p>Check the summary below. Use Back to make changes without losing your entries.</p>
+          </div>
+          <div class="review-summary">
+            <section>
+              <span>Services</span><strong>{{ selectedLabels }}</strong>
+            </section>
+            <section>
+              <span>Request</span
+              ><strong>
+                {{ lines.length }} board line(s) where relevant; preferred contact {{ preference }};
+                location {{ suburb }}, {{ country }}.
+              </strong>
+            </section>
+            <section>
+              <span>Description</span>
+              <p>{{ description }}</p>
+            </section>
+          </div>
+          <div class="consent-panel">
+            <label
+              ><input required type="checkbox" [(ngModel)]="privacy" name="privacy" /> I acknowledge
+              the current demonstration privacy notice (demo-privacy-v1).</label
+            ><label
+              ><input type="checkbox" [(ngModel)]="marketing" name="marketing" /> Optional marketing
+              updates</label
+            >
+          </div>
         }
         <div class="wizard-actions">
           @if (step > 1) {
-            <button type="button" (click)="step = step - 1">Back</button>
+            <button type="button" (click)="back()">Back</button>
           }
           <button type="submit" [disabled]="submitting">
             {{ step === 4 ? (submitting ? 'Submitting…' : 'Submit request') : 'Continue' }}
@@ -436,6 +498,7 @@ interface Line {
 })
 export class QuotePage {
   @ViewChild('summary') summary?: ElementRef<HTMLElement>;
+  @ViewChild('stepHeading') stepHeading?: ElementRef<HTMLElement>;
   private readonly api = inject(CatalogueApiService);
   private readonly changeDetector = inject(ChangeDetectorRef);
   readonly serviceOptions = ENQUIRY_SERVICES;
@@ -476,15 +539,20 @@ export class QuotePage {
   uploadCapability = '';
   private activeUpload?: XMLHttpRequest;
   private key = crypto.randomUUID();
+  contextLabel = '';
   constructor() {
     const route = inject(ActivatedRoute).snapshot;
     const variant = route.queryParamMap.get('variant') ?? '';
     const requested = supportedService(route.queryParamMap.get('service'));
     this.selected = [requested ?? 'BOARD_SALES'];
+    this.contextLabel = requested ? serviceLabel(requested) : 'Standalone board supply';
     this.lines = [this.newLine(variant)];
   }
   label(code: string) {
     return serviceLabel(code);
+  }
+  get selectedLabels() {
+    return this.selected.map((code) => serviceLabel(code)).join(', ');
   }
   hasBoards() {
     return this.selected.includes('BOARD_SALES') || this.selected.includes('BOARD_CUTTING');
@@ -544,11 +612,36 @@ export class QuotePage {
       this.errors = ['Select at least one service.'];
       return;
     }
+    if (this.step === 3) {
+      if (!this.fullName.trim()) this.errors.push('Enter your full name.');
+      if (this.preference === 'EMAIL' && !this.email.trim())
+        this.errors.push('Enter an email address for the selected contact preference.');
+      if (this.preference !== 'EMAIL' && !this.phone.trim())
+        this.errors.push('Enter a phone number for the selected contact preference.');
+      if (!this.country.trim()) this.errors.push('Enter a country code.');
+      if (!this.suburb.trim()) this.errors.push('Enter a town or suburb.');
+      if (this.description.trim().length < 10)
+        this.errors.push('Describe the request using at least 10 characters.');
+      if (this.errors.length) {
+        setTimeout(() => this.summary?.nativeElement.focus());
+        return;
+      }
+    }
+    if (this.step === 4 && !this.privacy) {
+      this.errors = ['Acknowledge the current privacy notice before submitting.'];
+      setTimeout(() => this.summary?.nativeElement.focus());
+      return;
+    }
     if (this.step < 4) {
       this.step++;
+      setTimeout(() => this.stepHeading?.nativeElement.focus());
       return;
     }
     this.submit();
+  }
+  back() {
+    if (this.step > 1) this.step--;
+    setTimeout(() => this.stepHeading?.nativeElement.focus());
   }
   async uploadFiles(event: Event) {
     const input = event.target as HTMLInputElement;
