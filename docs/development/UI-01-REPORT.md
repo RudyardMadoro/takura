@@ -58,14 +58,14 @@ backend change or network font dependency was introduced.
 
 ## Checks and actual results
 
-| Check                               | Status | Result                                                                                                              |
-| ----------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
-| `pnpm build:public`                 | PASS   | Angular browser/server bundles built; nine static routes prerendered. Initial browser transfer estimate: 111.05 kB. |
-| `pnpm test -- --project public-web` | PASS   | 1 test file, 2 tests passed.                                                                                        |
-| `pnpm exec ng test design-tokens --watch=false` | PASS | 1 test file, 1 test passed. |
-| `pnpm exec ng build design-tokens` | PASS | Angular package compiled and emitted successfully. |
-| `pnpm format:check`                 | PASS   | All Prettier-managed files passed after implementation.                                                             |
-| `git diff --check`                  | PASS   | No whitespace errors.                                                                                               |
+| Check                                           | Status | Result                                                                                                              |
+| ----------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
+| `pnpm build:public`                             | PASS   | Angular browser/server bundles built; nine static routes prerendered. Initial browser transfer estimate: 111.05 kB. |
+| `pnpm test -- --project public-web`             | PASS   | 1 test file, 2 tests passed.                                                                                        |
+| `pnpm exec ng test design-tokens --watch=false` | PASS   | 1 test file, 1 test passed.                                                                                         |
+| `pnpm exec ng build design-tokens`              | PASS   | Angular package compiled and emitted successfully.                                                                  |
+| `pnpm format:check`                             | PASS   | All Prettier-managed files passed after implementation.                                                             |
+| `git diff --check`                              | PASS   | No whitespace errors.                                                                                               |
 
 The host is Node 23.5.0 and emitted the existing odd-numbered/non-LTS warning; the repository pins
 Node 24.19.0. This did not fail the build.

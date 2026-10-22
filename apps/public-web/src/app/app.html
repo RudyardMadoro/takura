@@ -4,24 +4,95 @@
     {{ siteMode === 'STAGING' ? 'Staging' : 'Demonstration' }} environment — synthetic concepts only
   </div>
 }
-<header>
-  <a class="brand" routerLink="/">Example Property Transformation</a>
-  <details class="menu">
-    <summary>Menu</summary>
+<header class="site-header">
+  <a class="brand" routerLink="/" aria-label="Example Property Transformation home">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-copy">
+      <strong>Example Property</strong>
+      <span>Transformation</span>
+    </span>
+  </a>
+  <nav class="desktop-nav" aria-label="Desktop navigation">
+    <a routerLink="/property-transformation" routerLinkActive="active">Property</a>
+    <a routerLink="/services" routerLinkActive="active">Services</a>
+    <a routerLink="/projects" routerLinkActive="active">Projects</a>
+    <a routerLink="/cabinetry" routerLinkActive="active">Cabinetry</a>
+    <a routerLink="/boards" routerLinkActive="active">Boards</a>
+    <a routerLink="/hardware" routerLinkActive="active">Hardware</a>
+    <a routerLink="/about" routerLinkActive="active">About</a>
+    <a routerLink="/contact" routerLinkActive="active">Contact</a>
+    <a class="nav-cta" routerLink="/request-quote" routerLinkActive="active">Request a quote</a>
+  </nav>
+  <details #menu class="menu" (keydown)="handleMenuKeydown($event)">
+    <summary>
+      <span class="menu-label">Menu</span><span class="menu-icon" aria-hidden="true"></span>
+    </summary>
     <nav aria-label="Main navigation">
-      <a routerLink="/property-transformation">Property transformation</a
-      ><a routerLink="/services">Services</a><a routerLink="/projects">Projects</a
-      ><a routerLink="/cabinetry">Cabinetry</a> <a routerLink="/boards">Boards</a
-      ><a routerLink="/hardware">Hardware</a><a routerLink="/request-quote">Request board quote</a>
-      <a routerLink="/about">About</a><a routerLink="/contact">Contact</a>
+      <a routerLink="/property-transformation" routerLinkActive="active" (click)="closeMenu()"
+        >Property</a
+      >
+      <a routerLink="/services" routerLinkActive="active" (click)="closeMenu()">Services</a>
+      <a routerLink="/projects" routerLinkActive="active" (click)="closeMenu()">Projects</a>
+      <a routerLink="/cabinetry" routerLinkActive="active" (click)="closeMenu()">Cabinetry</a>
+      <a routerLink="/boards" routerLinkActive="active" (click)="closeMenu()">Boards</a>
+      <a routerLink="/hardware" routerLinkActive="active" (click)="closeMenu()">Hardware</a>
+      <a routerLink="/about" routerLinkActive="active" (click)="closeMenu()">About</a>
+      <a routerLink="/contact" routerLinkActive="active" (click)="closeMenu()">Contact</a>
+      <a class="nav-cta" routerLink="/request-quote" routerLinkActive="active" (click)="closeMenu()"
+        >Request a quote</a
+      >
     </nav>
   </details>
 </header>
 <main id="main"><router-outlet /></main>
-<footer>
-  <nav aria-label="Footer">
-    <a routerLink="/faqs">FAQs</a><a routerLink="/privacy">Privacy</a
-    ><a routerLink="/terms">Terms</a>
-  </nav>
-  <p>Contact actions are disabled until verified business details are confirmed.</p>
+<footer class="site-footer">
+  <section class="footer-intro" aria-labelledby="footer-heading">
+    <p class="eyebrow">Start a considered project</p>
+    <h2 id="footer-heading">Transform a property, shape cabinetry or source boards.</h2>
+    <a class="action action-light" routerLink="/request-quote">Discuss your requirements</a>
+  </section>
+  <div class="footer-grid">
+    <section>
+      <h3>Business divisions</h3>
+      <nav aria-label="Business divisions">
+        <a routerLink="/property-transformation">Property transformation</a>
+        <a routerLink="/cabinetry">Custom cabinetry</a>
+        <a routerLink="/boards">Standalone board supply</a>
+        <a routerLink="/hardware">Supporting hardware</a>
+      </nav>
+    </section>
+    <section>
+      <h3>Explore</h3>
+      <nav aria-label="Useful links">
+        <a routerLink="/services">Services</a>
+        <a routerLink="/projects">Projects</a>
+        <a routerLink="/about">About</a>
+        <a routerLink="/faqs">FAQs</a>
+      </nav>
+    </section>
+    <section class="footer-contact">
+      <h3>Contact</h3>
+      @if (email() || phone()) {
+        @if (email()) {
+          <a [href]="'mailto:' + email()">{{ email() }}</a>
+        }
+        @if (phone()) {
+          <a [href]="'tel:' + phone()">{{ phone() }}</a>
+        }
+      } @else {
+        <p>Verified business contact details are pending.</p>
+        <a routerLink="/contact">Contact information</a>
+      }
+    </section>
+  </div>
+  <div class="footer-legal">
+    <p>
+      Example Property Transformation ·
+      {{ nonProduction ? 'demonstration environment' : 'public website' }}
+    </p>
+    <nav aria-label="Legal">
+      <a routerLink="/privacy">Privacy</a>
+      <a routerLink="/terms">Terms</a>
+    </nav>
+  </div>
 </footer>

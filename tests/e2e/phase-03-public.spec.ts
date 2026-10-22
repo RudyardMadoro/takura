@@ -75,6 +75,9 @@ test.describe('Phase 03 public experience', () => {
     await page.keyboard.press('Enter');
     await expect(page.locator('header details')).toHaveAttribute('open', '');
     await expect(page.getByRole('navigation', { name: 'Main navigation' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('header details')).not.toHaveAttribute('open', '');
+    await expect(menuSummary).toBeFocused();
 
     await page.goto('/faqs');
     const question = page.getByText('Is the board catalogue live?', { exact: true });
