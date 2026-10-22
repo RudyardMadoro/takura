@@ -1,0 +1,45 @@
+name: release-candidate
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  candidate:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+        with: { fetch-depth: 0 }
+      - name: Require protected source
+        shell: bash
+        run: |
+          test "${GITHUB_REF}" = "refs/heads/main" || [[ "${GITHUB_REF}" == refs/tags/v* ]]
+          test -z "$(git status --porcelain)"
+      - run: docker build --pull -f Dockerfile.public -t takura-public:candidate .
+      - run: docker build --pull -f Dockerfile.staff -t takura-staff:candidate .
+      - run: docker build --pull -f Dockerfile.backend -t takura-api:candidate .
+      - name: Record tested immutable image identities
+        shell: pwsh
+        run: |
+          $public = "local/takura-public@" + (docker image inspect takura-public:candidate --format '{{.Id}}')
+          $staff = "local/takura-staff@" + (docker image inspect takura-staff:candidate --format '{{.Id}}')
+          $api = "local/takura-api@" + (docker image inspect takura-api:candidate --format '{{.Id}}')
+          ./ops/release/new-manifest.ps1 -PublicImage $public -StaffImage $staff -ApiImage $api -Output release-manifest.json
+      - name: Generate SBOMs
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/out" anchore/syft:v1.38.0 takura-public:candidate -o cyclonedx-json=/out/public-sbom.json
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/out" anchore/syft:v1.38.0 takura-staff:candidate -o cyclonedx-json=/out/staff-sbom.json
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/out" anchore/syft:v1.38.0 takura-api:candidate -o cyclonedx-json=/out/api-sbom.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence-${{ github.sha }}
+          path: |
+            release-manifest.json
+            *-sbom.json
+          retention-days: 30

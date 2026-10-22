@@ -25,6 +25,44 @@ jobs:
       - run: pnpm build
       - run: pnpm api:check
 
+  browser-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: pnpm/action-setup@7088e561eb65bb68695d245aa206f005ef30921d
+        with: { version: 11.25.0 }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: { node-version: 24.19.0, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165
+        with: { distribution: temurin, java-version: '21', cache: maven }
+      - name: Start isolated R1 stack
+        shell: bash
+        run: |
+          cp .env.example .env
+          docker compose up -d --wait postgres minio minio-init clamav
+          (cd backend && SPRING_PROFILES_ACTIVE=local nohup ./mvnw spring-boot:run > ../api.log 2>&1 &)
+          for i in {1..60}; do curl -fsS http://127.0.0.1:8080/api/v1/health && break; sleep 2; done
+          docker compose exec -T postgres psql -U takura_migrator -d takura < ops/demo-data.sql
+          (cd backend && SPRING_PROFILES_ACTIVE=local,worker,test-controlled-scan nohup ./mvnw spring-boot:run > ../worker.log 2>&1 &)
+          pnpm build:public
+          TAKURA_PUBLIC_SITE_MODE=DEMO TAKURA_API_ORIGIN=http://127.0.0.1:8080 nohup node dist/public-web/server/server.mjs > public.log 2>&1 &
+          nohup pnpm ng serve staff-web --host 127.0.0.1 --port 4201 > staff.log 2>&1 &
+          for url in http://127.0.0.1:4000 http://127.0.0.1:4201; do for i in {1..60}; do curl -fsS "$url" >/dev/null && break; sleep 2; done; done
+      - run: pnpm test:e2e:r1
+      - name: Upload failure evidence
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: browser-failure-${{ github.sha }}
+          path: |
+            test-results/playwright
+            api.log
+            worker.log
+            public.log
+            staff.log
+
   backend:
     runs-on: ubuntu-latest
     steps:
@@ -47,3 +85,25 @@ jobs:
       - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  security-and-iac:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_version: 1.9.8 }
+      - run: terraform fmt -check -recursive infra/aws/terraform
+      - run: terraform -chdir=infra/aws/terraform init -backend=false
+      - run: terraform -chdir=infra/aws/terraform validate
+      - run: docker run --rm -v "$PWD:/src" aquasec/trivy:0.68.2 fs --exit-code 1 --severity CRITICAL --scanners vuln,secret,misconfig /src
+
+  container-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - run: docker build --pull -f Dockerfile.public -t takura-public:test .
+      - run: docker build --pull -f Dockerfile.staff -t takura-staff:test .
+      - run: docker build --pull -f Dockerfile.backend -t takura-api:test .
+      - run: docker run --rm aquasec/trivy:0.68.2 image --exit-code 1 --severity CRITICAL takura-public:test
+      - run: docker run --rm aquasec/trivy:0.68.2 image --exit-code 1 --severity CRITICAL takura-staff:test
+      - run: docker run --rm aquasec/trivy:0.68.2 image --exit-code 1 --severity CRITICAL takura-api:test

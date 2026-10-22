@@ -1,0 +1,11 @@
+aws_region            = "af-south-1"
+environment           = "staging"
+availability_zones    = ["af-south-1a", "af-south-1b"]
+public_subnet_cidrs   = ["10.40.0.0/24", "10.40.1.0/24"]
+private_subnet_cidrs  = ["10.40.10.0/24", "10.40.11.0/24"]
+api_image_digest      = "replace.example/api@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+public_image_digest   = "replace.example/public@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+staff_image_digest    = "replace.example/staff@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+cognito_user_pool_arn = "arn:aws:cognito-idp:af-south-1:000000000000:userpool/REPLACE"
+ses_identity_arn      = "arn:aws:ses:af-south-1:000000000000:identity/replace.invalid"
+certificate_arn       = "arn:aws:acm:af-south-1:000000000000:certificate/00000000-0000-0000-0000-000000000000"

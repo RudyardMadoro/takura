@@ -1,0 +1,15 @@
+.git/
+.github
+.idea
+.angular/
+.angular-generated/
+.angular-scaffold/
+.env
+node_modules/
+**/node_modules/
+dist
+test-results
+playwright-report
+backend/target
+docs/source/*.docx
+**/*.log
