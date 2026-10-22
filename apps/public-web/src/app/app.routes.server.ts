@@ -14,6 +14,11 @@ const staticPaths = [
 export const serverRoutes: ServerRoute[] = [
   ...staticPaths.map((path) => ({ path, renderMode: RenderMode.Prerender }) as ServerRoute),
   { path: 'services', renderMode: RenderMode.Server },
+  { path: 'services/construction', renderMode: RenderMode.Prerender },
+  { path: 'services/renovations', renderMode: RenderMode.Prerender },
+  { path: 'services/extensions', renderMode: RenderMode.Prerender },
+  { path: 'services/conversions', renderMode: RenderMode.Prerender },
+  { path: 'services/maintenance', renderMode: RenderMode.Prerender },
   { path: 'projects', renderMode: RenderMode.Server },
   { path: 'services/:slug', renderMode: RenderMode.Server },
   { path: 'projects/:slug', renderMode: RenderMode.Server },

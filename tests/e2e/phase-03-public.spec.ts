@@ -6,6 +6,11 @@ const publicRoutes = [
   '/',
   '/property-transformation',
   '/services',
+  '/services/construction',
+  '/services/renovations',
+  '/services/extensions',
+  '/services/conversions',
+  '/services/maintenance',
   '/services/property-transformation',
   '/projects',
   '/projects/compact-home-concept',
@@ -54,6 +59,37 @@ test.describe('Phase 03 public experience', () => {
     await expect(page.locator('.project-showcase article').first()).toContainText(
       'Owner-development concept',
     );
+  });
+
+  test('service discovery and detail routes retain truthful enquiry integration', async ({
+    page,
+  }) => {
+    const indexResponse = await page.goto('/services');
+    expect(indexResponse?.status()).toBe(200);
+    await expect(page.getByRole('link', { name: /Construction/ })).toHaveAttribute(
+      'href',
+      '/services/construction',
+    );
+
+    const detailResponse = await page.goto('/services/construction');
+    expect(detailResponse?.status()).toBe(200);
+    await expect(page.getByRole('heading', { level: 1, name: 'Construction' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Discuss this service' })).toHaveAttribute(
+      'href',
+      /request-quote\?service=CONSTRUCTION/,
+    );
+    await expect(page.getByText(/not a construction commitment/i)).toBeVisible();
+    await expect(page.locator('.site-header')).toHaveCSS('position', 'sticky');
+    await expect(page.locator('.service-detail-hero')).toHaveCSS('position', 'static');
+    for (const selector of [
+      '.service-detail-hero h1',
+      '.service-detail-hero .lead',
+      '.service-detail-hero .action',
+    ]) {
+      const box = await page.locator(selector).boundingBox();
+      expect(box?.x).toBeGreaterThanOrEqual(24);
+    }
+    await expectWcagAa(page);
   });
 
   for (const width of viewports) {

@@ -1,4 +1,4 @@
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import {
   AfterViewInit,
   Component,
@@ -16,11 +16,16 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
 
 @Component({
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, NgTemplateOutlet],
   selector: 'app-public-page',
   template: `
-    <article class="page" [class.home-page]="kind === 'home'" [attr.aria-busy]="loading">
-      @if (kind !== 'home') {
+    <article
+      class="page"
+      [class.home-page]="kind === 'home'"
+      [class.service-page]="kind === 'service' || kind === 'service-overview'"
+      [attr.aria-busy]="loading"
+    >
+      @if (!['home', 'services', 'service', 'service-overview'].includes(kind)) {
         <p class="eyebrow">Demonstration content</p>
         <h1 #heading tabindex="-1">{{ pageTitle }}</h1>
       }
@@ -272,30 +277,44 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
             </p>
           }
           @case ('services') {
-            @for (item of items; track item.id) {
-              <article class="card">
-                <h2>
-                  <a [routerLink]="['/services', item.slug]">{{ item.title }}</a>
-                </h2>
-                <p>{{ item.summary }}</p>
-              </article>
-            } @empty {
-              <p>No published services are available.</p>
-            }
+            <header class="service-index-hero">
+              <p class="eyebrow">Services</p>
+              <h1 #heading tabindex="-1">Build, renew and shape spaces with a clearer brief.</h1>
+              <p class="lead">
+                Explore each route independently or combine relevant services in one quotation
+                request. Scope remains subject to verified facts, constraints and approvals.
+              </p>
+            </header>
+            <section class="service-index-grid" aria-label="Available service routes">
+              @for (service of serviceNavigation; track service.path; let index = $index) {
+                <a [routerLink]="service.path">
+                  <span>{{ (index + 1).toString().padStart(2, '0') }}</span>
+                  <div
+                    class="service-index-art"
+                    [class]="'service-index-art art-' + ((index % 4) + 1)"
+                    aria-hidden="true"
+                  ></div>
+                  <h2>{{ service.title }}</h2>
+                  <p>{{ service.summary }}</p>
+                  <strong>Explore service</strong>
+                </a>
+              }
+            </section>
+            <section class="service-index-cta">
+              <div>
+                <p class="eyebrow">Mixed requirements</p>
+                <h2>One brief can include more than one service.</h2>
+              </div>
+              <a class="action action-light" routerLink="/request-quote"
+                >Build your project brief</a
+              >
+            </section>
           }
           @case ('service') {
-            @if (content) {
-              <p class="lead">{{ content.summary }}</p>
-              <div class="rich-text" [innerHTML]="content.body_html"></div>
-              <p>
-                <a
-                  class="action"
-                  routerLink="/request-quote"
-                  [queryParams]="{ service: serviceCode(content.slug) }"
-                  >Request this service</a
-                >
-              </p>
-            }
+            <ng-container *ngTemplateOutlet="serviceDetail"></ng-container>
+          }
+          @case ('service-overview') {
+            <ng-container *ngTemplateOutlet="serviceDetail"></ng-container>
           }
           @case ('projects') {
             @for (item of items; track item.id) {
@@ -414,6 +433,99 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
         }
       }
     </article>
+    <ng-template #serviceDetail>
+      <header class="service-detail-hero">
+        <div>
+          <p class="eyebrow">Service overview</p>
+          <h1 #heading tabindex="-1">{{ pageTitle }}</h1>
+          <p class="lead">{{ serviceSummary }}</p>
+          <a
+            class="action action-light"
+            routerLink="/request-quote"
+            [queryParams]="{ service: currentServiceCode }"
+            >Discuss this service</a
+          >
+        </div>
+        <div
+          class="service-visual"
+          [class]="'service-visual service-visual-' + serviceVisual"
+          role="img"
+          [attr.aria-label]="'Abstract synthetic material study for ' + pageTitle"
+        ></div>
+      </header>
+      <section class="service-detail-intro">
+        <div>
+          <p class="eyebrow">Start with clarity</p>
+          <h2>What the first conversation can establish.</h2>
+        </div>
+        <div>
+          @if (content) {
+            <div class="rich-text" [innerHTML]="content.body_html"></div>
+          }
+          <p>{{ serviceNote }}</p>
+        </div>
+      </section>
+      <section class="service-scope" aria-labelledby="scope-heading">
+        <p class="eyebrow">Briefing framework</p>
+        <h2 id="scope-heading">Useful information to bring into scope.</h2>
+        <div>
+          @for (scope of serviceScope; track scope; let index = $index) {
+            <article>
+              <span>{{ (index + 1).toString().padStart(2, '0') }}</span>
+              <h3>{{ scope }}</h3>
+              <p>Record what is known now; unknown details can be clarified before quotation.</p>
+            </article>
+          }
+        </div>
+      </section>
+      <section class="service-gallery" aria-label="Synthetic service material studies">
+        <figure>
+          <div
+            class="service-study study-1"
+            role="img"
+            [attr.aria-label]="'Abstract structural study for ' + pageTitle"
+          ></div>
+          <figcaption>Structure and existing conditions · synthetic study</figcaption>
+        </figure>
+        <figure>
+          <div
+            class="service-study study-2"
+            role="img"
+            [attr.aria-label]="'Abstract spatial study for ' + pageTitle"
+          ></div>
+          <figcaption>Space, material and junctions · synthetic study</figcaption>
+        </figure>
+        <figure>
+          <div
+            class="service-study study-3"
+            role="img"
+            [attr.aria-label]="'Abstract detail study for ' + pageTitle"
+          ></div>
+          <figcaption>Scope and detail coordination · synthetic study</figcaption>
+        </figure>
+      </section>
+      <section class="related-services" aria-labelledby="related-heading">
+        <div>
+          <p class="eyebrow">Related routes</p>
+          <h2 id="related-heading">Build a connected brief.</h2>
+        </div>
+        <nav aria-label="Related services">
+          @for (service of relatedServices(); track service.path) {
+            <a [routerLink]="service.path">{{ service.title }}<span aria-hidden="true">→</span></a>
+          }
+        </nav>
+      </section>
+      <section class="service-final-cta">
+        <p class="eyebrow">Next step</p>
+        <h2>Describe the requirement without committing to an unverified solution.</h2>
+        <a
+          class="action action-light"
+          routerLink="/request-quote"
+          [queryParams]="{ service: currentServiceCode }"
+          >Start the service brief</a
+        >
+      </section>
+    </ng-template>
     <dialog
       #galleryDialog
       class="gallery-dialog"
@@ -454,6 +566,69 @@ export class PublicPage implements OnInit, AfterViewInit {
   error: 'not-found' | 'unavailable' | null = null;
   items: PublicContent[] = [];
   content?: PublicContent;
+  serviceSummary = '';
+  currentServiceCode = 'PROPERTY_TRANSFORMATION';
+  serviceVisual = 'property';
+  serviceNote = '';
+  serviceScope: string[] = [];
+  readonly serviceNavigation = [
+    {
+      title: 'Construction',
+      path: '/services/construction',
+      slug: 'construction',
+      summary:
+        'Define intended building work, site constraints and qualification needs before scope is agreed.',
+    },
+    {
+      title: 'Renovations',
+      path: '/services/renovations',
+      slug: 'renovations',
+      summary:
+        'Clarify affected spaces, priorities and existing conditions without overstating the result.',
+    },
+    {
+      title: 'Extensions',
+      path: '/services/extensions',
+      slug: 'extensions',
+      summary:
+        'Explore additional space with early attention to structure, access, approvals and dependencies.',
+    },
+    {
+      title: 'Property conversions',
+      path: '/services/conversions',
+      slug: 'conversions',
+      summary:
+        'Frame a feasibility conversation around the property, intended use and approval status.',
+    },
+    {
+      title: 'Maintenance',
+      path: '/services/maintenance',
+      slug: 'maintenance',
+      summary:
+        'Record repair and upkeep requirements with honest timing and service-area qualification.',
+    },
+    {
+      title: 'Property transformation',
+      path: '/services/property-transformation',
+      slug: 'property-transformation',
+      summary:
+        'Consider property potential through evidence, constraints and approval-aware next steps.',
+    },
+    {
+      title: 'Custom cabinetry',
+      path: '/services/custom-cabinetry',
+      slug: 'custom-cabinetry',
+      summary:
+        'Plan supply-only or fix-and-supply cabinetry with responsibilities and measurements made explicit.',
+    },
+    {
+      title: 'Board supply',
+      path: '/services/standalone-board-supply',
+      slug: 'standalone-board-supply',
+      summary:
+        'Request full sheets or cutting help from published specifications without stock or price claims.',
+    },
+  ];
   activeStage = 0;
   readonly stages = [
     {
@@ -493,6 +668,17 @@ export class PublicPage implements OnInit, AfterViewInit {
     }
     const homeProjects = this.route.snapshot.data['homeProjects'] as PublicContentPage | undefined;
     if (homeProjects) this.items = homeProjects.items;
+    if (this.kind === 'service-overview') {
+      this.configureService(
+        this.route.snapshot.data['serviceCode'],
+        this.route.snapshot.data['summary'],
+        this.route.snapshot.data['scope'],
+        this.route.snapshot.data['note'],
+      );
+    } else if (this.kind === 'service' && this.content) {
+      const code = this.serviceCode(this.content.slug);
+      this.configureService(code, this.content.summary);
+    }
     this.updateMetadata(this.content?.summary);
   }
   ngAfterViewInit() {
@@ -510,6 +696,73 @@ export class PublicPage implements OnInit, AfterViewInit {
     if (normalised.includes('interior')) return 'INTERIORS';
     if (normalised.includes('hardware')) return 'HARDWARE';
     return 'PROPERTY_TRANSFORMATION';
+  }
+  relatedServices() {
+    const currentPath = '/' + this.route.snapshot.url.map((segment) => segment.path).join('/');
+    return this.serviceNavigation.filter((service) => service.path !== currentPath).slice(0, 4);
+  }
+  private configureService(code: string, summary?: string, scope?: string[], note?: string) {
+    this.currentServiceCode = code || 'PROPERTY_TRANSFORMATION';
+    this.serviceSummary =
+      summary || 'Begin with a clear, evidence-led brief before scope is agreed.';
+    this.serviceVisual = this.serviceVisualFor(this.currentServiceCode);
+    this.serviceScope = scope?.length ? scope : this.defaultServiceScope(this.currentServiceCode);
+    this.serviceNote =
+      note ||
+      'Final scope, programme and responsibilities depend on verified requirements, existing conditions and any applicable approvals.';
+  }
+  private serviceVisualFor(code: string) {
+    if (code === 'CABINETRY') return 'cabinetry';
+    if (code === 'BOARD_SALES' || code === 'BOARD_CUTTING') return 'boards';
+    if (code === 'RENOVATION' || code === 'MAINTENANCE') return 'renovation';
+    if (code === 'CONSTRUCTION' || code === 'EXTENSION') return 'construction';
+    return 'property';
+  }
+  private defaultServiceScope(code: string) {
+    const scopes: Record<string, string[]> = {
+      CONSTRUCTION: [
+        'Intended work and current site',
+        'Access, timing and known constraints',
+        'Available drawings and approval status',
+      ],
+      RENOVATION: [
+        'Affected rooms and existing condition',
+        'Priorities, finishes and retained elements',
+        'Access, occupancy and desired timing',
+      ],
+      EXTENSION: [
+        'Additional space and intended use',
+        'Existing structure and site access',
+        'Plans, approvals and service connections',
+      ],
+      MAINTENANCE: [
+        'Affected area and observed issue',
+        'Urgency without emergency assumptions',
+        'Access and preferred contact route',
+      ],
+      CABINETRY: [
+        'Product category and fulfilment route',
+        'Approximate dimensions and material ideas',
+        'Installation scope and explicit exclusions',
+      ],
+      BOARD_SALES: [
+        'Material, finish and thickness',
+        'Sheet size, quantity and collection intent',
+        'Substitute preference and availability wording',
+      ],
+      PROPERTY_TRANSFORMATION: [
+        'Property status and intended use',
+        'Existing buildings and available land',
+        'Known plans, constraints and approval status',
+      ],
+    };
+    return (
+      scopes[code] ?? [
+        'Requirement and intended outcome',
+        'Known constraints and dependencies',
+        'Timing, location and available evidence',
+      ]
+    );
   }
   private updateMetadata(
     description = `Synthetic demonstration: ${this.pageTitle}. No unverified business claims.`,

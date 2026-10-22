@@ -24,6 +24,91 @@ export const routes: Routes = [
     resolve: { publicContent: publicContentResolver },
   },
   {
+    path: 'services/construction',
+    component: PublicPage,
+    data: {
+      kind: 'service-overview',
+      title: 'Construction',
+      serviceCode: 'CONSTRUCTION',
+      summary:
+        'Start with the intended work, known constraints and the information needed to define a responsible construction scope.',
+      scope: [
+        'Project intent and work type',
+        'Known site and access constraints',
+        'Plans, approvals and information still required',
+      ],
+      note: 'A submitted brief is not a construction commitment, programme or approval confirmation.',
+    },
+  },
+  {
+    path: 'services/renovations',
+    component: PublicPage,
+    data: {
+      kind: 'service-overview',
+      title: 'Renovations',
+      serviceCode: 'RENOVATION',
+      summary:
+        'Describe the spaces to be renewed, the desired outcome and the existing conditions that need review.',
+      scope: [
+        'Affected rooms or areas',
+        'Existing-condition information',
+        'Priorities, desired timing and dependencies',
+      ],
+      note: 'Existing conditions and hidden work must be verified before scope can be agreed.',
+    },
+  },
+  {
+    path: 'services/extensions',
+    component: PublicPage,
+    data: {
+      kind: 'service-overview',
+      title: 'Extensions',
+      serviceCode: 'EXTENSION',
+      summary:
+        'Explore additional space through an approval-aware brief grounded in the existing property and intended use.',
+      scope: [
+        'Intended additional space',
+        'Relationship to the existing building',
+        'Plans, approvals and site facts to verify',
+      ],
+      note: 'No permissible area, approval outcome or construction solution is promised before assessment.',
+    },
+  },
+  {
+    path: 'services/conversions',
+    component: PublicPage,
+    data: {
+      kind: 'service-overview',
+      title: 'Property conversions',
+      serviceCode: 'PROPERTY_TRANSFORMATION',
+      summary:
+        'Frame a possible change of use or spatial transformation without assuming feasibility, unit counts or approval.',
+      scope: [
+        'Current and intended use',
+        'Existing-house or additional-land context',
+        'Authorisation, occupancy and approval status',
+      ],
+      note: 'Feasibility depends on verified property facts, applicable rules and relevant professional input.',
+    },
+  },
+  {
+    path: 'services/maintenance',
+    component: PublicPage,
+    data: {
+      kind: 'service-overview',
+      title: 'Maintenance',
+      serviceCode: 'MAINTENANCE',
+      summary:
+        'Record the affected area, observed issue and urgency so the request can be qualified by the appropriate team.',
+      scope: [
+        'Affected area and observed condition',
+        'Access and timing preferences',
+        'Photos or supporting information where available',
+      ],
+      note: 'Urgency information supports triage and does not promise emergency attendance.',
+    },
+  },
+  {
     path: 'services/:slug',
     component: PublicPage,
     data: { kind: 'service', title: 'Service detail' },

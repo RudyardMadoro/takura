@@ -82,6 +82,14 @@ app.use('/api/v1', async (req, res, next) => {
 });
 app.use(async (req, res, next) => {
   if (!/^\/(services|projects)\/[^/]+$|^\/boards\/[^/]+$/.test(req.path)) return next();
+  const staticServiceOverviews = new Set([
+    '/services/construction',
+    '/services/renovations',
+    '/services/extensions',
+    '/services/conversions',
+    '/services/maintenance',
+  ]);
+  if (staticServiceOverviews.has(req.path)) return next();
   try {
     const apiPath = req.path.startsWith('/boards/') ? `/catalogue${req.path}` : req.path;
     const response = await fetch(`${apiOrigin}/api/v1${apiPath}`, { redirect: 'manual' });
