@@ -24,11 +24,20 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
       [class.home-page]="kind === 'home'"
       [class.service-page]="kind === 'service' || kind === 'service-overview'"
       [class.portfolio-page]="kind === 'projects' || kind === 'project'"
+      [class.cabinetry-page]="kind === 'cabinetry'"
       [attr.aria-busy]="loading"
     >
       @if (
         error ||
-        !['home', 'services', 'service', 'service-overview', 'projects', 'project'].includes(kind)
+        ![
+          'home',
+          'services',
+          'service',
+          'service-overview',
+          'projects',
+          'project',
+          'cabinetry',
+        ].includes(kind)
       ) {
         <p class="eyebrow">Demonstration content</p>
         <h1 #heading tabindex="-1">{{ pageTitle }}</h1>
@@ -486,17 +495,188 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
             }
           }
           @case ('cabinetry') {
-            <p class="lead">
-              Cabinetry is offered as SUPPLY_ONLY or FIX_AND_SUPPLY after the brief and site
-              constraints are confirmed.
-            </p>
-            <h2>Material-led decisions</h2>
-            <p>Layout, hardware, finish and installation responsibility are recorded separately.</p>
-            <p>
-              <a class="action" routerLink="/request-quote" [queryParams]="{ service: 'CABINETRY' }"
+            <header class="cabinetry-hero">
+              <img
+                src="/images/takura-cabinetry-concept.png"
+                width="1536"
+                height="1024"
+                alt="Synthetic cabinetry concept with timber veneer doors and charcoal stone surfaces"
+                fetchpriority="high"
+              />
+              <div class="cabinetry-hero-shade"></div>
+              <div>
+                <p class="eyebrow">Custom cabinetry</p>
+                <h1 #heading tabindex="-1">
+                  Joinery shaped around the room, material and responsibility.
+                </h1>
+                <p>
+                  Explore briefing routes for kitchens, wardrobes, vanities, TV units and custom
+                  storage. Every concept remains subject to verified measurements, scope and
+                  material selection.
+                </p>
+                <a
+                  class="action action-light"
+                  routerLink="/request-quote"
+                  [queryParams]="{ service: 'CABINETRY' }"
+                  >Start a cabinetry brief</a
+                ><small>Synthetic design concept · not completed client work</small>
+              </div>
+            </header>
+            <section class="cabinetry-intro">
+              <div>
+                <p class="eyebrow">A considered fit</p>
+                <h2>From a useful brief to an agreed fabrication scope.</h2>
+              </div>
+              <div>
+                @if (content) {
+                  <div class="rich-text" [innerHTML]="content.body_html"></div>
+                }
+                <p>
+                  Choose SUPPLY_ONLY, FIX_AND_SUPPLY or UNDECIDED. Plumbing, wiring, structural
+                  work, appliances and countertops are not silently included.
+                </p>
+              </div>
+            </section>
+            <section class="cabinetry-offers" aria-labelledby="cabinetry-offers-heading">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Cabinetry categories</p>
+                  <h2 id="cabinetry-offers-heading">Describe the furniture the space needs.</h2>
+                </div>
+                <p>These are briefing categories, not stocked products or completed commissions.</p>
+              </div>
+              <div class="cabinetry-offer-grid">
+                @for (offer of cabinetryOffers; track offer.title; let index = $index) {
+                  <article>
+                    <div
+                      class="cabinetry-offer-art"
+                      [class]="'cabinetry-offer-art cabinetry-offer-art-' + ((index % 3) + 1)"
+                      aria-hidden="true"
+                    ></div>
+                    <span>{{ (index + 1).toString().padStart(2, '0') }}</span>
+                    <h3>{{ offer.title }}</h3>
+                    <p>{{ offer.description }}</p>
+                    <a
+                      class="text-link"
+                      routerLink="/request-quote"
+                      [queryParams]="{ service: 'CABINETRY' }"
+                      >Include in a brief</a
+                    >
+                  </article>
+                }
+              </div>
+            </section>
+            <section class="cabinetry-materials">
+              <div>
+                <p class="eyebrow">Material direction</p>
+                <h2>Record preferences without presenting samples as guaranteed stock.</h2>
+                <p>
+                  Material, finish, hardware and edge details can be discussed as preferences. Final
+                  selections depend on confirmation, suitability and sourcing.
+                </p>
+              </div>
+              <div class="material-swatch-grid" aria-label="Synthetic material direction studies">
+                <figure>
+                  <span
+                    class="swatch swatch-timber"
+                    role="img"
+                    aria-label="Synthetic warm timber material study"
+                  ></span>
+                  <figcaption>Warm timber direction</figcaption>
+                </figure>
+                <figure>
+                  <span
+                    class="swatch swatch-charcoal"
+                    role="img"
+                    aria-label="Synthetic charcoal material study"
+                  ></span>
+                  <figcaption>Charcoal direction</figcaption>
+                </figure>
+                <figure>
+                  <span
+                    class="swatch swatch-neutral"
+                    role="img"
+                    aria-label="Synthetic neutral material study"
+                  ></span>
+                  <figcaption>Neutral direction</figcaption>
+                </figure>
+              </div>
+            </section>
+            <section class="cabinetry-gallery-section" aria-labelledby="cabinetry-gallery-heading">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Design studies</p>
+                  <h2 id="cabinetry-gallery-heading">Details viewed at a useful scale.</h2>
+                </div>
+                <p>Open each synthetic study for keyboard-accessible inspection.</p>
+              </div>
+              <div class="cabinetry-gallery">
+                @for (study of cabinetryStages; track study.label; let index = $index) {
+                  <figure>
+                    <button
+                      type="button"
+                      (click)="openCabinetryGallery(index, $event.currentTarget)"
+                      [attr.aria-label]="'Open ' + study.label"
+                    >
+                      <span
+                        class="cabinetry-study"
+                        [class]="'cabinetry-study cabinetry-study-' + (index + 1)"
+                        role="img"
+                        [attr.aria-label]="study.alt"
+                      ></span>
+                    </button>
+                    <figcaption>{{ study.label }}</figcaption>
+                  </figure>
+                }
+              </div>
+            </section>
+            <section class="cabinetry-process">
+              <div>
+                <p class="eyebrow">What the brief records</p>
+                <h2>Useful information, with uncertainty kept visible.</h2>
+              </div>
+              <ol>
+                <li>
+                  <span>01</span>
+                  <div>
+                    <strong>Category and fulfilment</strong>
+                    <p>
+                      Kitchen, wardrobe, vanity, TV unit or other; supply-only, fix-and-supply or
+                      undecided.
+                    </p>
+                  </div>
+                </li>
+                <li>
+                  <span>02</span>
+                  <div>
+                    <strong>Approximate dimensions</strong>
+                    <p>Early measurements remain UNVERIFIED until an agreed measurement review.</p>
+                  </div>
+                </li>
+                <li>
+                  <span>03</span>
+                  <div>
+                    <strong>Materials and exclusions</strong>
+                    <p>
+                      Capture preferences, installation responsibility and work that remains outside
+                      scope.
+                    </p>
+                  </div>
+                </li>
+              </ol>
+            </section>
+            <section class="cabinetry-cta">
+              <div>
+                <p class="eyebrow">Begin with what you know</p>
+                <h2>Bring the room, intended use and material ideas into one brief.</h2>
+              </div>
+              <a
+                class="action action-light"
+                routerLink="/request-quote"
+                [queryParams]="{ service: 'CABINETRY' }"
                 >Request cabinetry</a
               >
-            </p>
+            </section>
           }
           @case ('about') {
             <p>
@@ -654,13 +834,14 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
     >
       <h2 id="gallery-title">Concept illustration</h2>
       <p aria-live="polite">
-        Image {{ activeStage + 1 }} of {{ stages.length }}: {{ stages[activeStage].label }}
+        Image {{ activeStage + 1 }} of {{ activeGalleryStages.length }}:
+        {{ activeGalleryStages[activeStage].label }}
       </p>
       <div
         class="placeholder dialog-image"
-        [class]="stages[activeStage].className"
+        [class]="activeGalleryStages[activeStage].className"
         role="img"
-        [attr.aria-label]="stages[activeStage].alt"
+        [attr.aria-label]="activeGalleryStages[activeStage].alt"
       ></div>
       <div class="dialog-actions">
         <button type="button" (click)="previous()" aria-label="Previous image">Previous</button
@@ -766,6 +947,51 @@ export class PublicPage implements OnInit, AfterViewInit {
       label: 'After concept',
       alt: 'Abstract after-stage placeholder illustration',
       className: 'after',
+    },
+  ];
+  readonly cabinetryStages = [
+    {
+      label: 'Kitchen composition study',
+      alt: 'Synthetic study of cabinetry proportions and work-surface relationships',
+      className: 'cabinetry-dialog-1',
+    },
+    {
+      label: 'Wardrobe storage study',
+      alt: 'Synthetic study of full-height wardrobe storage divisions',
+      className: 'cabinetry-dialog-2',
+    },
+    {
+      label: 'Joinery detail study',
+      alt: 'Synthetic study of timber, charcoal and neutral joinery details',
+      className: 'cabinetry-dialog-3',
+    },
+  ];
+  activeGalleryStages = this.stages;
+  readonly cabinetryOffers = [
+    {
+      title: 'Kitchens',
+      description:
+        'Brief storage, preparation zones, appliance interfaces and fulfilment responsibility.',
+    },
+    {
+      title: 'Wardrobes',
+      description:
+        'Describe room constraints, internal storage priorities, door direction and finish ideas.',
+    },
+    {
+      title: 'Vanities',
+      description:
+        'Record intended storage and basin context while keeping plumbing outside unagreed scope.',
+    },
+    {
+      title: 'TV units',
+      description:
+        'Explore display, storage and cable-management requirements without including wiring work.',
+    },
+    {
+      title: 'Custom storage',
+      description:
+        'Use an OTHER explanation for fitted furniture that does not belong to a standard category.',
     },
   ];
   readonly nonProduction = isNonProduction(this.siteMode);
@@ -938,6 +1164,13 @@ export class PublicPage implements OnInit, AfterViewInit {
     });
   }
   openGallery(index: number, source: EventTarget | null) {
+    this.activeGalleryStages = this.stages;
+    this.activeStage = index;
+    this.returnFocus = source instanceof HTMLElement ? source : undefined;
+    this.galleryDialog?.nativeElement.showModal();
+  }
+  openCabinetryGallery(index: number, source: EventTarget | null) {
+    this.activeGalleryStages = this.cabinetryStages;
     this.activeStage = index;
     this.returnFocus = source instanceof HTMLElement ? source : undefined;
     this.galleryDialog?.nativeElement.showModal();
@@ -947,9 +1180,10 @@ export class PublicPage implements OnInit, AfterViewInit {
     this.returnFocus?.focus();
   }
   next() {
-    this.activeStage = (this.activeStage + 1) % this.stages.length;
+    this.activeStage = (this.activeStage + 1) % this.activeGalleryStages.length;
   }
   previous() {
-    this.activeStage = (this.activeStage + this.stages.length - 1) % this.stages.length;
+    this.activeStage =
+      (this.activeStage + this.activeGalleryStages.length - 1) % this.activeGalleryStages.length;
   }
 }

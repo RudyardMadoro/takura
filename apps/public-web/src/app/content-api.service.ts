@@ -71,3 +71,12 @@ export const relatedProjectsResolver: ResolveFn<PublicContentPage> = () =>
   inject(ContentApiService)
     .list('projects')
     .pipe(catchError(() => of({ items: [], next_cursor: null, page_size: 12 })));
+
+export const cabinetryContentResolver: ResolveFn<PublicContent | ResolvedContentError> = () =>
+  inject(ContentApiService)
+    .detail('services', 'custom-cabinetry')
+    .pipe(
+      catchError((failure: HttpErrorResponse) =>
+        of({ error: failure.status === 404 ? 'not-found' : 'unavailable' } as ResolvedContentError),
+      ),
+    );

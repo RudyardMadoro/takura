@@ -199,6 +199,28 @@ test.describe('Phase 03 public experience', () => {
     await expectWcagAa(page);
   });
 
+  test('cabinetry showcase uses published copy and an accessible enquiry gallery', async ({
+    page,
+  }) => {
+    const response = await page.goto('/cabinetry');
+    expect(response?.status()).toBe(200);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(
+      'Joinery shaped around the room',
+    );
+    await expect(page.locator('.cabinetry-offer-grid article')).toHaveCount(5);
+    await expect(page.getByRole('link', { name: 'Start a cabinetry brief' })).toHaveAttribute(
+      'href',
+      /request-quote\?service=CABINETRY/,
+    );
+    const opener = page.getByRole('button', { name: 'Open Kitchen composition study' });
+    await opener.click();
+    const dialog = page.getByRole('dialog', { name: 'Concept illustration' });
+    await expect(dialog).toContainText('Image 1 of 3: Kitchen composition study');
+    await page.keyboard.press('Escape');
+    await expect(opener).toBeFocused();
+    await expectWcagAa(page);
+  });
+
   test('representative states have no automatically detectable WCAG A/AA findings', async ({
     page,
   }) => {

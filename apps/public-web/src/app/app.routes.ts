@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { PublicPage } from './public.page';
 import {
   homeProjectsResolver,
+  cabinetryContentResolver,
   publicContentResolver,
   relatedProjectsResolver,
 } from './content-api.service';
@@ -137,6 +138,7 @@ export const routes: Routes = [
     path: 'cabinetry',
     component: PublicPage,
     data: { kind: 'cabinetry', title: 'Custom cabinetry' },
+    resolve: { publicContent: cabinetryContentResolver },
   },
   {
     path: 'about',
