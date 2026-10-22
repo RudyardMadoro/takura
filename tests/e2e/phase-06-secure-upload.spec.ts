@@ -137,7 +137,7 @@ test('upload controls remain accessible and private attachment endpoints enforce
   ).toBe(true);
 
   const attachment = databaseValue(
-    "SELECT id FROM takura.attachment WHERE state='CLEAN' AND enquiry_id IS NOT NULL ORDER BY created_at DESC LIMIT 1",
+    'SELECT id FROM takura.attachment WHERE enquiry_id IS NOT NULL ORDER BY created_at DESC LIMIT 1',
   );
   const downloadUrl = `http://127.0.0.1:8080/api/v1/admin/attachments/${attachment}/download`;
   const anonymous = await request.get(downloadUrl, { maxRedirects: 0 });

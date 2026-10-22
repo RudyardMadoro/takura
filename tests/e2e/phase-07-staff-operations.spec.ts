@@ -5,6 +5,8 @@ import { execFileSync } from 'node:child_process';
 const fixtureId = '07000000-0000-4000-8000-000000000001';
 const fixtureReference = 'ENQ-2026-PHASE07';
 
+test.use({ baseURL: process.env['TAKURA_STAFF_URL'] ?? 'http://localhost:4201' });
+
 function databaseCommand(sql: string) {
   return execFileSync(
     'docker',

@@ -81,7 +81,11 @@ test.describe('Phase 03 public experience', () => {
     await question.focus();
     await page.keyboard.press('Enter');
     await expect(question.locator('xpath=..')).toHaveAttribute('open', '');
-    await expect(page.getByText('No. Catalogue records arrive in Phase 04.')).toBeVisible();
+    await expect(
+      page.getByText('Yes. Published board specifications can be requested as full sheets', {
+        exact: false,
+      }),
+    ).toBeVisible();
     const accessibilityTree = await page.locator('body').ariaSnapshot();
     expect(accessibilityTree).toContain('Frequently asked questions');
     expect(accessibilityTree).toContain('Is the board catalogue live?');
