@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="430" viewBox="0 0 760 430">
+  <title>Takura Muzenda Property Transformation — Plan, Transform, Enhance, Create Value</title>
+  <g transform="translate(300 12)">
+    <path fill="#C99A4B" d="M8 52 78 9l74 43h-20L79 22 29 52H8Z"/>
+    <path fill="#202429" d="m17 64 61-35v23L56 65v67H37V76L17 88V64Zm49 0 28 22 48-31v77h-20V89l-28 19-8-6v30H66V64Z"/>
+    <path fill="#C99A4B" d="M96 112h9v9h-9zm13 0h9v9h-9zm-13 13h9v9h-9zm13 0h9v9h-9z"/>
+  </g>
+  <text x="380" y="232" text-anchor="middle" fill="#202429" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="800" letter-spacing="8" textLength="650" lengthAdjust="spacingAndGlyphs">TAKURA MUZENDA</text>
+  <path stroke="#C99A4B" stroke-width="4" d="M60 282h105m430 0h105"/>
+  <text x="380" y="294" text-anchor="middle" fill="#202429" font-family="Arial, Helvetica, sans-serif" font-size="27" letter-spacing="9" textLength="390" lengthAdjust="spacingAndGlyphs">PROPERTY TRANSFORMATION</text>
+  <text x="380" y="356" text-anchor="middle" fill="#202429" font-family="Arial, Helvetica, sans-serif" font-size="18" letter-spacing="8" textLength="540" lengthAdjust="spacingAndGlyphs">PLAN · TRANSFORM · ENHANCE · CREATE VALUE</text>
+</svg>
