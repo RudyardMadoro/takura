@@ -71,6 +71,40 @@ test.describe('Phase 03 public experience', () => {
     }
   });
 
+  test('complete home hero content fits standard desktop viewports', async ({ page }) => {
+    for (const viewport of [
+      { width: 1366, height: 768 },
+      { width: 1440, height: 900 },
+      { width: 1920, height: 1080 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto('/');
+      const heading = page.locator('.home-hero h1');
+      const lineCount = await heading.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return element.getBoundingClientRect().height / Number.parseFloat(style.lineHeight);
+      });
+      expect(
+        lineCount,
+        `headline should use at most three lines at ${viewport.width}px`,
+      ).toBeLessThan(3.1);
+
+      for (const selector of [
+        '.home-hero .eyebrow',
+        '.home-hero h1',
+        '.home-hero-copy > p:not(.eyebrow, .concept-note)',
+        '.home-hero .home-actions',
+        '.home-hero .concept-note',
+      ]) {
+        const box = await page.locator(selector).boundingBox();
+        expect(
+          (box?.y ?? viewport.height) + (box?.height ?? 0),
+          `${selector} should be visible at ${viewport.width}×${viewport.height}`,
+        ).toBeLessThanOrEqual(viewport.height);
+      }
+    }
+  });
+
   test('Takura Muzenda branding uses responsive vector marks and metadata', async ({ page }) => {
     await page.goto('/');
     const compact = page.locator('.brand-logo-compact');
