@@ -57,6 +57,25 @@ test.describe('Phase 03 public experience', () => {
       'href',
       '/request-quote',
     );
+    await expect(page.getByText('A connected approach', { exact: true })).toHaveCount(0);
+    await expect(page.locator('app-hero-carousel + .home-section')).toContainText(
+      'One brief. Distinct specialist routes.',
+    );
+    const serviceImages = page.locator('.home-service-grid .service-card-image img');
+    await expect(serviceImages).toHaveCount(4);
+    await expect(page.locator('.home-service-grid .service-index-art')).toHaveCount(0);
+    expect(
+      await serviceImages.evaluateAll((images) => images.map((image) => image.getAttribute('src'))),
+    ).toEqual([
+      '/images/service-property-transformation.webp',
+      '/images/service-custom-cabinetry.webp',
+      '/images/service-board-supply-cutting.webp',
+      '/images/service-supporting-hardware.webp',
+    ]);
+    for (const image of await serviceImages.all()) {
+      await expect(image).toHaveAttribute('alt', /Synthetic/);
+      await expect(image).toHaveAttribute('loading', 'lazy');
+    }
     await expect(page.locator('.project-showcase article').first()).toContainText(
       'Owner-development concept',
     );

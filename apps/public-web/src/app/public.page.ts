@@ -64,22 +64,6 @@ import { HeroCarouselComponent } from './hero-carousel.component';
           @case ('home') {
             <app-hero-carousel />
 
-            <section class="home-intro home-section reveal" appReveal>
-              <p class="section-index" aria-hidden="true">01</p>
-              <div>
-                <p class="eyebrow">A connected approach</p>
-                <h2>From property potential to the details that make a space work.</h2>
-              </div>
-              <div class="home-intro-copy">
-                <p>
-                  Takura's demonstration experience brings property assessment, building work,
-                  fitted cabinetry and material supply into one clear path—without making promises
-                  before facts, approvals and scope are verified.
-                </p>
-                <a class="text-link" routerLink="/about">How the approach is presented</a>
-              </div>
-            </section>
-
             <section class="home-section reveal" appReveal aria-labelledby="services-heading">
               <div class="section-heading">
                 <div>
@@ -92,11 +76,16 @@ import { HeroCarouselComponent } from './hero-carousel.component';
                 @for (service of topLevelServices; track service.path; let index = $index) {
                   <a [routerLink]="service.path">
                     <span>{{ (index + 1).toString().padStart(2, '0') }}</span>
-                    <div
-                      class="service-index-art"
-                      [class]="'service-index-art art-' + ((index % 4) + 1)"
-                      aria-hidden="true"
-                    ></div>
+                    <div class="service-card-image">
+                      <img
+                        [src]="service.image"
+                        width="1680"
+                        height="945"
+                        loading="lazy"
+                        decoding="async"
+                        [alt]="service.imageAlt"
+                      />
+                    </div>
                     <h3>{{ service.title }}</h3>
                     <p>{{ service.summary }}</p>
                     <strong>Explore offering</strong>
@@ -870,24 +859,32 @@ export class PublicPage implements OnInit, AfterViewInit {
     {
       title: 'Property transformation',
       path: '/services/property-transformation',
+      image: '/images/service-property-transformation.webp',
+      imageAlt: 'Synthetic concept of a contemporary transformed home in golden evening light',
       summary:
         'Develop, construct, renovate, extend, convert and maintain property through one coordinated, evidence-led service.',
     },
     {
       title: 'Cabinetry & custom interiors',
       path: '/cabinetry',
+      image: '/images/service-custom-cabinetry.webp',
+      imageAlt: 'Synthetic concept of a warm walnut kitchen with stone surfaces and fitted storage',
       summary:
         'Plan kitchens, wardrobes, vanities and fitted storage through clear supply-only or fix-and-supply routes.',
     },
     {
       title: 'Board supply & cutting',
       path: '/boards',
+      image: '/images/service-board-supply-cutting.webp',
+      imageAlt: 'Synthetic concept of a sunlit board showroom and precision cutting workspace',
       summary:
         'Browse published full-sheet specifications or request qualified cut-to-size assistance without inventory claims.',
     },
     {
       title: 'Supporting hardware',
       path: '/hardware',
+      image: '/images/service-supporting-hardware.webp',
+      imageAlt: 'Synthetic display of cabinet handles, hinges, drawer runners and fixings',
       summary:
         'Include compatible hardware and material supplies in a considered quotation request without creating a cart.',
     },
