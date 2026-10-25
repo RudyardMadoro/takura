@@ -19,14 +19,13 @@ export const routes: Routes = [
   },
   {
     path: 'property-transformation',
-    component: PublicPage,
-    data: { kind: 'property', title: 'Property transformation' },
+    redirectTo: 'services/property-transformation',
+    pathMatch: 'full',
   },
   {
     path: 'services',
-    component: PublicPage,
-    data: { kind: 'services', title: 'Services' },
-    resolve: { publicContent: publicContentResolver },
+    redirectTo: '',
+    pathMatch: 'full',
   },
   {
     path: 'services/construction',

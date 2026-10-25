@@ -52,6 +52,9 @@ $env:SPRING_PROFILES_ACTIVE='local'
 .\mvnw.cmd spring-boot:run
 ```
 
+Both Angular development servers proxy `/api` to the local backend on `127.0.0.1:8080`.
+Start the backend before opening API-backed public routes such as `/services` or `/projects`.
+
 Start the worker from the same backend artifact with no HTTP business server:
 
 ```powershell

@@ -29,6 +29,20 @@ app.use('/quote/view', (_req, res, next) => {
   next();
 });
 
+app.get('/property-transformation', (req, res) => {
+  const query = req.originalUrl.includes('?')
+    ? req.originalUrl.slice(req.originalUrl.indexOf('?'))
+    : '';
+  return res.redirect(308, `/services/property-transformation${query}`);
+});
+
+app.get('/services', (req, res) => {
+  const query = req.originalUrl.includes('?')
+    ? req.originalUrl.slice(req.originalUrl.indexOf('?'))
+    : '';
+  return res.redirect(308, `/${query}`);
+});
+
 const apiOrigin = (process.env['TAKURA_API_ORIGIN'] || 'http://127.0.0.1:8080').replace(/\/$/, '');
 app.use('/api/v1', async (req, res, next) => {
   if (

@@ -113,40 +113,22 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                   <p class="eyebrow">What we can explore</p>
                   <h2 id="services-heading">One brief. Distinct specialist routes.</h2>
                 </div>
-                <a class="text-link" routerLink="/services">View all services</a>
+                <a class="text-link" routerLink="/request-quote">Build a project brief</a>
               </div>
-              <div class="service-editorial-grid">
-                <a routerLink="/property-transformation"
-                  ><span>01</span>
-                  <h3>Property development</h3>
-                  <p>Evidence-led feasibility, constraints and approval-aware next steps.</p></a
-                >
-                <a routerLink="/services"
-                  ><span>02</span>
-                  <h3>Construction & extensions</h3>
-                  <p>Define the intended work and qualification needs before scope is agreed.</p></a
-                >
-                <a routerLink="/services"
-                  ><span>03</span>
-                  <h3>Renovations & maintenance</h3>
-                  <p>
-                    Describe affected areas, priorities and timing without emergency promises.
-                  </p></a
-                >
-                <a routerLink="/cabinetry"
-                  ><span>04</span>
-                  <h3>Custom cabinetry</h3>
-                  <p>
-                    Supply-only and fix-and-supply routes with responsibilities made explicit.
-                  </p></a
-                >
-                <a routerLink="/boards"
-                  ><span>05</span>
-                  <h3>Board supply</h3>
-                  <p>
-                    Published full-sheet specifications, sourced on request without stock claims.
-                  </p></a
-                >
+              <div class="service-index-grid home-service-grid">
+                @for (service of topLevelServices; track service.path; let index = $index) {
+                  <a [routerLink]="service.path">
+                    <span>{{ (index + 1).toString().padStart(2, '0') }}</span>
+                    <div
+                      class="service-index-art"
+                      [class]="'service-index-art art-' + ((index % 4) + 1)"
+                      aria-hidden="true"
+                    ></div>
+                    <h3>{{ service.title }}</h3>
+                    <p>{{ service.summary }}</p>
+                    <strong>Explore offering</strong>
+                  </a>
+                }
               </div>
             </section>
 
@@ -290,40 +272,6 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                 >Request a property discussion</a
               >
             </p>
-          }
-          @case ('services') {
-            <header class="service-index-hero">
-              <p class="eyebrow">Services</p>
-              <h1 #heading tabindex="-1">Build, renew and shape spaces with a clearer brief.</h1>
-              <p class="lead">
-                Explore each route independently or combine relevant services in one quotation
-                request. Scope remains subject to verified facts, constraints and approvals.
-              </p>
-            </header>
-            <section class="service-index-grid" aria-label="Available service routes">
-              @for (service of serviceNavigation; track service.path; let index = $index) {
-                <a [routerLink]="service.path">
-                  <span>{{ (index + 1).toString().padStart(2, '0') }}</span>
-                  <div
-                    class="service-index-art"
-                    [class]="'service-index-art art-' + ((index % 4) + 1)"
-                    aria-hidden="true"
-                  ></div>
-                  <h2>{{ service.title }}</h2>
-                  <p>{{ service.summary }}</p>
-                  <strong>Explore service</strong>
-                </a>
-              }
-            </section>
-            <section class="service-index-cta">
-              <div>
-                <p class="eyebrow">Mixed requirements</p>
-                <h2>One brief can include more than one service.</h2>
-              </div>
-              <a class="action action-light" routerLink="/request-quote"
-                >Build your project brief</a
-              >
-            </section>
           }
           @case ('service') {
             <ng-container *ngTemplateOutlet="serviceDetail"></ng-container>
@@ -727,7 +675,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
               This route is intentionally unavailable until its planned phase supplies a working,
               truthful experience.
             </p>
-            <a routerLink="/services">Explore available service information</a>
+            <a routerLink="/">Explore available service information</a>
           }
           @default {
             <p>We could not find that published page.</p>
@@ -781,6 +729,42 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
           }
         </div>
       </section>
+      @if (currentServiceCode === 'PROPERTY_TRANSFORMATION') {
+        <section class="service-capabilities" aria-labelledby="capabilities-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Transformation capabilities</p>
+              <h2 id="capabilities-heading">
+                One service, shaped around the property requirement.
+              </h2>
+            </div>
+            <p>
+              Select the closest starting point. A combined requirement can retain more than one
+              capability in a single quotation brief.
+            </p>
+          </div>
+          <div class="service-index-grid">
+            @for (capability of propertyCapabilities; track capability.code; let index = $index) {
+              <article [attr.id]="capability.anchor">
+                <span>{{ (index + 1).toString().padStart(2, '0') }}</span>
+                <div
+                  class="service-index-art"
+                  [class]="'service-index-art art-' + ((index % 4) + 1)"
+                  aria-hidden="true"
+                ></div>
+                <h3>{{ capability.title }}</h3>
+                <p>{{ capability.summary }}</p>
+                <a
+                  class="text-link"
+                  routerLink="/request-quote"
+                  [queryParams]="{ service: capability.code }"
+                  >Request {{ capability.title.toLowerCase() }}</a
+                >
+              </article>
+            }
+          </div>
+        </section>
+      }
       <section class="service-gallery" aria-label="Synthetic service material studies">
         <figure>
           <div
@@ -876,62 +860,74 @@ export class PublicPage implements OnInit, AfterViewInit {
   serviceVisual = 'property';
   serviceNote = '';
   serviceScope: string[] = [];
-  readonly serviceNavigation = [
-    {
-      title: 'Construction',
-      path: '/services/construction',
-      slug: 'construction',
-      summary:
-        'Define intended building work, site constraints and qualification needs before scope is agreed.',
-    },
-    {
-      title: 'Renovations',
-      path: '/services/renovations',
-      slug: 'renovations',
-      summary:
-        'Clarify affected spaces, priorities and existing conditions without overstating the result.',
-    },
-    {
-      title: 'Extensions',
-      path: '/services/extensions',
-      slug: 'extensions',
-      summary:
-        'Explore additional space with early attention to structure, access, approvals and dependencies.',
-    },
-    {
-      title: 'Property conversions',
-      path: '/services/conversions',
-      slug: 'conversions',
-      summary:
-        'Frame a feasibility conversation around the property, intended use and approval status.',
-    },
-    {
-      title: 'Maintenance',
-      path: '/services/maintenance',
-      slug: 'maintenance',
-      summary:
-        'Record repair and upkeep requirements with honest timing and service-area qualification.',
-    },
+  readonly topLevelServices = [
     {
       title: 'Property transformation',
       path: '/services/property-transformation',
-      slug: 'property-transformation',
       summary:
-        'Consider property potential through evidence, constraints and approval-aware next steps.',
+        'Develop, construct, renovate, extend, convert and maintain property through one coordinated, evidence-led service.',
     },
     {
-      title: 'Custom cabinetry',
-      path: '/services/custom-cabinetry',
-      slug: 'custom-cabinetry',
+      title: 'Cabinetry & custom interiors',
+      path: '/cabinetry',
       summary:
-        'Plan supply-only or fix-and-supply cabinetry with responsibilities and measurements made explicit.',
+        'Plan kitchens, wardrobes, vanities and fitted storage through clear supply-only or fix-and-supply routes.',
     },
     {
-      title: 'Board supply',
-      path: '/services/standalone-board-supply',
-      slug: 'standalone-board-supply',
+      title: 'Board supply & cutting',
+      path: '/boards',
       summary:
-        'Request full sheets or cutting help from published specifications without stock or price claims.',
+        'Browse published full-sheet specifications or request qualified cut-to-size assistance without inventory claims.',
+    },
+    {
+      title: 'Supporting hardware',
+      path: '/hardware',
+      summary:
+        'Include compatible hardware and material supplies in a considered quotation request without creating a cart.',
+    },
+  ];
+  readonly propertyCapabilities = [
+    {
+      title: 'Construction',
+      code: 'CONSTRUCTION',
+      anchor: 'construction',
+      summary:
+        'Define intended building work, site constraints, plans and qualification needs before scope is agreed.',
+    },
+    {
+      title: 'Renovations',
+      code: 'RENOVATION',
+      anchor: 'renovations',
+      summary:
+        'Clarify affected spaces, retained elements, priorities and existing conditions before committing to an outcome.',
+    },
+    {
+      title: 'Extensions',
+      code: 'EXTENSION',
+      anchor: 'extensions',
+      summary:
+        'Explore additional space with early attention to the existing structure, access, approvals and dependencies.',
+    },
+    {
+      title: 'Property conversions',
+      code: 'PROPERTY_TRANSFORMATION',
+      anchor: 'conversions',
+      summary:
+        'Frame a change-of-use or spatial transformation discussion without assuming feasibility or approval.',
+    },
+    {
+      title: 'Maintenance',
+      code: 'MAINTENANCE',
+      anchor: 'maintenance',
+      summary:
+        'Record repair and upkeep requirements with honest service-area, access and timing qualification.',
+    },
+    {
+      title: 'Interiors',
+      code: 'INTERIORS',
+      anchor: 'interiors',
+      summary:
+        'Coordinate internal spatial and finish requirements where they form part of the broader transformation brief.',
     },
   ];
   activeStage = 0;
@@ -1053,7 +1049,7 @@ export class PublicPage implements OnInit, AfterViewInit {
   }
   relatedServices() {
     const currentPath = '/' + this.route.snapshot.url.map((segment) => segment.path).join('/');
-    return this.serviceNavigation.filter((service) => service.path !== currentPath).slice(0, 4);
+    return this.topLevelServices.filter((service) => service.path !== currentPath);
   }
   relatedProjects() {
     return this.projectItems.filter((item) => item.id !== this.content?.id).slice(0, 2);
@@ -1133,7 +1129,7 @@ export class PublicPage implements OnInit, AfterViewInit {
   private updateMetadata(
     description = `Synthetic demonstration: ${this.pageTitle}. No unverified business claims.`,
   ) {
-    const title = `${this.pageTitle} | Example Property Transformation`;
+    const title = `${this.pageTitle} | Takura Muzenda Property Transformation`;
     this.title.setTitle(title);
     this.meta.updateTag({ name: 'description', content: description });
     this.meta.updateTag({ property: 'og:title', content: title });

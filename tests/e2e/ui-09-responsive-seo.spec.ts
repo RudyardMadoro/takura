@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-const routes = ['/', '/services', '/services/construction', '/projects', '/cabinetry', '/boards'];
+const routes = ['/', '/services/construction', '/projects', '/cabinetry', '/boards'];
 
 test('representative public pages remain contained across responsive widths', async ({ page }) => {
   for (const width of [320, 768, 1440]) {
@@ -36,12 +36,18 @@ test('mobile navigation has usable targets and returns focus on Escape', async (
 
 test('SSR metadata and reduced-motion behavior remain valid', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/services');
-  await expect(page).toHaveTitle(/Services.+Example Property Transformation/);
+  await page.goto('/');
+  await expect(page).toHaveTitle(/Property transformation.+Takura Muzenda Property Transformation/);
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /.+/);
-  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /Services/);
-  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', /\/services$/);
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/services$/);
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+    'content',
+    /Property transformation/,
+  );
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', /\/$/);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    /example\.invalid\/?$/,
+  );
 
   const result = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag22aa'])

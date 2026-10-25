@@ -28,7 +28,12 @@ describe('App', () => {
         environment: 'DEMO',
         contact: { email: 'contact@example.invalid', phone: '' },
       });
-    expect(compiled.querySelector('.brand')?.textContent).toContain('Example Property');
+    expect(compiled.querySelector('.brand-logo-compact')?.getAttribute('alt')).toBe(
+      'Takura Muzenda Property Transformation',
+    );
+    expect(compiled.querySelector('.footer-brand img')?.getAttribute('alt')).toContain(
+      'Plan, Transform, Enhance, Create Value',
+    );
     expect(compiled.querySelector('nav[aria-label="Main navigation"]')).toBeTruthy();
     expect(compiled.querySelector('nav[aria-label="Business divisions"]')).toBeTruthy();
     expect(compiled.querySelector('.footer-contact')?.textContent).toContain(

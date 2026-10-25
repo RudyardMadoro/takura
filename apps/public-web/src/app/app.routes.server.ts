@@ -1,7 +1,6 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
 const staticPaths = [
   '',
-  'property-transformation',
   'cabinetry',
   'about',
   'contact',
@@ -13,6 +12,7 @@ const staticPaths = [
 ];
 export const serverRoutes: ServerRoute[] = [
   ...staticPaths.map((path) => ({ path, renderMode: RenderMode.Prerender }) as ServerRoute),
+  { path: 'property-transformation', renderMode: RenderMode.Server },
   { path: 'services', renderMode: RenderMode.Server },
   { path: 'services/construction', renderMode: RenderMode.Prerender },
   { path: 'services/renovations', renderMode: RenderMode.Prerender },

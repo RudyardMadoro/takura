@@ -70,7 +70,8 @@
               "buildTarget": "public-web:build:production"
             },
             "development": {
-              "buildTarget": "public-web:build:development"
+              "buildTarget": "public-web:build:development",
+              "proxyConfig": "apps/public-web/proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

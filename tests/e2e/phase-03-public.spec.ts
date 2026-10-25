@@ -5,7 +5,6 @@ const viewports = [320, 375, 768, 1024, 1440];
 const publicRoutes = [
   '/',
   '/property-transformation',
-  '/services',
   '/services/construction',
   '/services/renovations',
   '/services/extensions',
@@ -61,24 +60,79 @@ test.describe('Phase 03 public experience', () => {
     );
   });
 
+  test('home hero uses the established full-bleed service-page layout', async ({ page }) => {
+    for (const width of [375, 768, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/');
+      const heroBox = await page.locator('.home-hero').boundingBox();
+      expect(heroBox?.x, `hero should meet the left viewport edge at ${width}px`).toBe(0);
+      expect(heroBox?.width, `hero should span the viewport at ${width}px`).toBe(width);
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
+  test('Takura Muzenda branding uses responsive vector marks and metadata', async ({ page }) => {
+    await page.goto('/');
+    const compact = page.locator('.brand-logo-compact');
+    const footerLogo = page.locator('.footer-brand img');
+    await expect(compact).toBeVisible();
+    await expect(compact).toHaveAttribute('src', '/brand/takura-muzenda-compact.svg');
+    await expect(footerLogo).toHaveAttribute('src', '/brand/takura-muzenda-full-light.svg');
+    await expect(page.locator('link[rel="icon"]')).toHaveAttribute(
+      'href',
+      '/brand/takura-muzenda-mark.svg',
+    );
+    await expect(page.locator('meta[name="application-name"]')).toHaveAttribute(
+      'content',
+      'Takura Muzenda Property Transformation',
+    );
+    expect(
+      await compact.evaluate((image: HTMLImageElement) => [
+        image.naturalWidth,
+        image.naturalHeight,
+      ]),
+    ).toEqual([540, 128]);
+
+    await page.setViewportSize({ width: 375, height: 812 });
+    await expect(compact).toBeHidden();
+    await expect(page.locator('.brand-logo-mark')).toBeVisible();
+  });
+
   test('service discovery and detail routes retain truthful enquiry integration', async ({
     page,
   }) => {
-    const indexResponse = await page.goto('/services');
+    const indexResponse = await page.goto('/');
     expect(indexResponse?.status()).toBe(200);
-    await expect(page.getByRole('link', { name: /Construction/ })).toHaveAttribute(
-      'href',
-      '/services/construction',
-    );
+    await expect(
+      page.getByRole('link', { name: /Property transformation/, exact: false }).first(),
+    ).toHaveAttribute('href', '/services/property-transformation');
+    await expect(page.getByRole('link', { name: /Cabinetry & custom interiors/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Board supply & cutting/ })).toBeVisible();
+    await expect(page.locator('.service-index-grid > a')).toHaveCount(4);
 
-    const detailResponse = await page.goto('/services/construction');
+    const detailResponse = await page.goto('/services/property-transformation');
     expect(detailResponse?.status()).toBe(200);
-    await expect(page.getByRole('heading', { level: 1, name: 'Construction' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Property transformation' }),
+    ).toBeVisible();
+    for (const capability of [
+      'Construction',
+      'Renovations',
+      'Extensions',
+      'Property conversions',
+      'Maintenance',
+      'Interiors',
+    ]) {
+      await expect(page.getByRole('heading', { level: 3, name: capability })).toBeVisible();
+    }
     await expect(page.getByRole('link', { name: 'Discuss this service' })).toHaveAttribute(
+      'href',
+      /request-quote\?service=PROPERTY_TRANSFORMATION/,
+    );
+    await expect(page.getByRole('link', { name: 'Request construction' })).toHaveAttribute(
       'href',
       /request-quote\?service=CONSTRUCTION/,
     );
-    await expect(page.getByText(/not a construction commitment/i)).toBeVisible();
     await expect(page.locator('.site-header')).toHaveCSS('position', 'sticky');
     await expect(page.locator('.service-detail-hero')).toHaveCSS('position', 'static');
     for (const selector of [
@@ -90,6 +144,24 @@ test.describe('Phase 03 public experience', () => {
       expect(box?.x).toBeGreaterThanOrEqual(24);
     }
     await expectWcagAa(page);
+  });
+
+  test('legacy property route permanently redirects and preserves query parameters', async ({
+    request,
+  }) => {
+    const response = await request.get('/property-transformation?source=legacy', {
+      maxRedirects: 0,
+    });
+    expect(response.status()).toBe(308);
+    expect(response.headers()['location']).toBe('/services/property-transformation?source=legacy');
+  });
+
+  test('retired services overview permanently redirects home and preserves query parameters', async ({
+    request,
+  }) => {
+    const response = await request.get('/services?source=legacy', { maxRedirects: 0 });
+    expect(response.status()).toBe(308);
+    expect(response.headers()['location']).toBe('/?source=legacy');
   });
 
   for (const width of viewports) {
