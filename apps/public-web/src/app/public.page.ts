@@ -13,10 +13,12 @@ import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PublicContent, PublicContentPage, ResolvedContentError } from './content-api.service';
 import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
+import { RevealDirective } from './reveal.directive';
+import { HeroCarouselComponent } from './hero-carousel.component';
 
 @Component({
   standalone: true,
-  imports: [RouterLink, NgTemplateOutlet],
+  imports: [RouterLink, NgTemplateOutlet, RevealDirective, HeroCarouselComponent],
   selector: 'app-public-page',
   template: `
     <article
@@ -60,38 +62,9 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
       } @else {
         @switch (kind) {
           @case ('home') {
-            <section class="home-hero" aria-labelledby="home-title">
-              <img
-                src="/images/takura-home-hero-concept.png"
-                width="1944"
-                height="817"
-                alt="Synthetic concept of a contemporary home with charcoal walls, timber screening and indigenous landscaping"
-                fetchpriority="high"
-                decoding="async"
-              />
-              <div class="home-hero-overlay"></div>
-              <div class="home-hero-copy">
-                <p class="eyebrow">Property · interiors · materials</p>
-                <h1 #heading id="home-title" tabindex="-1">
-                  Thoughtful spaces, shaped around real constraints.
-                </h1>
-                <p>
-                  Explore property transformation, construction, cabinetry and standalone board
-                  supply through one considered enquiry process.
-                </p>
-                <div class="home-actions">
-                  <a class="action action-light" routerLink="/request-quote"
-                    >Start a project brief</a
-                  >
-                  <a class="text-link" routerLink="/projects">Explore concepts</a>
-                </div>
-                <p class="concept-note">
-                  Synthetic architectural concept · not completed client work
-                </p>
-              </div>
-            </section>
+            <app-hero-carousel />
 
-            <section class="home-intro home-section reveal">
+            <section class="home-intro home-section reveal" appReveal>
               <p class="section-index" aria-hidden="true">01</p>
               <div>
                 <p class="eyebrow">A connected approach</p>
@@ -107,7 +80,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
               </div>
             </section>
 
-            <section class="home-section reveal" aria-labelledby="services-heading">
+            <section class="home-section reveal" appReveal aria-labelledby="services-heading">
               <div class="section-heading">
                 <div>
                   <p class="eyebrow">What we can explore</p>
@@ -132,7 +105,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
               </div>
             </section>
 
-            <section class="cabinetry-feature reveal" aria-labelledby="cabinetry-heading">
+            <section class="cabinetry-feature reveal" appReveal aria-labelledby="cabinetry-heading">
               <figure>
                 <img
                   src="/images/takura-cabinetry-concept.png"
@@ -161,7 +134,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
               </div>
             </section>
 
-            <section class="board-feature reveal" aria-labelledby="boards-heading">
+            <section class="board-feature reveal" appReveal aria-labelledby="boards-heading">
               <div>
                 <p class="eyebrow">Boards & workshop</p>
                 <h2 id="boards-heading">Full sheets or a cut-to-size conversation.</h2>
@@ -185,7 +158,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
               </div>
             </section>
 
-            <section class="home-section reveal" aria-labelledby="projects-heading">
+            <section class="home-section reveal" appReveal aria-labelledby="projects-heading">
               <div class="section-heading">
                 <div>
                   <p class="eyebrow">Published concepts</p>
@@ -213,7 +186,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
               </div>
             </section>
 
-            <section class="process-feature reveal" aria-labelledby="process-heading">
+            <section class="process-feature reveal" appReveal aria-labelledby="process-heading">
               <div>
                 <p class="eyebrow">A careful process</p>
                 <h2 id="process-heading">Clarity before commitment.</h2>
@@ -243,7 +216,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
               </ol>
             </section>
 
-            <section class="home-cta reveal" aria-labelledby="home-cta-heading">
+            <section class="home-cta reveal" appReveal aria-labelledby="home-cta-heading">
               <p class="eyebrow">Begin with what you know</p>
               <h2 id="home-cta-heading">
                 Bring property, cabinetry and materials into one considered brief.
@@ -280,7 +253,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
             <ng-container *ngTemplateOutlet="serviceDetail"></ng-container>
           }
           @case ('projects') {
-            <header class="portfolio-hero">
+            <header class="portfolio-hero reveal" appReveal>
               <div>
                 <p class="eyebrow">Published concepts</p>
                 <h1 #heading tabindex="-1">
@@ -293,7 +266,11 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                 claim.
               </p>
             </header>
-            <section class="portfolio-grid" aria-label="Published project concepts">
+            <section
+              class="portfolio-grid reveal"
+              appReveal
+              aria-label="Published project concepts"
+            >
               @for (item of items; track item.id; let index = $index) {
                 <article [class.featured]="item.featured">
                   <a
@@ -323,7 +300,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                 <p>No published projects are available.</p>
               }
             </section>
-            <section class="portfolio-note">
+            <section class="portfolio-note reveal" appReveal>
               <p class="eyebrow">Publication standard</p>
               <h2>Only cleared, published concepts appear here.</h2>
               <p>
@@ -334,7 +311,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
           }
           @case ('project') {
             @if (content) {
-              <header class="project-detail-hero">
+              <header class="project-detail-hero reveal" appReveal>
                 <div>
                   <p class="eyebrow">Owner-development concept</p>
                   <h1 #heading tabindex="-1">{{ content.title }}</h1>
@@ -360,7 +337,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                   [attr.aria-label]="'Synthetic architectural study for ' + content.title"
                 ></div>
               </header>
-              <section class="project-narrative">
+              <section class="project-narrative reveal" appReveal>
                 <div>
                   <p class="eyebrow">Concept narrative</p>
                   <h2>Exploring an idea without presenting it as completed work.</h2>
@@ -373,7 +350,11 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                   </p>
                 </div>
               </section>
-              <section class="project-gallery-section" aria-labelledby="gallery-heading">
+              <section
+                class="project-gallery-section reveal"
+                appReveal
+                aria-labelledby="gallery-heading"
+              >
                 <div class="section-heading">
                   <div>
                     <p class="eyebrow">Concept sequence</p>
@@ -404,7 +385,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                   }
                 </div>
               </section>
-              <section class="project-enquiry-cta">
+              <section class="project-enquiry-cta reveal" appReveal>
                 <div>
                   <p class="eyebrow">Discuss your own property</p>
                   <h2>Use this concept as a starting point, not a promised solution.</h2>
@@ -417,7 +398,11 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                 >
               </section>
               @if (relatedProjects().length) {
-                <section class="related-projects" aria-labelledby="related-projects-heading">
+                <section
+                  class="related-projects reveal"
+                  appReveal
+                  aria-labelledby="related-projects-heading"
+                >
                   <div class="section-heading">
                     <div>
                       <p class="eyebrow">Continue exploring</p>
@@ -445,7 +430,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
             }
           }
           @case ('cabinetry') {
-            <header class="cabinetry-hero">
+            <header class="cabinetry-hero reveal" appReveal>
               <img
                 src="/images/takura-cabinetry-concept.png"
                 width="1536"
@@ -473,7 +458,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                 ><small>Synthetic design concept · not completed client work</small>
               </div>
             </header>
-            <section class="cabinetry-intro">
+            <section class="cabinetry-intro reveal" appReveal>
               <div>
                 <p class="eyebrow">A considered fit</p>
                 <h2>From a useful brief to an agreed fabrication scope.</h2>
@@ -488,7 +473,11 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                 </p>
               </div>
             </section>
-            <section class="cabinetry-offers" aria-labelledby="cabinetry-offers-heading">
+            <section
+              class="cabinetry-offers reveal"
+              appReveal
+              aria-labelledby="cabinetry-offers-heading"
+            >
               <div class="section-heading">
                 <div>
                   <p class="eyebrow">Cabinetry categories</p>
@@ -517,7 +506,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                 }
               </div>
             </section>
-            <section class="cabinetry-materials">
+            <section class="cabinetry-materials reveal" appReveal>
               <div>
                 <p class="eyebrow">Material direction</p>
                 <h2>Record preferences without presenting samples as guaranteed stock.</h2>
@@ -553,7 +542,11 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                 </figure>
               </div>
             </section>
-            <section class="cabinetry-gallery-section" aria-labelledby="cabinetry-gallery-heading">
+            <section
+              class="cabinetry-gallery-section reveal"
+              appReveal
+              aria-labelledby="cabinetry-gallery-heading"
+            >
               <div class="section-heading">
                 <div>
                   <p class="eyebrow">Design studies</p>
@@ -581,7 +574,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                 }
               </div>
             </section>
-            <section class="cabinetry-process">
+            <section class="cabinetry-process reveal" appReveal>
               <div>
                 <p class="eyebrow">What the brief records</p>
                 <h2>Useful information, with uncertainty kept visible.</h2>
@@ -616,7 +609,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
                 </li>
               </ol>
             </section>
-            <section class="cabinetry-cta">
+            <section class="cabinetry-cta reveal" appReveal>
               <div>
                 <p class="eyebrow">Begin with what you know</p>
                 <h2>Bring the room, intended use and material ideas into one brief.</h2>
@@ -630,15 +623,20 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
             </section>
           }
           @case ('about') {
-            <p>
-              No owner biography, credential, accreditation, workshop capacity or trading claim is
-              published until evidence is approved.
-            </p>
+            <div class="simple-page-content reveal" appReveal>
+              <p>
+                No owner biography, credential, accreditation, workshop capacity or trading claim is
+                published until evidence is approved.
+              </p>
+            </div>
           }
           @case ('contact') {
-            <p><strong>Contact details pending confirmation.</strong></p>
-            <button disabled>Call unavailable</button> <button disabled>Email unavailable</button>
-            <p>No map pin or fabricated phone number is shown.</p>
+            <div class="simple-page-content reveal" appReveal>
+              <p><strong>Contact details pending confirmation.</strong></p>
+              <button disabled>Call unavailable</button>
+              <button disabled>Email unavailable</button>
+              <p>No map pin or fabricated phone number is shown.</p>
+            </div>
           }
           @case ('faqs') {
             <details>
@@ -685,7 +683,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
       }
     </article>
     <ng-template #serviceDetail>
-      <header class="service-detail-hero">
+      <header class="service-detail-hero reveal" appReveal>
         <div>
           <p class="eyebrow">Service overview</p>
           <h1 #heading tabindex="-1">{{ pageTitle }}</h1>
@@ -704,7 +702,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
           [attr.aria-label]="'Abstract synthetic material study for ' + pageTitle"
         ></div>
       </header>
-      <section class="service-detail-intro">
+      <section class="service-detail-intro reveal" appReveal>
         <div>
           <p class="eyebrow">Start with clarity</p>
           <h2>What the first conversation can establish.</h2>
@@ -716,7 +714,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
           <p>{{ serviceNote }}</p>
         </div>
       </section>
-      <section class="service-scope" aria-labelledby="scope-heading">
+      <section class="service-scope reveal" appReveal aria-labelledby="scope-heading">
         <p class="eyebrow">Briefing framework</p>
         <h2 id="scope-heading">Useful information to bring into scope.</h2>
         <div>
@@ -730,7 +728,11 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
         </div>
       </section>
       @if (currentServiceCode === 'PROPERTY_TRANSFORMATION') {
-        <section class="service-capabilities" aria-labelledby="capabilities-heading">
+        <section
+          class="service-capabilities reveal"
+          appReveal
+          aria-labelledby="capabilities-heading"
+        >
           <div class="section-heading">
             <div>
               <p class="eyebrow">Transformation capabilities</p>
@@ -765,7 +767,11 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
           </div>
         </section>
       }
-      <section class="service-gallery" aria-label="Synthetic service material studies">
+      <section
+        class="service-gallery reveal"
+        appReveal
+        aria-label="Synthetic service material studies"
+      >
         <figure>
           <div
             class="service-study study-1"
@@ -791,7 +797,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
           <figcaption>Scope and detail coordination · synthetic study</figcaption>
         </figure>
       </section>
-      <section class="related-services" aria-labelledby="related-heading">
+      <section class="related-services reveal" appReveal aria-labelledby="related-heading">
         <div>
           <p class="eyebrow">Related routes</p>
           <h2 id="related-heading">Build a connected brief.</h2>
@@ -802,7 +808,7 @@ import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
           }
         </nav>
       </section>
-      <section class="service-final-cta">
+      <section class="service-final-cta reveal" appReveal>
         <p class="eyebrow">Next step</p>
         <h2>Describe the requirement without committing to an unverified solution.</h2>
         <a

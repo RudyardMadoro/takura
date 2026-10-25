@@ -32,6 +32,8 @@ async function expectNoHorizontalOverflow(page: Page) {
 }
 
 async function expectWcagAa(page: Page) {
+  // Scan the settled visual state so transient entrance opacity is not mistaken for text colour.
+  await page.waitForTimeout(2000);
   const result = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
@@ -47,7 +49,7 @@ test.describe('Phase 03 public experience', () => {
     await expect(
       page.getByRole('heading', { name: 'Thoughtful spaces, shaped around real constraints.' }),
     ).toBeVisible();
-    await expect(page.locator('.home-hero img')).toHaveAttribute(
+    await expect(page.locator('.hero-slide[data-slide-index="0"] img')).toHaveAttribute(
       'alt',
       /Synthetic concept of a contemporary home/,
     );
@@ -71,6 +73,99 @@ test.describe('Phase 03 public experience', () => {
     }
   });
 
+  test('hero carousel autoplays, loops, pauses for keyboard focus and preserves CTA context', async ({
+    page,
+  }) => {
+    await page.clock.install();
+    await page.goto('/');
+
+    const slides = page.locator('.hero-slide');
+    const indicators = page.locator('.hero-carousel-indicators button');
+    await expect(slides).toHaveCount(3);
+    await expect(indicators).toHaveCount(3);
+    await expect(page.locator('.hero-carousel-arrow')).toHaveCount(0);
+    await expect(slides.nth(0)).toHaveClass(/is-active/);
+    await expect(slides.nth(1)).toHaveAttribute('inert', '');
+    expect(
+      await slides.nth(0).evaluate((element) => getComputedStyle(element).transitionDuration),
+    ).toBe('1.5s');
+
+    await page.clock.fastForward(7_100);
+    await expect(slides.nth(1)).toHaveClass(/is-active/);
+    await expect(
+      slides.nth(1).getByRole('link', { name: 'Explore property transformation' }),
+    ).toHaveAttribute('href', '/services/property-transformation');
+    await expect(slides.nth(1).getByRole('link', { name: 'Request a quote' })).toHaveAttribute(
+      'href',
+      /request-quote\?service=PROPERTY_TRANSFORMATION/,
+    );
+
+    await page.locator('.home-hero').hover();
+    await page.clock.fastForward(7_100);
+    await expect(slides.nth(2)).toHaveClass(/is-active/);
+    await page.clock.fastForward(7_100);
+    await expect(slides.nth(0)).toHaveClass(/is-active/);
+
+    await page
+      .getByRole('button', { name: 'Show slide 3: Beautifully crafted spaces. Built around you.' })
+      .click();
+    await expect(slides.nth(2)).toHaveClass(/is-active/);
+    await expect(slides.nth(2).getByRole('link', { name: 'Explore cabinetry' })).toHaveAttribute(
+      'href',
+      '/cabinetry',
+    );
+    await expect
+      .poll(async () =>
+        Math.round((await indicators.nth(0).locator('span').boundingBox())?.width ?? 0),
+      )
+      .toBe(9);
+    await expect
+      .poll(async () =>
+        Math.round((await indicators.nth(2).locator('span').boundingBox())?.width ?? 0),
+      )
+      .toBe(11);
+
+    await page.clock.fastForward(7_100);
+    await expect(slides.nth(0)).toHaveClass(/is-active/);
+
+    await indicators.nth(1).focus();
+    await page.clock.fastForward(8_000);
+    await expect(slides.nth(0)).toHaveClass(/is-active/);
+    await page.locator('.brand').focus();
+    await page.clock.fastForward(7_100);
+    await expect(slides.nth(1)).toHaveClass(/is-active/);
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.reload();
+    await page.clock.fastForward(8_000);
+    await expect(page.locator('.hero-slide').nth(0)).toHaveClass(/is-active/);
+  });
+
+  test('all carousel slides remain contained on a narrow mobile viewport', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.goto('/');
+    const slides = page.locator('.hero-slide');
+
+    for (let index = 0; index < 3; index += 1) {
+      await page
+        .getByRole('button', {
+          name: new RegExp(`Show slide ${index + 1}:`),
+        })
+        .click();
+      const heroBox = await page.locator('.home-hero').boundingBox();
+      const copyBox = await slides.nth(index).locator('.hero-slide-copy').boundingBox();
+      expect(copyBox?.x).toBeGreaterThanOrEqual(heroBox?.x ?? 0);
+      expect((copyBox?.x ?? 0) + (copyBox?.width ?? 0)).toBeLessThanOrEqual(
+        (heroBox?.x ?? 0) + (heroBox?.width ?? 0),
+      );
+      expect(copyBox?.y).toBeGreaterThanOrEqual(heroBox?.y ?? 0);
+      expect((copyBox?.y ?? 0) + (copyBox?.height ?? 0)).toBeLessThanOrEqual(
+        (heroBox?.y ?? 0) + (heroBox?.height ?? 0),
+      );
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
   test('complete home hero content fits standard desktop viewports', async ({ page }) => {
     for (const viewport of [
       { width: 1366, height: 768 },
@@ -79,7 +174,8 @@ test.describe('Phase 03 public experience', () => {
     ]) {
       await page.setViewportSize(viewport);
       await page.goto('/');
-      const heading = page.locator('.home-hero h1');
+      const activeSlide = page.locator('.hero-slide.is-active');
+      const heading = activeSlide.locator('h1');
       const lineCount = await heading.evaluate((element) => {
         const style = getComputedStyle(element);
         return element.getBoundingClientRect().height / Number.parseFloat(style.lineHeight);
@@ -90,11 +186,11 @@ test.describe('Phase 03 public experience', () => {
       ).toBeLessThan(3.1);
 
       for (const selector of [
-        '.home-hero .eyebrow',
-        '.home-hero h1',
-        '.home-hero-copy > p:not(.eyebrow, .concept-note)',
-        '.home-hero .home-actions',
-        '.home-hero .concept-note',
+        '.hero-slide.is-active .eyebrow',
+        '.hero-slide.is-active h1',
+        '.hero-slide.is-active .home-hero-copy > p:not(.eyebrow, .concept-note)',
+        '.hero-slide.is-active .home-actions',
+        '.hero-slide.is-active .concept-note',
       ]) {
         const box = await page.locator(selector).boundingBox();
         expect(
@@ -342,6 +438,43 @@ test.describe('Phase 03 public experience', () => {
     await expect(page.getByText('Loading published content…')).toBeHidden();
     await page.getByRole('button', { name: 'Open Before concept illustration' }).click();
     await expectWcagAa(page);
+  });
+
+  test('premium motion is progressive, once-only and reduced-motion safe', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+
+    const heroMotion = await page.locator('.hero-slide.is-active img').evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { name: style.animationName, duration: style.animationDuration };
+    });
+    expect(heroMotion.name).toContain('hero-cinematic-zoom');
+    expect(heroMotion.duration).toBe('2.8s');
+
+    const delays = await page
+      .locator('.hero-slide.is-active .home-hero-copy > *')
+      .evaluateAll((elements) =>
+        elements.map((element) => Number.parseFloat(getComputedStyle(element).animationDelay)),
+      );
+    expect(delays).toEqual([...delays].sort((a, b) => a - b));
+    expect(new Set(delays).size).toBeGreaterThan(3);
+
+    const process = page.locator('.process-feature');
+    await expect(process).toHaveClass(/reveal-ready/);
+    await process.scrollIntoViewIfNeeded();
+    await expect(process).toHaveClass(/reveal-visible/);
+    await page.evaluate(() => window.scrollTo(0, 300));
+    await expect(page.locator('html')).toHaveClass(/page-scrolled/);
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.reload();
+    const reduced = await page.locator('.hero-slide.is-active img').evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { animation: style.animationName, transform: style.transform };
+    });
+    expect(reduced.animation).toBe('none');
+    expect(reduced.transform).toBe('none');
+    await expect(page.locator('.process-feature')).not.toHaveClass(/reveal-ready/);
   });
 
   test('missing dynamic content has a genuine HTTP 404 and noindex', async ({ page }) => {

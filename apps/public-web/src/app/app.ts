@@ -1,5 +1,17 @@
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  DOCUMENT,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  PLATFORM_ID,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { PUBLIC_API_ORIGIN } from './content-api.service';
 import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
@@ -15,9 +27,19 @@ interface PublicConfig {
   styleUrl: './app.scss',
   templateUrl: './app.html',
 })
-export class App implements OnInit {
+export class App implements OnInit, AfterViewInit, OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly apiOrigin = inject(PUBLIC_API_ORIGIN);
+  private readonly document = inject(DOCUMENT);
+  private readonly platformId = inject(PLATFORM_ID);
+  private scrollFrame?: number;
+  private readonly handleScroll = () => {
+    if (this.scrollFrame !== undefined) return;
+    this.scrollFrame = requestAnimationFrame(() => {
+      this.document.documentElement.classList.toggle('page-scrolled', window.scrollY > 24);
+      this.scrollFrame = undefined;
+    });
+  };
   readonly siteMode = inject(PUBLIC_SITE_MODE);
   readonly nonProduction = isNonProduction(this.siteMode);
   readonly email = signal('');
@@ -34,6 +56,18 @@ export class App implements OnInit {
         // The shell remains useful when optional public configuration is unavailable.
       },
     });
+  }
+
+  ngAfterViewInit() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    window.addEventListener('scroll', this.handleScroll, { passive: true });
+    this.handleScroll();
+  }
+
+  ngOnDestroy() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    window.removeEventListener('scroll', this.handleScroll);
+    if (this.scrollFrame !== undefined) cancelAnimationFrame(this.scrollFrame);
   }
 
   closeMenu() {

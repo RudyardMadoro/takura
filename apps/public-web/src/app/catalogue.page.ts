@@ -2,12 +2,13 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BoardPage, BoardProduct, HardwareItem } from './catalogue-api.service';
+import { RevealDirective } from './reveal.directive';
 @Component({
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, RevealDirective],
   selector: 'app-catalogue',
   template: `<article class="page catalogue-page">
-    <header class="catalogue-heading">
+    <header class="catalogue-heading reveal" appReveal>
       <div>
         <p class="eyebrow">Materials catalogue</p>
         <h1 tabindex="-1">
@@ -31,7 +32,12 @@ import { BoardPage, BoardProduct, HardwareItem } from './catalogue-api.service';
         <p>Please try again later.</p>
       </div>
     } @else if (kind === 'boards') {
-      <form class="filters catalogue-filters" (ngSubmit)="apply()" aria-label="Board filters">
+      <form
+        class="filters catalogue-filters reveal"
+        appReveal
+        (ngSubmit)="apply()"
+        aria-label="Board filters"
+      >
         <div class="filter-heading">
           <strong>Refine published boards</strong
           ><span>Filters update the URL so results can be revisited.</span>
@@ -56,7 +62,7 @@ import { BoardPage, BoardProduct, HardwareItem } from './catalogue-api.service';
           </select></label
         ><button>Apply filters</button><a routerLink="/boards">Clear</a>
       </form>
-      <div class="board-product-grid">
+      <div class="board-product-grid reveal" appReveal>
         @for (item of products; track item.id; let index = $index) {
           <article class="board-product-card">
             <a
@@ -99,7 +105,7 @@ import { BoardPage, BoardProduct, HardwareItem } from './catalogue-api.service';
         }
       </div>
     } @else if (kind === 'board' && product) {
-      <section class="board-detail-hero">
+      <section class="board-detail-hero reveal" appReveal>
         <div>
           <p class="eyebrow">Published board</p>
           <h2>{{ product.name }}</h2>
@@ -144,7 +150,7 @@ import { BoardPage, BoardProduct, HardwareItem } from './catalogue-api.service';
         >
       </div>
     } @else if (kind === 'hardware') {
-      <div class="hardware-grid">
+      <div class="hardware-grid reveal" appReveal>
         @for (item of hardware; track item.id) {
           <article class="card hardware-card">
             <p class="tag">{{ item.category }} · {{ item.unit }}</p>
