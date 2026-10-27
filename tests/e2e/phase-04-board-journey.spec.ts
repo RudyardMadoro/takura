@@ -30,6 +30,8 @@ test('catalogue and wizard have no automated WCAG A/AA violations at mobile widt
   await page.setViewportSize({ width: 320, height: 900 });
   for (const path of ['/boards', '/hardware', '/request-quote']) {
     await page.goto(path);
+    // Measure the settled visual state rather than the intentional entrance opacity transition.
+    await page.waitForTimeout(2_000);
     const result = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag22aa'])
       .analyze();

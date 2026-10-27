@@ -14,11 +14,11 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PublicContent, PublicContentPage, ResolvedContentError } from './content-api.service';
 import { isNonProduction, PUBLIC_SITE_MODE } from './site-mode';
 import { RevealDirective } from './reveal.directive';
-import { HeroCarouselComponent } from './hero-carousel.component';
+import { HeroVideoComponent } from './hero-video.component';
 
 @Component({
   standalone: true,
-  imports: [RouterLink, NgTemplateOutlet, RevealDirective, HeroCarouselComponent],
+  imports: [RouterLink, NgTemplateOutlet, RevealDirective, HeroVideoComponent],
   selector: 'app-public-page',
   template: `
     <article
@@ -62,9 +62,14 @@ import { HeroCarouselComponent } from './hero-carousel.component';
       } @else {
         @switch (kind) {
           @case ('home') {
-            <app-hero-carousel />
+            <app-hero-video />
 
-            <section class="home-section reveal" appReveal aria-labelledby="services-heading">
+            <section
+              id="services"
+              class="home-section reveal"
+              appReveal
+              aria-labelledby="services-heading"
+            >
               <div class="section-heading">
                 <div>
                   <p class="eyebrow">What we can explore</p>
@@ -94,59 +99,6 @@ import { HeroCarouselComponent } from './hero-carousel.component';
               </div>
             </section>
 
-            <section class="cabinetry-feature reveal" appReveal aria-labelledby="cabinetry-heading">
-              <figure>
-                <img
-                  src="/images/takura-cabinetry-concept.png"
-                  width="1536"
-                  height="1024"
-                  loading="lazy"
-                  decoding="async"
-                  alt="Synthetic cabinetry concept with timber veneer doors and charcoal stone surfaces"
-                />
-                <figcaption>Synthetic cabinetry concept · design direction only</figcaption>
-              </figure>
-              <div>
-                <p class="eyebrow">Cabinetry</p>
-                <h2 id="cabinetry-heading">Material-led joinery, with scope made clear.</h2>
-                <p>
-                  Explore kitchens, wardrobes and fitted storage through supply-only, fix-and-supply
-                  or undecided qualification routes. Measurements remain unverified until an agreed
-                  review takes place.
-                </p>
-                <a
-                  class="action"
-                  routerLink="/request-quote"
-                  [queryParams]="{ service: 'CABINETRY' }"
-                  >Discuss cabinetry</a
-                >
-              </div>
-            </section>
-
-            <section class="board-feature reveal" appReveal aria-labelledby="boards-heading">
-              <div>
-                <p class="eyebrow">Boards & workshop</p>
-                <h2 id="boards-heading">Full sheets or a cut-to-size conversation.</h2>
-                <p>
-                  Browse published board specifications, request full sheets, or ask for help
-                  preparing a cutting brief. No cart, stock reservation or automatic manufacturing
-                  instruction is created.
-                </p>
-                <div class="home-actions">
-                  <a class="action action-light" routerLink="/boards">Browse boards</a>
-                  <a
-                    class="text-link light"
-                    routerLink="/request-quote"
-                    [queryParams]="{ service: 'BOARD_CUTTING' }"
-                    >Request cutting help</a
-                  >
-                </div>
-              </div>
-              <div class="material-stack" aria-hidden="true">
-                <span></span><span></span><span></span><span></span>
-              </div>
-            </section>
-
             <section class="home-section reveal" appReveal aria-labelledby="projects-heading">
               <div class="section-heading">
                 <div>
@@ -156,13 +108,20 @@ import { HeroCarouselComponent } from './hero-carousel.component';
                 <a class="text-link" routerLink="/projects">See all concepts</a>
               </div>
               <div class="project-showcase">
-                @for (item of items.slice(0, 3); track item.id; let index = $index) {
+                @for (item of items.slice(0, 3); track item.id) {
                   <article>
-                    <div
-                      class="project-art"
-                      [class]="'project-art project-art-' + (index + 1)"
-                      aria-hidden="true"
-                    ></div>
+                    @if (conceptImages[item.slug]; as conceptImage) {
+                      <div class="project-art project-art-image">
+                        <img
+                          [src]="conceptImage.src"
+                          width="1200"
+                          height="900"
+                          loading="lazy"
+                          decoding="async"
+                          [alt]="conceptImage.alt"
+                        />
+                      </div>
+                    }
                     <p class="tag">Owner-development concept · synthetic</p>
                     <h3>
                       <a [routerLink]="['/projects', item.slug]">{{ item.title }}</a>
@@ -203,16 +162,6 @@ import { HeroCarouselComponent } from './hero-carousel.component';
                   </div>
                 </li>
               </ol>
-            </section>
-
-            <section class="home-cta reveal" appReveal aria-labelledby="home-cta-heading">
-              <p class="eyebrow">Begin with what you know</p>
-              <h2 id="home-cta-heading">
-                Bring property, cabinetry and materials into one considered brief.
-              </h2>
-              <a class="action action-light" routerLink="/request-quote"
-                >Request a quotation discussion</a
-              >
             </section>
           }
           @case ('property') {
@@ -797,16 +746,6 @@ import { HeroCarouselComponent } from './hero-carousel.component';
           }
         </nav>
       </section>
-      <section class="service-final-cta reveal" appReveal>
-        <p class="eyebrow">Next step</p>
-        <h2>Describe the requirement without committing to an unverified solution.</h2>
-        <a
-          class="action action-light"
-          routerLink="/request-quote"
-          [queryParams]="{ service: currentServiceCode }"
-          >Start the service brief</a
-        >
-      </section>
     </ng-template>
     <dialog
       #galleryDialog
@@ -855,6 +794,20 @@ export class PublicPage implements OnInit, AfterViewInit {
   serviceVisual = 'property';
   serviceNote = '';
   serviceScope: string[] = [];
+  readonly conceptImages: Record<string, { src: string; alt: string }> = {
+    'compact-home-concept': {
+      src: '/images/concept-compact-modern-home.webp',
+      alt: 'Synthetic concept of a compact contemporary single-storey home with warm lighting and landscaping',
+    },
+    'storage-renewal-concept': {
+      src: '/images/concept-storage-renewal.webp',
+      alt: 'Synthetic storage-renewal concept with integrated timber cabinetry and organised shelving',
+    },
+    'workshop-material-concept': {
+      src: '/images/concept-workshop-materials.webp',
+      alt: 'Synthetic workshop-material concept with board samples, cabinetry hardware and design drawings',
+    },
+  };
   readonly topLevelServices = [
     {
       title: 'Property transformation',

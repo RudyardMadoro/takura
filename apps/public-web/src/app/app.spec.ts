@@ -31,9 +31,8 @@ describe('App', () => {
     expect(compiled.querySelector('.brand-logo-compact')?.getAttribute('alt')).toBe(
       'Takura Muzenda Property Transformation',
     );
-    expect(compiled.querySelector('.footer-brand img')?.getAttribute('alt')).toContain(
-      'Plan, Transform, Enhance, Create Value',
-    );
+    expect(compiled.querySelector('.footer-brand')).toBeFalsy();
+    expect(compiled.querySelector('.footer-intro')).toBeFalsy();
     expect(compiled.querySelector('nav[aria-label="Main navigation"]')).toBeTruthy();
     expect(compiled.querySelector('nav[aria-label="Business divisions"]')).toBeTruthy();
     expect(compiled.querySelector('.footer-contact')?.textContent).toContain(
