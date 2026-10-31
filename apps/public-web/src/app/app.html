@@ -1,10 +1,10 @@
 <a class="skip-link" href="#main">Skip to content</a>
 @if (nonProduction) {
-  <div class="demo-banner" role="status">
+  <div #demoBanner class="demo-banner" role="status">
     {{ siteMode === 'STAGING' ? 'Staging' : 'Demonstration' }} environment — synthetic concepts only
   </div>
 }
-<header class="site-header">
+<header #siteHeader class="site-header">
   <a class="brand" routerLink="/" aria-label="Takura Muzenda Property Transformation home">
     <img
       class="brand-logo brand-logo-compact"

@@ -304,6 +304,11 @@ test.describe('Phase 03 public experience', () => {
       'href',
       /request-quote\?service=CONSTRUCTION/,
     );
+    await expect(page.getByText('Start with clarity', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('Briefing framework', { exact: true })).toHaveCount(0);
+    await expect(
+      page.locator('.service-detail-intro, .service-scope, .service-gallery'),
+    ).toHaveCount(0);
     await expect(page.locator('.site-header')).toHaveCSS('position', 'sticky');
     await expect(page.locator('.service-detail-hero')).toHaveCSS('position', 'static');
     for (const selector of [
@@ -315,6 +320,11 @@ test.describe('Phase 03 public experience', () => {
       expect(box?.x).toBeGreaterThanOrEqual(24);
     }
     await expectWcagAa(page);
+
+    await page.goto('/services/construction');
+    await expect(
+      page.locator('.service-detail-intro, .service-scope, .service-gallery'),
+    ).toHaveCount(3);
   });
 
   test('legacy property route permanently redirects and preserves query parameters', async ({

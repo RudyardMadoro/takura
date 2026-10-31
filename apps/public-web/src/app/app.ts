@@ -33,6 +33,7 @@ export class App implements OnInit, AfterViewInit, OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
   private scrollFrame?: number;
+  private chromeObserver?: ResizeObserver;
   private readonly handleScroll = () => {
     if (this.scrollFrame !== undefined) return;
     this.scrollFrame = requestAnimationFrame(() => {
@@ -45,6 +46,8 @@ export class App implements OnInit, AfterViewInit, OnDestroy {
   readonly email = signal('');
   readonly phone = signal('');
   @ViewChild('menu') menu?: ElementRef<HTMLDetailsElement>;
+  @ViewChild('siteHeader') siteHeader?: ElementRef<HTMLElement>;
+  @ViewChild('demoBanner') demoBanner?: ElementRef<HTMLElement>;
 
   ngOnInit() {
     this.http.get<PublicConfig>(`${this.apiOrigin}/api/v1/public/config`).subscribe({
@@ -62,11 +65,23 @@ export class App implements OnInit, AfterViewInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) return;
     window.addEventListener('scroll', this.handleScroll, { passive: true });
     this.handleScroll();
+    const updateChromeHeight = () => {
+      const height =
+        (this.siteHeader?.nativeElement.getBoundingClientRect().height ?? 0) +
+        (this.demoBanner?.nativeElement.getBoundingClientRect().height ?? 0);
+      this.document.documentElement.style.setProperty('--site-chrome-height', `${height}px`);
+    };
+    this.chromeObserver = new ResizeObserver(updateChromeHeight);
+    if (this.siteHeader) this.chromeObserver.observe(this.siteHeader.nativeElement);
+    if (this.demoBanner) this.chromeObserver.observe(this.demoBanner.nativeElement);
+    updateChromeHeight();
   }
 
   ngOnDestroy() {
     if (!isPlatformBrowser(this.platformId)) return;
     window.removeEventListener('scroll', this.handleScroll);
+    this.chromeObserver?.disconnect();
+    this.document.documentElement.style.removeProperty('--site-chrome-height');
     if (this.scrollFrame !== undefined) cancelAnimationFrame(this.scrollFrame);
   }
 

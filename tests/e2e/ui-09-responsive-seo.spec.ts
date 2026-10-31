@@ -1,7 +1,14 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-const routes = ['/', '/services/construction', '/projects', '/cabinetry', '/boards'];
+const routes = [
+  '/',
+  '/services/property-transformation',
+  '/services/construction',
+  '/projects',
+  '/cabinetry',
+  '/boards',
+];
 
 test('representative public pages remain contained across responsive widths', async ({ page }) => {
   for (const width of [320, 768, 1440]) {
@@ -15,6 +22,36 @@ test('representative public pages remain contained across responsive widths', as
         `${route} overflowed at ${width}px`,
       ).toBe(true);
     }
+  }
+});
+
+test('property transformation hero uses the desktop viewport below the site chrome', async ({
+  page,
+}) => {
+  for (const viewport of [
+    { width: 1366, height: 768 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/services/property-transformation');
+
+    const headerBottom = await page
+      .locator('.site-header')
+      .evaluate((element) => element.getBoundingClientRect().bottom);
+    const heroBox = await page.locator('.service-detail-hero').boundingBox();
+    expect(heroBox?.y).toBeCloseTo(headerBottom, 0);
+    expect((heroBox?.y ?? 0) + (heroBox?.height ?? 0)).toBeLessThanOrEqual(viewport.height + 1);
+
+    const headingLines = await page.locator('.service-detail-hero h1').evaluate((element) => {
+      const style = getComputedStyle(element);
+      return Math.round(
+        element.getBoundingClientRect().height / Number.parseFloat(style.lineHeight),
+      );
+    });
+    expect(headingLines).toBeLessThanOrEqual(2);
+    await expect(page.locator('.service-detail-hero .lead')).toBeInViewport();
+    await expect(page.locator('.service-detail-hero .action')).toBeInViewport();
+    await expect(page.locator('.service-visual img')).toBeInViewport();
   }
 });
 

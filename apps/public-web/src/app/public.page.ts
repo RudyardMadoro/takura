@@ -621,7 +621,7 @@ import { HeroVideoComponent } from './hero-video.component';
       }
     </article>
     <ng-template #serviceDetail>
-      <header class="service-detail-hero reveal" appReveal>
+      <header class="service-detail-hero">
         <div>
           <p class="eyebrow">Service overview</p>
           <h1 #heading tabindex="-1">{{ pageTitle }}</h1>
@@ -633,38 +633,51 @@ import { HeroVideoComponent } from './hero-video.component';
             >Discuss this service</a
           >
         </div>
-        <div
-          class="service-visual"
-          [class]="'service-visual service-visual-' + serviceVisual"
-          role="img"
-          [attr.aria-label]="'Abstract synthetic material study for ' + pageTitle"
-        ></div>
+        <div class="service-visual" [class]="'service-visual service-visual-' + serviceVisual">
+          @if (currentServiceCode === 'PROPERTY_TRANSFORMATION') {
+            <img
+              src="/images/hero-property-transformation.webp"
+              alt="Synthetic concept of a transformed contemporary property"
+              width="1920"
+              height="1280"
+              decoding="async"
+            />
+          } @else {
+            <span
+              class="service-visual-study"
+              role="img"
+              [attr.aria-label]="'Abstract synthetic material study for ' + pageTitle"
+            ></span>
+          }
+        </div>
       </header>
-      <section class="service-detail-intro reveal" appReveal>
-        <div>
-          <p class="eyebrow">Start with clarity</p>
-          <h2>What the first conversation can establish.</h2>
-        </div>
-        <div>
-          @if (content) {
-            <div class="rich-text" [innerHTML]="content.body_html"></div>
-          }
-          <p>{{ serviceNote }}</p>
-        </div>
-      </section>
-      <section class="service-scope reveal" appReveal aria-labelledby="scope-heading">
-        <p class="eyebrow">Briefing framework</p>
-        <h2 id="scope-heading">Useful information to bring into scope.</h2>
-        <div>
-          @for (scope of serviceScope; track scope; let index = $index) {
-            <article>
-              <span>{{ (index + 1).toString().padStart(2, '0') }}</span>
-              <h3>{{ scope }}</h3>
-              <p>Record what is known now; unknown details can be clarified before quotation.</p>
-            </article>
-          }
-        </div>
-      </section>
+      @if (currentServiceCode !== 'PROPERTY_TRANSFORMATION') {
+        <section class="service-detail-intro reveal" appReveal>
+          <div>
+            <p class="eyebrow">Start with clarity</p>
+            <h2>What the first conversation can establish.</h2>
+          </div>
+          <div>
+            @if (content) {
+              <div class="rich-text" [innerHTML]="content.body_html"></div>
+            }
+            <p>{{ serviceNote }}</p>
+          </div>
+        </section>
+        <section class="service-scope reveal" appReveal aria-labelledby="scope-heading">
+          <p class="eyebrow">Briefing framework</p>
+          <h2 id="scope-heading">Useful information to bring into scope.</h2>
+          <div>
+            @for (scope of serviceScope; track scope; let index = $index) {
+              <article>
+                <span>{{ (index + 1).toString().padStart(2, '0') }}</span>
+                <h3>{{ scope }}</h3>
+                <p>Record what is known now; unknown details can be clarified before quotation.</p>
+              </article>
+            }
+          </div>
+        </section>
+      }
       @if (currentServiceCode === 'PROPERTY_TRANSFORMATION') {
         <section
           class="service-capabilities reveal"
@@ -705,36 +718,38 @@ import { HeroVideoComponent } from './hero-video.component';
           </div>
         </section>
       }
-      <section
-        class="service-gallery reveal"
-        appReveal
-        aria-label="Synthetic service material studies"
-      >
-        <figure>
-          <div
-            class="service-study study-1"
-            role="img"
-            [attr.aria-label]="'Abstract structural study for ' + pageTitle"
-          ></div>
-          <figcaption>Structure and existing conditions · synthetic study</figcaption>
-        </figure>
-        <figure>
-          <div
-            class="service-study study-2"
-            role="img"
-            [attr.aria-label]="'Abstract spatial study for ' + pageTitle"
-          ></div>
-          <figcaption>Space, material and junctions · synthetic study</figcaption>
-        </figure>
-        <figure>
-          <div
-            class="service-study study-3"
-            role="img"
-            [attr.aria-label]="'Abstract detail study for ' + pageTitle"
-          ></div>
-          <figcaption>Scope and detail coordination · synthetic study</figcaption>
-        </figure>
-      </section>
+      @if (currentServiceCode !== 'PROPERTY_TRANSFORMATION') {
+        <section
+          class="service-gallery reveal"
+          appReveal
+          aria-label="Synthetic service material studies"
+        >
+          <figure>
+            <div
+              class="service-study study-1"
+              role="img"
+              [attr.aria-label]="'Abstract structural study for ' + pageTitle"
+            ></div>
+            <figcaption>Structure and existing conditions · synthetic study</figcaption>
+          </figure>
+          <figure>
+            <div
+              class="service-study study-2"
+              role="img"
+              [attr.aria-label]="'Abstract spatial study for ' + pageTitle"
+            ></div>
+            <figcaption>Space, material and junctions · synthetic study</figcaption>
+          </figure>
+          <figure>
+            <div
+              class="service-study study-3"
+              role="img"
+              [attr.aria-label]="'Abstract detail study for ' + pageTitle"
+            ></div>
+            <figcaption>Scope and detail coordination · synthetic study</figcaption>
+          </figure>
+        </section>
+      }
       <section class="related-services reveal" appReveal aria-labelledby="related-heading">
         <div>
           <p class="eyebrow">Related routes</p>
@@ -1024,10 +1039,16 @@ export class PublicPage implements OnInit, AfterViewInit {
     this.serviceSummary =
       summary || 'Begin with a clear, evidence-led brief before scope is agreed.';
     this.serviceVisual = this.serviceVisualFor(this.currentServiceCode);
-    this.serviceScope = scope?.length ? scope : this.defaultServiceScope(this.currentServiceCode);
-    this.serviceNote =
-      note ||
-      'Final scope, programme and responsibilities depend on verified requirements, existing conditions and any applicable approvals.';
+    const hasSupportingBrief = this.currentServiceCode !== 'PROPERTY_TRANSFORMATION';
+    this.serviceScope = hasSupportingBrief
+      ? scope?.length
+        ? scope
+        : this.defaultServiceScope(this.currentServiceCode)
+      : [];
+    this.serviceNote = hasSupportingBrief
+      ? note ||
+        'Final scope, programme and responsibilities depend on verified requirements, existing conditions and any applicable approvals.'
+      : '';
   }
   private serviceVisualFor(code: string) {
     if (code === 'CABINETRY') return 'cabinetry';
@@ -1067,11 +1088,6 @@ export class PublicPage implements OnInit, AfterViewInit {
         'Material, finish and thickness',
         'Sheet size, quantity and collection intent',
         'Substitute preference and availability wording',
-      ],
-      PROPERTY_TRANSFORMATION: [
-        'Property status and intended use',
-        'Existing buildings and available land',
-        'Known plans, constraints and approval status',
       ],
     };
     return (
